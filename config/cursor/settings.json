@@ -1,0 +1,137 @@
+{
+  "[dockercompose]": {
+    "editor.autoIndent": "advanced",
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.insertSpaces": true,
+    "editor.quickSuggestions": {
+      "comments": false,
+      "other": true,
+      "strings": true
+    },
+    "editor.tabSize": 2
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers",
+    "editor.formatOnSave": true
+  },
+  "[github-actions-workflow]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": true
+  },
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[terraform-vars]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true
+  },
+  "application.shellEnvironmentResolutionTimeout": 30,
+  "cursor.composer.usageSummaryDisplay": "always",
+  "cursor.cpp.enablePartialAccepts": true,
+  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.autoIndent": "advanced",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "editor.cursorBlinking": "solid",
+  "editor.detectIndentation": true,
+  "editor.fontFamily": "JetBrains Mono",
+  "editor.formatOnSave": true,
+  "editor.guides.bracketPairs": true,
+  "editor.guides.highlightActiveIndentation": true,
+  "editor.guides.indentation": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.matchBrackets": "always",
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.semanticHighlighting.enabled": true,
+  "editor.smoothScrolling": false,
+  "editor.stickyScroll.enabled": true,
+  "editor.suggest.insertMode": "replace",
+  "editor.suggest.preview": true,
+  "editor.tabSize": 2,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "extensions.autoUpdate": true,
+  "extensions.ignoreRecommendations": true,
+  "files.autoSave": "off",
+  "files.exclude": {
+    "**/.pytest_cache": true,
+    "**/.terraform": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/venv": true
+  },
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "git.blame.editorDecoration.enabled": true,
+  "git.blame.statusBarItem.enabled": true,
+  "git.openRepositoryInParentFolders": "always",
+  "python.terminal.activateEnvironment": false,
+  "redhat.telemetry.enabled": false,
+  "search.exclude": {
+    "**/*.code-search": true,
+    "**/bower_components": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/node_modules": true
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "telemetry.telemetryLevel": "off",
+  "terminal.integrated.altClickMovesCursor": true,
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
+  "terminal.integrated.enablePersistentSessions": false,
+  "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font Mono",
+  "terminal.integrated.macOptionIsMeta": true,
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "args": [
+        "-l"
+      ],
+      "path": "zsh"
+    }
+  },
+  "terminal.integrated.scrollback": 50000,
+  "terminal.integrated.shellIntegration.decorationsEnabled": "never",
+  "terminal.integrated.suggest.enabled": false,
+  "terraform.experimentalFeatures.prefillRequiredFields": true,
+  "terraform.languageServer.enable": true,
+  "terraform.languageServer.ignoreSingleFileWarning": true,
+  "terraform.validation.enableEnhancedValidation": true,
+  "window.confirmSaveUntitledWorkspace": false,
+  "window.titleBarStyle": "custom",
+  "workbench.activityBar.orientation": "vertical",
+  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.editor.labelFormat": "default",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.startupEditor": "none",
+  "yaml.format.printWidth": 1000,
+  "yaml.disableSchemaDetection": [
+    "**/.github/workflows/*.yml",
+    "**/.github/workflows/*.yaml",
+    "**/.gitea/workflows/*.yml",
+    "**/.gitea/workflows/*.yaml",
+    "**/.forgejo/workflows/*.yml",
+    "**/.forgejo/workflows/*.yaml"
+  ],
+  "cursor.composer.showEmptyStateTips": false
+}

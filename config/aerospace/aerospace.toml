@@ -1,0 +1,135 @@
+# AeroSpace tiling window manager. https://nikitabobko.github.io/AeroSpace
+# Symlinked live by modules/aerospace.nix; edit this file directly.
+config-version = 2
+start-at-login = false
+
+# Absolute paths: AeroSpace is launched by the GUI/launchd, not a login shell,
+# so it inherits none of Homebrew's PATH.
+after-startup-command = [
+  'exec-and-forget /opt/homebrew/bin/borders style=round width=8.0 hidpi=on active_color=0xfffab387 inactive_color=0xffb7bdf8',
+]
+
+# See: https://nikitabobko.github.io/AeroSpace/guide#normalization
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+# List of workspaces that should stay alive even with no windows, so
+# `aerospace list-workspaces --all` reports them from a cold start.
+# See: https://nikitabobko.github.io/AeroSpace/guide#persistent-workspaces
+persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+# See: https://nikitabobko.github.io/AeroSpace/guide#layouts
+accordion-padding = 30
+
+# Possible values: tiles|accordion
+default-root-container-layout = 'tiles'
+
+# Possible values: horizontal|vertical|auto
+default-root-container-orientation = 'auto'
+
+# Turns off macOS "Hide application" (cmd-h) semantics inside AeroSpace.
+automatically-unhide-macos-hidden-apps = true
+
+# Possible values: (qwerty|dvorak)
+[key-mapping]
+preset = 'qwerty'
+
+# Gaps between windows (inner-*) and between monitor edges (outer-*).
+[gaps]
+inner.horizontal = 12
+inner.vertical = 12
+outer.left = 12
+outer.right = 12
+outer.bottom = 12
+outer.top = 12
+
+[[on-window-detected]]
+if.app-id = 'com.apple.systempreferences'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.finder'
+run = 'layout floating'
+
+# No letter-based workspace bindings (a-z), and no punctuation bindings
+# (- = ; , . /) either: this machine runs the Italian-Pro keyboard layout,
+# and AeroSpace's 'qwerty' preset resolves bindings by physical US keycode
+# rather than the printed keycap. On this layout the US punctuation keycodes
+# type Italian accented letters, and @ # [ ] { } only come out with Option
+# held on non-digit keys. Binding alt-<punctuation> or reusing letters already
+# bound elsewhere (h j k l t a f r e n p) would either silently fail to fire
+# or steal a combo needed to type those characters, so only digit-based
+# workspace bindings are used.
+#
+# alt-5 and alt-9 are a known exception among the digits: on this layout
+# Option+5 and Option+9 are needed to type `~` and backtick respectively
+# (used constantly in shell paths and command substitution). Binding them as
+# workspace switches steals those combos system-wide while AeroSpace is
+# running. Kept anyway as an accepted trade-off for having workspaces 1-9.
+[mode.main.binding]
+# See: https://nikitabobko.github.io/AeroSpace/commands#focus
+alt-h = 'focus left'
+alt-j = 'focus down'
+alt-k = 'focus up'
+alt-l = 'focus right'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#move
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#workspace
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+alt-8 = 'workspace 8'
+alt-9 = 'workspace 9'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
+alt-shift-1 = 'move-node-to-workspace 1 --focus-follows-window'
+alt-shift-2 = 'move-node-to-workspace 2 --focus-follows-window'
+alt-shift-3 = 'move-node-to-workspace 3 --focus-follows-window'
+alt-shift-4 = 'move-node-to-workspace 4 --focus-follows-window'
+alt-shift-5 = 'move-node-to-workspace 5 --focus-follows-window'
+alt-shift-6 = 'move-node-to-workspace 6 --focus-follows-window'
+alt-shift-7 = 'move-node-to-workspace 7 --focus-follows-window'
+alt-shift-8 = 'move-node-to-workspace 8 --focus-follows-window'
+alt-shift-9 = 'move-node-to-workspace 9 --focus-follows-window'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#layout
+alt-t = 'layout tiles horizontal vertical'
+alt-a = 'layout accordion horizontal vertical'
+alt-f = 'layout floating tiling'
+alt-shift-f = 'fullscreen'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#resize
+alt-r = 'resize smart -50'
+alt-e = 'resize smart +50'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#focus
+alt-n = 'focus dfs-next'
+alt-p = 'focus dfs-prev'
+
+alt-tab = 'workspace-back-and-forth'
+
+# See: https://nikitabobko.github.io/AeroSpace/commands#close
+alt-shift-q = 'close --quit-if-last-window'
+
+# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
+alt-shift-s = 'mode service'
+
+# 'service' binding mode declaration.
+[mode.service.binding]
+esc = ['reload-config', 'mode main']
+r = ['flatten-workspace-tree', 'mode main']                # reset layout
+f = ['layout floating tiling', 'mode main']                # toggle floating/tiling
+backspace = ['close-all-windows-but-current', 'mode main']
+alt-shift-h = ['join-with left', 'mode main']
+alt-shift-j = ['join-with down', 'mode main']
+alt-shift-k = ['join-with up', 'mode main']
+alt-shift-l = ['join-with right', 'mode main']

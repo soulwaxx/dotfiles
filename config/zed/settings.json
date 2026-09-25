@@ -1,0 +1,83 @@
+{
+  "edit_predictions": {
+    "provider": "zed",
+    "mode": "eager",
+  },
+  "show_edit_predictions": true,
+  "vim_mode": true,
+  "theme": "Catppuccin Mocha",
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
+  "buffer_font_size": 13,
+  "buffer_line_height": { "custom": 1.6 },
+  "minimap": { "show": "never" },
+  "project_panel": {
+    "dock": "left",
+    "starts_open": true,
+  },
+  "cursor_blink": false,
+  "relative_line_numbers": "enabled",
+  "indent_guides": { "enabled": true },
+  "show_whitespaces": "boundary",
+  "format_on_save": "on",
+  "tab_size": 2,
+  "terminal": {
+    "font_family": "JetBrainsMono Nerd Font Mono",
+    "font_size": 13,
+  },
+  "languages": {
+    "YAML": {
+      "formatter": {
+        "external": {
+          "command": "yamlfmt",
+          "arguments": [
+            "-formatter",
+            "type=basic,indentless_arrays=false,retain_line_breaks=true",
+            "-",
+          ],
+        },
+      },
+      "format_on_save": "on",
+    },
+  },
+  "lsp": {
+    "terraform-ls": {
+      "initialization_options": {
+        "experimentalFeatures": {
+          "prefillRequiredFields": true,
+        },
+      },
+    },
+  },
+  "file_types": {
+    "Helm": [
+      "**/templates/**/*.yaml",
+      "**/templates/**/*.yml",
+      "**/templates/**/*.tpl",
+      "**/*.gotmpl",
+      "**/helmfile.yaml"
+    ]
+  },
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.pytest_cache",
+    "**/.terraform",
+    "**/.venv",
+    "**/__pycache__",
+    "**/venv",
+    "**/node_modules",
+    "**/.DS_Store",
+  ],
+  "auto_install_extensions": {
+    "catppuccin": true,
+    "nix": true,
+    "terraform": true,
+    "helm": true,
+    "dockerfile": true,
+    "toml": true,
+    "rego": true,
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
+}

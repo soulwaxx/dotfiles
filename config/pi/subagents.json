@@ -1,0 +1,22 @@
+{
+  "globalConcurrencyLimit": 4,
+  "maxActiveAsyncRunsPerSession": 3,
+  "maxSubagentSpawnsPerSession": 50,
+  "maxSubagentSpawnsPerRun": 16,
+  "parallel": {
+    "maxTasks": 8,
+    "concurrency": 4
+  },
+  "timeoutMs": 3600000,
+  "checkpointBeforeDeadlineMs": 300000,
+  "scheduledRuns": {
+    "enabled": false
+  },
+  "toolDescriptionMode": "compact",
+  "inlineToolDisplay": "summary",
+  "fleetView": true,
+  "asyncWidget": false,
+  "worktree": false,
+  "defaultSubagentContext": "fresh",
+  "maxSubagentDepth": 1
+}

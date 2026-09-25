@@ -1,0 +1,29 @@
+# OS
+.DS_Store
+
+# Nix
+result
+.direnv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Secrets
+.secrets
+
+config/shared/skills/create-aws-account/
+config/shared/skills/scaffold-gitops/
+
+# Claude Code ephemeral state
+.claude/
+
+# Runtime state / untracked local dirs (not owned by this repo)
+.config/
+plans/
+.pi

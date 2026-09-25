@@ -1,0 +1,8 @@
+{
+  "workflow": "none",
+  "tools": {
+    "sourceCheck": {
+      "enabled": false
+    }
+  }
+}

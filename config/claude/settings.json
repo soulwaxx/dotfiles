@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "70",
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "CLAUDE_CODE_TMUX_TRUECOLOR": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_TELEMETRY": "1",
+    "ENABLE_CLAUDEAI_MCP_SERVERS": "false"
+  },
+  "permissions": {
+    "defaultMode": "default",
+    "disableBypassPermissionsMode": "disable",
+    "allow": [
+      "mcp__aws-mcp__*",
+      "mcp__aws-pricing-mcp-server__*",
+      "mcp__aws-knowledge-mcp__*",
+      "mcp__kubernetes__*",
+      "mcp__notion__*",
+      "mcp__github__*",
+      "mcp__datadog__*",
+      "WebSearch",
+      "ToolSearch",
+      "WebFetch",
+      "Bash(nix run .#check:*)",
+      "Bash(nix run .#fmt:*)",
+      "Bash(nix flake show:*)",
+      "Bash(nix flake check:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git stash list:*)",
+      "Bash(terraform plan:*)",
+      "Bash(terraform validate:*)",
+      "Bash(terraform fmt:*)",
+      "Bash(terraform show:*)",
+      "Bash(terraform state list:*)",
+      "Bash(terraform state show:*)",
+      "Bash(terraform init:*)",
+      "Bash(kubectl get:*)",
+      "Bash(kubectl describe:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl version:*)",
+      "Bash(kubectl config get-contexts:*)",
+      "Bash(kubectl config current-context:*)",
+      "Bash(helm lint:*)",
+      "Bash(helm template:*)",
+      "Bash(helm list:*)",
+      "Bash(helm get:*)",
+      "Bash(helm show:*)",
+      "Bash(helm history:*)",
+      "Bash(helm diff:*)",
+      "Bash(terraform output:*)",
+      "Bash(kustomize build:*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(*.pem)",
+      "Read(*.key)",
+      "Read(secret)",
+      "Read(secret/**)",
+      "Read(secrets)",
+      "Read(secrets/**)",
+      "Read(~/.secrets)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/credentials)",
+      "Read(~/.pi/agent/auth.json)",
+      "Read(~/.claude.json)",
+      "Bash(rm /nix*)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf ~/*)",
+      "Bash(sudo rm -rf ~)",
+      "Bash(sudo rm -rf ~/*)",
+      "Bash(rm * /nix*)",
+      "Bash(sudo rm /nix*)",
+      "Bash(sudo rm * /nix*)",
+      "Bash(dd *)",
+      "Bash(sudo dd *)",
+      "Bash(mkfs *)",
+      "Bash(mkfs.*)",
+      "Bash(sudo mkfs *)",
+      "Bash(sudo mkfs.*)",
+      "Bash(fdisk *)",
+      "Bash(sudo fdisk *)",
+      "Bash(parted *)",
+      "Bash(sudo parted *)",
+      "Bash(wipefs *)",
+      "Bash(sudo wipefs *)",
+      "Bash(diskutil erase*)",
+      "Bash(diskutil apfs delete *)",
+      "Bash(chmod * /nix*)",
+      "Bash(sudo chmod * /nix*)",
+      "Bash(chmod * -R * 777*)",
+      "Bash(chmod * 777* -R *)",
+      "Bash(sudo chmod * -R * 777*)",
+      "Bash(chmod -R 777 *)",
+      "Bash(chmod -R 777*)",
+      "Bash(sudo chmod -R 777 *)",
+      "Bash(sudo chmod -R 777*)",
+      "Bash(chown * -R /*)",
+      "Bash(chown * -R ~*)",
+      "Bash(sudo chown * -R /*)",
+      "Bash(sudo chown * -R ~*)",
+      "Bash(chown -R * /*)",
+      "Bash(chown -R * ~*)",
+      "Bash(sudo chown -R * /*)",
+      "Bash(sudo chown -R * ~*)",
+      "Bash(reboot)",
+      "Bash(reboot *)",
+      "Bash(sudo reboot)",
+      "Bash(sudo reboot *)",
+      "Bash(shutdown)",
+      "Bash(shutdown *)",
+      "Bash(sudo shutdown)",
+      "Bash(sudo shutdown *)"
+    ],
+    "ask": [
+      "Bash(rm -r*)",
+      "Bash(rm -R*)",
+      "Bash(rm -*r*)",
+      "Bash(rm -*R*)",
+      "Bash(rm --recursive*)",
+      "Bash(rm * -r*)",
+      "Bash(rm * -R*)",
+      "Bash(rm * --recursive*)",
+      "Bash(sudo rm)",
+      "Bash(sudo rm *)",
+      "Bash(sudo * rm)",
+      "Bash(sudo * rm *)",
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(git * push*)",
+      "Bash(git reset --hard)",
+      "Bash(git reset --hard *)",
+      "Bash(git * reset --hard*)",
+      "Bash(git clean *-f*)",
+      "Bash(git * clean *-f*)",
+      "Bash(git checkout -- *)",
+      "Bash(git * checkout -- *)",
+      "Bash(git restore * .)",
+      "Bash(git restore * :/*)",
+      "Bash(git * restore * .)",
+      "Bash(git * restore * :/*)",
+      "Bash(git tag -d *)",
+      "Bash(git * tag -d *)",
+      "Bash(git branch -D *)",
+      "Bash(git * branch -D *)",
+      "Bash(terraform apply)",
+      "Bash(terraform apply *)",
+      "Bash(terraform * apply*)",
+      "Bash(terraform destroy)",
+      "Bash(terraform destroy *)",
+      "Bash(terraform * destroy*)",
+      "Bash(terraform * delete*)",
+      "Bash(terraform state rm *)",
+      "Bash(tofu apply)",
+      "Bash(tofu apply *)",
+      "Bash(tofu * apply*)",
+      "Bash(tofu destroy)",
+      "Bash(tofu destroy *)",
+      "Bash(tofu * destroy*)",
+      "Bash(tofu * delete*)",
+      "Bash(tofu state rm *)",
+      "Bash(terragrunt apply)",
+      "Bash(terragrunt apply *)",
+      "Bash(terragrunt * apply*)",
+      "Bash(terragrunt destroy)",
+      "Bash(terragrunt destroy *)",
+      "Bash(terragrunt * destroy*)",
+      "Bash(terragrunt * delete*)",
+      "Bash(terragrunt state rm *)",
+      "Bash(kubectl delete *)",
+      "Bash(kubectl * delete*)",
+      "Bash(kubectl drain *)",
+      "Bash(kubectl * drain*)",
+      "Bash(helm delete *)",
+      "Bash(helm * delete*)",
+      "Bash(helm uninstall *)",
+      "Bash(helm * uninstall*)",
+      "Bash(aws *delete*)",
+      "Bash(aws *deregister*)",
+      "Bash(aws *detach*)",
+      "Bash(aws *disable*)",
+      "Bash(aws *rb*)",
+      "Bash(aws *remove*)",
+      "Bash(aws *rm*)",
+      "Bash(aws *terminate*)",
+      "Bash(brew uninstall *)",
+      "Bash(brew untap *)",
+      "Bash(brew zap *)",
+      "Bash(npm uninstall *)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm uninstall *)",
+      "Bash(yarn remove *)",
+      "Bash(yarn uninstall *)",
+      "Bash(pip uninstall *)",
+      "Bash(pip3 uninstall *)",
+      "Bash(uv pip uninstall *)",
+      "Bash(uv tool uninstall *)",
+      "Bash(cargo uninstall *)",
+      "Bash(nix profile remove *)",
+      "Bash(nix-env -e *)",
+      "mcp__*delete*",
+      "mcp__*merge*",
+      "mcp__*push*",
+      "mcp__*terminate*",
+      "mcp__*deregister*",
+      "mcp__aws-mcp__*",
+      "mcp__github__*create*",
+      "mcp__github__*update*",
+      "mcp__github__*add*",
+      "mcp__github__*remove*",
+      "mcp__github__*fork*",
+      "mcp__github__*lock*",
+      "mcp__github__*mark*",
+      "mcp__github__*dismiss*",
+      "mcp__notion__*create*",
+      "mcp__notion__*update*",
+      "mcp__notion__*move*",
+      "mcp__notion__*append*",
+      "mcp__notion__*add*",
+      "mcp__notion__*archive*"
+    ]
+  },
+  "enabledPlugins": {},
+  "extraKnownMarketplaces": {},
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|NotebookEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/obsidian-session.sh\" prewrite",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/semantic-command-scanner.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|idle_prompt|elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/notify-attention.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/notify-attention.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/obsidian-session.sh\" start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|NotebookEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/obsidian-session.sh\" autocommit",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/obsidian-session.sh\" stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude/statusline-command.sh\"",
+    "padding": 0,
+    "hideVimModeIndicator": true
+  },
+  "disableRemoteControl": true,
+  "disableWorkflows": true,
+  "disableArtifact": true,
+  "disableSkillShellExecution": true,
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
+  "includeGitInstructions": false,
+  "cleanupPeriodDays": 14,
+  "spinnerTipsEnabled": false,
+  "showTurnDuration": true,
+  "terminalProgressBarEnabled": true,
+  "tui": "fullscreen",
+  "autoUpdatesChannel": "latest",
+  "showClearContextOnPlanAccept": true
+}
