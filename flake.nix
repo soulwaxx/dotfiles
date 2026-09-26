@@ -268,6 +268,10 @@
           ${pkgs.bash}/bin/bash tests/claude-state-jq.sh
           touch $out
         '';
+        herdr-config = pkgs.runCommand "check-herdr-config" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+          python3 ${./tests/herdr-config.py} ${./config/herdr/config.toml}
+          touch $out
+        '';
         skill-autocomplete =
           pkgs.runCommand "check-skill-autocomplete" { nativeBuildInputs = [ pkgs.nodejs_24 ]; }
             ''

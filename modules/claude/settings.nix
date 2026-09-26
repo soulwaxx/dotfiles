@@ -1,6 +1,7 @@
 # Copy config/claude/settings.json to ~/.claude/settings.json on activation.
 # Claude Code writes to this file at runtime, so it's a copy, not a symlink.
-# A snapshot tracks drift between switches.
+# Snapshots track repo changes and live drift independently so integrations can
+# add generated entries after the repo settings are copied.
 {
   pkgs,
   config,
@@ -15,6 +16,7 @@ in
   home.activation.claudeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     STATE_DIR="$HOME/.local/state/dotfiles"
     LAST="''${STATE_DIR}/claude-settings.last.json"
+    BASE="''${STATE_DIR}/claude-settings.base.json"
     LIVE="$HOME/.claude/settings.json"
     SRC="${settingsSource}"
 
@@ -31,10 +33,10 @@ in
       fi
     fi
 
-    if ! ${pkgs.diffutils}/bin/cmp -s "''${SRC}" "''${LAST}" 2>/dev/null || \
-       ! ${pkgs.diffutils}/bin/cmp -s "''${SRC}" "''${LIVE}" 2>/dev/null; then
+    if ! ${pkgs.diffutils}/bin/cmp -s "''${SRC}" "''${BASE}" 2>/dev/null || \
+       ! ${pkgs.diffutils}/bin/cmp -s "''${LIVE}" "''${LAST}" 2>/dev/null; then
       run install -m 644 "''${SRC}" "''${LIVE}"
-      run install -m 644 "''${SRC}" "''${LAST}"
+      run install -m 644 "''${SRC}" "''${BASE}"
     fi
   '';
 }

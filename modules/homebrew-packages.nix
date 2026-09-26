@@ -44,6 +44,7 @@ let
     "fd"
     "glow"
     "graphviz"
+    "herdr" # config lives in modules/herdr.nix
     "jq"
     "make" # GNU make (installs as gmake)
     "nixfmt" # nvim conform + treefmt parity; Mason has no darwin-arm64 nixfmt

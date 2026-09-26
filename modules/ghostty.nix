@@ -20,7 +20,11 @@ in
     settings = {
       theme = config.dotfiles.theme.current.ghostty;
 
-      command = "direct:${pkgs.tmux}/bin/tmux new-session";
+      command =
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          "direct:/opt/homebrew/bin/herdr"
+        else
+          "direct:${pkgs.herdr}/bin/herdr";
 
       font-family = config.dotfiles.theme.current.font.mono;
       # font-size is in points. Ghostty's point->pixel baseline is 72 DPI on

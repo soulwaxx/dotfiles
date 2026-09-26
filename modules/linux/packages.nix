@@ -37,6 +37,7 @@ let
     pkgs.fd
     pkgs.glow
     pkgs.graphviz
+    pkgs.herdr # config lives in modules/herdr.nix
     pkgs.ghostscript
     pkgs.imagemagick
     pkgs.jq
@@ -45,6 +46,7 @@ let
     pkgs.nixfmt # nvim conform (nix) + treefmt parity
     pkgs.statix # nvim-lint nix source
     pkgs.p7zip
+    pkgs.python3 # herdr's Claude session hook runs python3
     pkgs.ripgrep
     pkgs.shellcheck
     pkgs.tmux # config lives in modules/tmux.nix

@@ -106,9 +106,8 @@ let
     # Render mermaid diagrams once complete instead of streaming partial frames.
     markdown.mermaid = "final";
     tuiMode = "fullscreen"; # alternatives: "regular" (default), "fullscreen"
-    # Force capabilities pi under-detects behind tmux (TERM=tmux-256color).
-    # Path is Ghostty -> tmux 3.7 (allow-passthrough on) -> pi, which supports
-    # all three; kitty images depend on Ghostty + tmux graphics passthrough.
+    # Force capabilities pi may under-detect behind a multiplexer.
+    # Kitty images work in Ghostty through Herdr or tmux graphics passthrough.
     terminal = {
       hyperlinks = true;
       trueColor = true;

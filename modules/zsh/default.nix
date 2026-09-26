@@ -267,16 +267,6 @@ in
         fi
         unset _fzf_functions
 
-        # Bare `tmux` attaches to the default home workspace.
-        unalias tmux 2>/dev/null
-        tmux() {
-          if [[ $# -eq 0 ]]; then
-            exec command tmux new-session -A -s home
-          else
-            command tmux "$@"
-          fi
-        }
-
         # Copy a whole file to the local machine's clipboard. OSC 52 travels over
         # the terminal connection, so this also works through SSH. Inside tmux,
         # `set-clipboard external` drops OSC 52 from panes; load-buffer -w makes

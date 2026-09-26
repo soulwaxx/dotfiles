@@ -40,6 +40,7 @@ in
     ../starship.nix
     ../neovim.nix
     ../tmux.nix
+    ../herdr.nix
     ../sesh.nix
     ../k9s.nix
     ../terraform.nix

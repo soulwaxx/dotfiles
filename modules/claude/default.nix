@@ -15,7 +15,10 @@ let
   symlinkedPaths = {
     ".claude/statusline-command.sh" = "statusline.sh";
     ".claude/commands" = "commands";
-    ".claude/hooks" = "hooks";
+    ".claude/hooks/block-no-verify.sh" = "hooks/block-no-verify.sh";
+    ".claude/hooks/notify-attention.sh" = "hooks/notify-attention.sh";
+    ".claude/hooks/obsidian-session.sh" = "hooks/obsidian-session.sh";
+    ".claude/hooks/semantic-command-scanner.sh" = "hooks/semantic-command-scanner.sh";
   };
   # Harness-agnostic prose lives in config/shared and is symlinked into both
   # harnesses (pi mirrors these; see modules/pi.nix).
@@ -78,24 +81,35 @@ in
     ./mcp.nix
   ];
 
-  home.activation.installClaudeCode = mkCurlInstaller {
-    name = "claude";
-    displayName = "Claude Code";
-    installDir = "$HOME/.local/bin";
-    url = "https://claude.ai/install.sh";
-    binPath = "$HOME/.local/bin/claude";
-    extraPath = [ "/usr/bin" ];
-  };
+  home = {
+    activation = {
+      migrateClaudeHooks = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
+        if [[ -L "$HOME/.claude/hooks" && "$(readlink -f "$HOME/.claude/hooks")" == "${dotfiles}/config/claude/hooks" ]]; then
+          run rm "$HOME/.claude/hooks"
+          run mkdir -p "$HOME/.claude/hooks"
+        fi
+      '';
 
-  # Symlinked so edits take effect without a rebuild.
-  home.file =
-    lib.mapAttrs (_target: sourcePath: {
-      source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/claude/${sourcePath}";
-      force = true;
-    }) symlinkedPaths
-    // lib.mapAttrs (_target: sourcePath: {
-      source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/${sourcePath}";
-      force = true;
-    }) sharedPaths
-    // claudeAgentFiles;
+      installClaudeCode = mkCurlInstaller {
+        name = "claude";
+        displayName = "Claude Code";
+        installDir = "$HOME/.local/bin";
+        url = "https://claude.ai/install.sh";
+        binPath = "$HOME/.local/bin/claude";
+        extraPath = [ "/usr/bin" ];
+      };
+    };
+
+    # Symlinked so edits take effect without a rebuild.
+    file =
+      lib.mapAttrs (_target: sourcePath: {
+        source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/claude/${sourcePath}";
+        force = true;
+      }) symlinkedPaths
+      // lib.mapAttrs (_target: sourcePath: {
+        source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/${sourcePath}";
+        force = true;
+      }) sharedPaths
+      // claudeAgentFiles;
+  };
 }
