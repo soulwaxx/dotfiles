@@ -25,9 +25,8 @@ Shared behavioral guidelines to reduce common LLM coding mistakes, loaded by bot
 Before implementing:
 
 - State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
+- If multiple interpretations exist, name them and ask instead of choosing silently.
 - If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
 
 ## 2. Simplicity First
 
@@ -39,16 +38,13 @@ Before implementing:
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
 ## 3. Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
 When editing existing code:
 
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
+- Don't refactor or reformat unrelated code and comments.
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it - don't delete it.
 
@@ -79,8 +75,6 @@ Transform tasks into verifiable goals: a bug fix means a failing test that
 reproduces it, then passes. For multi-step tasks, state a brief plan and verify
 each step.
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
 ## 6. Work Sequentially
 
 **Keep one owner from inspection through verification.**
@@ -95,3 +89,7 @@ For non-trivial work, complete each phase before starting the next:
 
 Do not split tightly coupled work across concurrent writers. If a fresh review
 is needed, finish the implementation first, then review it as a separate pass.
+
+## 7. Repository Scouting
+
+For broad repository investigations (multiple files, callers, tests, or behavior tracing), launch an available read-only `scout` with a bounded question and request file/line evidence. Read its findings before deciding or editing, and investigate gaps directly. Keep trivial lookups inline, avoid duplicate scouts, and honor requests not to delegate.

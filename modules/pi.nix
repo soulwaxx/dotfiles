@@ -27,7 +27,7 @@ let
       source = mkPiAgent "scout" ../config/shared/agents/scout.md ''
         description: Use for read-only codebase investigation that traces behavior, locates relevant files, callers, and tests, and returns cited evidence.
         advertise: true
-        tools: read, bash, grep, find, ls
+        tools: read, bash, grep, find, ls, contact_supervisor
         model: ${subagentModels.scout}
         thinking: low
         async: true
@@ -43,7 +43,7 @@ let
       source = mkPiAgent "reviewer" ../config/shared/agents/reviewer.md ''
         description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
         advertise: true
-        tools: read, bash, grep, find, ls
+        tools: read, bash, grep, find, ls, watchdog_diff, contact_supervisor
         model: ${subagentModels.reviewer}
         thinking: high
         async: true
@@ -60,7 +60,7 @@ let
       source = mkPiAgent "worker" ../config/shared/agents/worker.md ''
         description: Use for an already well-scoped implementation task with clear success criteria; make minimal edits and run focused verification.
         advertise: true
-        tools: read, bash, edit, write, grep, find, ls
+        tools: read, bash, edit, write, grep, find, ls, contact_supervisor
         model: ${subagentModels.worker}
         thinking: high
         async: true

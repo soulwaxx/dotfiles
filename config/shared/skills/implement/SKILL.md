@@ -14,15 +14,15 @@ Find the last `## Execution table` in the conversation.
 
 ### 2. Execute row by row
 
-Complete each row in the current session before starting the next one. Run its verification check immediately after the work.
+Complete each row in order before starting the next one. Honor its `Owner` assignment; `inline` means do not delegate that row. For `scout`, `worker`, or `reviewer`, launch the named subagent with that row's bounded task, relevant repository context, authority boundary, success criteria, verification, and expected report. Wait for and inspect its result before running the row's verification in the current session. Keep decisions and final acceptance with the parent; do not let subagents delegate further. Stop and report a launch or execution failure rather than silently switching to inline work.
 
 | Mode | Action |
 | --- | --- |
 | **direct** | Perform the task and mark it done. |
-| **inspect** | Read the relevant files, callers, and tests. Record the findings before continuing. |
+| **inspect** | Read the relevant files, callers, and tests, or assign the scoped investigation to `scout`. Record and check the findings before continuing. |
 | **decide** | Compare the concrete options, state the recommendation, and get user approval when the choice changes scope or behavior. |
-| **edit** | Change only the listed files, then run focused checks for those files. |
-| **review** | Re-read the request and repository rules, inspect the full diff, and report or fix findings before continuing. |
+| **edit** | Change only the listed files, or assign that change to `worker`, then run focused checks for those files. |
+| **review** | Re-read the request and repository rules, inspect the full diff inline or assign a fixed-point review to `reviewer`, and report or fix findings before continuing. |
 
 Stop if a verification check fails. Diagnose the failure before moving to the next row.
 
