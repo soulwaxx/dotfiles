@@ -1,5 +1,6 @@
 {
   "permissionReviewLog": false,
+  "doublePressToConfirm": false,
   "permission": {
     "*": "allow",
     "bash": {
@@ -48,14 +49,6 @@
       "tofu * destroy*": "ask",
       "tofu * delete*": "ask",
       "tofu state rm *": "ask",
-      "terragrunt apply": "ask",
-      "terragrunt apply *": "ask",
-      "terragrunt * apply*": "ask",
-      "terragrunt destroy": "ask",
-      "terragrunt destroy *": "ask",
-      "terragrunt * destroy*": "ask",
-      "terragrunt * delete*": "ask",
-      "terragrunt state rm *": "ask",
       "kubectl delete *": "ask",
       "kubectl * delete*": "ask",
       "kubectl drain *": "ask",
@@ -144,7 +137,6 @@
     },
     "path": {
       "*": "allow",
-      ".env.example": "allow",
       ".env": "deny",
       "*/.env": "deny",
       ".env.*": "deny",
