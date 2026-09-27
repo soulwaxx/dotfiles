@@ -9,6 +9,17 @@ let
   cfg = config.dotfiles.claude.obsidian;
   homeDir = config.home.homeDirectory;
   defaultVaultPath = if pkgs.stdenv.hostPlatform.isDarwin then "${homeDir}/soulwaxx_brain" else null;
+  properties = pkgs.writeText "obsidian-properties.json" (
+    builtins.toJSON {
+      inherit (cfg) vaultPath;
+      features = {
+        guard = true;
+        toc = true;
+        autoCommit = true;
+        retrievalRefresh = true;
+      };
+    }
+  );
 in
 {
   imports = [
@@ -32,19 +43,23 @@ in
       default = defaultVaultPath;
       description = ''
         Absolute path to the Obsidian vault. Defaults to the shared vault on
-        macOS hosts and null on Linux. Set to null to disable claude-obsidian
-        shell wiring and vault checks on this host.
+        macOS hosts and null on Linux. Used to initialize the standalone
+        package's editable properties file and to select the brain shell vault.
       '';
     };
   };
 
   config = lib.mkMerge [
     {
-      # Claude's hooks read this at runtime; null disables them on Linux.
-      home.file.".claude/obsidian-vault-path".text =
-        if cfg.vaultPath == null then "" else "${cfg.vaultPath}\n";
-      # The wiki skill's okf_mw middleware (validate.py/guard.py/sync.py, bundled
-      # in config/shared/skills/wiki/scripts/okf_mw/) shells out to `python3`.
+      # Create a user-editable property file only once; package upgrades and
+      # switches must not overwrite local feature selections.
+      home.activation.obsidianProperties = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        if [[ ! -e "$HOME/.config/obsidian-second-brain/properties.json" ]]; then
+          run mkdir -p "$HOME/.config/obsidian-second-brain"
+          run install -m 644 ${properties} "$HOME/.config/obsidian-second-brain/properties.json"
+        fi
+      '';
+      # The wiki skill's okf_mw middleware shells out to `python3`.
       # Provisioned by the single Python interpreter with PyYAML in shared.nix;
       # not declared here to avoid a home.packages conflict.
       #
@@ -68,7 +83,7 @@ in
         obsidianCli="/Applications/Obsidian.app/Contents/MacOS/obsidian-cli"
         if [[ -x "$obsidianCli" ]]; then
           run mkdir -p "$HOME/.local/bin"
-          # The wiki-cli skill's transport detection invokes "obsidian-cli";
+          # The wiki skill's transport detection invokes "obsidian-cli";
           # link under that exact name (the bundle's own binary name). Keep the
           # legacy "obsidian" name too so anything calling that still resolves.
           run ln -sf "$obsidianCli" "$HOME/.local/bin/obsidian-cli"
@@ -81,9 +96,8 @@ in
     })
 
     (lib.mkIf (cfg.vaultPath != null) {
-      # The claude-obsidian plugin (and the pi wiki skill it's symlinked to) are
-      # vault-cwd-scoped: hooks and scripts only work when the harness runs inside
-      # the vault. `brain` is harness-agnostic: it cd's there, pulls the latest
+      # The standalone integration is vault-cwd-scoped; `brain` cd's into the
+      # vault, pulls the latest
       # vault commits, drops the user into an interactive shell in the vault (they
       # launch `claude` or `pi` themselves from there), then pushes on exit.
       programs.zsh.initContent = ''
@@ -99,7 +113,7 @@ in
 
       home.activation.claudeObsidianVaultCheck = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         if [[ ! -d ${lib.escapeShellArg cfg.vaultPath} ]]; then
-          echo "WARN: dotfiles.claude.obsidian.vaultPath '${cfg.vaultPath}' does not exist on this host; hooks will silently no-op." >&2
+          echo "WARN: brain vault path '${cfg.vaultPath}' does not exist on this host." >&2
         fi
       '';
     })

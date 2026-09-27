@@ -91,6 +91,8 @@ let
     "npm:@juicesharp/rpiv-btw"
     "npm:pi-powerline-footer"
     "npm:pi-blackhole"
+    "git:github.com/soulwaxx/obsidian-second-brain"
+    "git:github.com/soulwaxx/pi-skill-autocomplete"
   ];
 
   piSettings = {
@@ -115,8 +117,7 @@ let
     };
     defaultProjectTrust = "ask";
     quietStartup = true;
-    # Give the skill/file/command autocomplete dropdown (incl. the mid-prompt
-    # skill picker in extensions/skill-autocomplete.ts) room to browse.
+    # Give the skill/file/command autocomplete dropdown room to browse.
     autocompleteMaxVisible = 8;
     enableSkillCommands = true;
     packages = piPackages;
@@ -143,11 +144,13 @@ let
   piMcp = mkPiMcp { inherit isWork awsMcp; };
 
   piPackageSource = package: if builtins.isString package then package else package.source;
-  piPackageNames = map (package: lib.removePrefix "npm:" (piPackageSource package)) piPackages;
+  piPackageNames = map (package: lib.removePrefix "npm:" (piPackageSource package)) (
+    builtins.filter (package: lib.hasPrefix "npm:" (piPackageSource package)) piPackages
+  );
   piAllowedPackagesFile = jsonFormat.generate "pi-allowed-packages.json" piPackageNames;
 
   piSettingsFile = jsonFormat.generate "pi-settings.json" piSettings;
-  piMcpFile = jsonFormat.generate "pi-mcp.json" piMcp;
+  piMcpFile = jsonFormat.generate "pi-mcp-adapter.json" piMcp;
 in
 {
   home = {
@@ -205,7 +208,7 @@ in
         source = piSettingsFile;
         force = true;
       };
-      ".pi/agent/mcp.json" = {
+      ".pi/agent/mcp-adapter.json" = {
         source = piMcpFile;
         force = true;
       };
@@ -221,12 +224,6 @@ in
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/web-search.json";
 
       # Extension configs — static JSON, symlinked.
-      ".pi/agent/extensions/dotfiles-obsidian/config.json".source =
-        jsonFormat.generate "pi-obsidian-config.json"
-          {
-            hookPath = "~/.claude/hooks/obsidian-session.sh";
-            vaultPath = config.dotfiles.claude.obsidian.vaultPath;
-          };
       ".pi/agent/extensions/pi-permission-system/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
       ".pi/agent/pi-fff.json".source =
@@ -237,12 +234,8 @@ in
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.json";
 
       # Extension source symlinks. Pi auto-discovers these paths and supports /reload.
-      ".pi/agent/extensions/dotfiles-obsidian/index.ts".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/extensions/obsidian.ts";
       ".pi/agent/extensions/dotfiles-handoff/index.ts".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/extensions/handoff.ts";
-      ".pi/agent/extensions/dotfiles-skill-autocomplete/index.ts".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/extensions/skill-autocomplete.ts";
 
       # Shared global instructions and skills — harness-agnostic prose owned by
       # config/shared and symlinked into both harnesses as a context/memory file:

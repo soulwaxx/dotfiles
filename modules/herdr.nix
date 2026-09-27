@@ -13,7 +13,7 @@ in
     config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.path}/config/herdr/config.toml";
 
   home.activation.herdrIntegrations =
-    lib.hm.dag.entryAfter [ "linkGeneration" "claudeSettings" "installPi" ]
+    lib.hm.dag.entryAfter [ "linkGeneration" "installObsidianPlugin" "installPi" ]
       ''
         if [[ ! -x "${herdrBin}" ]]; then
           echo "herdr: binary not found at ${herdrBin}" >&2

@@ -272,12 +272,6 @@
           python3 ${./tests/herdr-config.py} ${./config/herdr/config.toml}
           touch $out
         '';
-        skill-autocomplete =
-          pkgs.runCommand "check-skill-autocomplete" { nativeBuildInputs = [ pkgs.nodejs_24 ]; }
-            ''
-              node ${./tests/skill-autocomplete.mjs} ${./config/pi/extensions/skill-autocomplete.ts}
-              touch $out
-            '';
         semantic-command-scanner =
           pkgs.runCommand "check-semantic-command-scanner"
             {
@@ -295,30 +289,6 @@
               cp ${./config/claude/hooks/semantic-command-scanner.sh} config/claude/hooks/semantic-command-scanner.sh
               ${pkgs.bash}/bin/bash tests/semantic-command-scanner.sh \
                 config/claude/hooks/semantic-command-scanner.sh
-              touch $out
-            '';
-        obsidian-lifecycle =
-          pkgs.runCommand "check-obsidian-lifecycle"
-            {
-              nativeBuildInputs = [
-                pkgs.bash
-                pkgs.git
-                pkgs.jq
-                pkgs.nodejs_24
-                (pkgs.python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]))
-              ];
-            }
-            ''
-              ${pkgs.bash}/bin/bash ${./tests/obsidian-lifecycle.sh} \
-                ${./config/claude/hooks/obsidian-session.sh} \
-                ${./config/shared/skills/wiki/scripts/okf_mw}
-              python3 ${./tests/obsidian-middleware.py} \
-                ${./config/shared/skills/wiki/scripts/okf_mw} \
-                ${./config/shared/skills/wiki/scripts/migrate_wikilinks.py}
-              node ${./tests/obsidian-extension.mjs} \
-                ${./config/pi/extensions/obsidian.ts} \
-                ${./config/claude/hooks/obsidian-session.sh} \
-                ${./config/shared/skills/wiki/scripts/okf_mw}
               touch $out
             '';
         zsh-functions =

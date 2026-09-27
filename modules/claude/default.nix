@@ -17,7 +17,6 @@ let
     ".claude/commands" = "commands";
     ".claude/hooks/block-no-verify.sh" = "hooks/block-no-verify.sh";
     ".claude/hooks/notify-attention.sh" = "hooks/notify-attention.sh";
-    ".claude/hooks/obsidian-session.sh" = "hooks/obsidian-session.sh";
     ".claude/hooks/semantic-command-scanner.sh" = "hooks/semantic-command-scanner.sh";
   };
   # Harness-agnostic prose lives in config/shared and is symlinked into both
@@ -98,6 +97,21 @@ in
         binPath = "$HOME/.local/bin/claude";
         extraPath = [ "/usr/bin" ];
       };
+
+      installObsidianPlugin = lib.hm.dag.entryAfter [ "installClaudeCode" "claudeSettings" ] ''
+        if ! "$HOME/.local/bin/claude" plugin marketplace list --json |
+          ${pkgs.jq}/bin/jq -e 'any(.[]; .name == "obsidian-second-brain")' >/dev/null; then
+          run "$HOME/.local/bin/claude" plugin marketplace add soulwaxx/obsidian-second-brain
+        fi
+        if ! "$HOME/.local/bin/claude" plugin list --json |
+          ${pkgs.jq}/bin/jq -e 'any(.[]; .id == "obsidian-second-brain@obsidian-second-brain" and .scope == "user")' >/dev/null; then
+          run "$HOME/.local/bin/claude" plugin install obsidian-second-brain@obsidian-second-brain --scope user
+        fi
+        if "$HOME/.local/bin/claude" plugin list --json |
+          ${pkgs.jq}/bin/jq -e 'any(.[]; .id == "obsidian-second-brain@obsidian-second-brain" and .scope == "user" and .enabled == false)' >/dev/null; then
+          run "$HOME/.local/bin/claude" plugin enable obsidian-second-brain@obsidian-second-brain --scope user
+        fi
+      '';
     };
 
     # Symlinked so edits take effect without a rebuild.
