@@ -54,9 +54,9 @@ Done when every skeleton section and every branch section is present, in order, 
 
 ### 5. Style gates
 
-Run the grep gate from WRITING-STYLE.md on every file you wrote, and rewrite each sentence it flags. Then run the read-through gate: re-read each section against the structure and sentence rules in WRITING-STYLE.md, and rewrite each sentence that fails.
+Run the grep gate from WRITING-STYLE.md on every file you wrote, and rewrite each sentence it flags. Run the repetition count on `ANALYSIS.md` and resolve each hit. Then run the read-through gate: re-read each section against the structure and sentence rules in WRITING-STYLE.md, and rewrite each sentence that fails.
 
-Done when the grep gate returns no hits outside its allowed exceptions and every section has had its read-through.
+Done when the grep gate returns no hits outside its allowed exceptions, every repetition-count hit is resolved, and every section has had its read-through.
 
 ### 6. Self-check
 
@@ -65,7 +65,8 @@ Check the draft against every item:
 - [ ] Every skeleton section and every branch section is present, in order. An empty section reads "None" with the reason.
 - [ ] **Relevance gate**: every paragraph, bullet and table row supports the verdict, a decision, a risk or an open item. Delete each one that supports none.
 - [ ] Every selection candidate has a sourced finding or explicit unknown for each hard constraint in `ANALYSIS_RESOURCES.md`.
-- [ ] Every sentence that supports the verdict cites a primary source or a repo path, or carries *(assumed)*.
+- [ ] Every fact the verdict rests on cites a primary source or a repo path where the document first states it, or carries *(assumed)*. No later sentence repeats that citation.
+- [ ] **Plain names**: outside the implementer sections, an identifier or repo path appears only where the verdict turns on it, and only once.
 - [ ] Every number (cost, limit, version, count) cites a source.
 - [ ] Every *(assumed)* claim appears in Open items with how to confirm it. Every unverified hard constraint stays unknown in the matrix and makes the chosen verdict conditional until its proof gate passes.
 - [ ] Every option block opens with its bold verdict, then states what the option is, what it gains and what decides it, in at most three sentences plus bullets for three or more parallel points. Every non-chosen option ends with a revisit trigger.
@@ -92,13 +93,13 @@ The sections of `ANALYSIS.md`, in order. The document builds through the evidenc
 
 1. **Header block.** `# <Topic>: analysis`, then one line each for ticket or parent and status (`analysis, not implementation`).
 2. **Problem and goal.** The current pain (in numbers where they exist), the target, and the scope of this document.
-3. **Constraints.** Two lists, **Hard constraints** and **Preferences**. Every item cites its source.
+3. **Constraints.** Two lists, **Hard constraints** and **Preferences**. Each item states the rule it imposes in one line and cites one source. The facts behind a constraint (API behaviour, limits, versions) go into the option block they decide, or stay in `ANALYSIS_RESOURCES.md`.
 4. **Branch sections.** From SELECTION.md or IMPLEMENTATION.md.
 5. **Recommendation.**
    - The verdict in one sentence. A verdict can be conditional ("chosen, pending the cost check"); name the unverified hard constraint and put its proof gate in Open items.
    - The one or two reasons it wins.
    - The strongest counter-argument, and why it loses here.
-   - One line per other option, with its verdict.
+   - Selection: one line per other candidate, with its verdict. Implementation: one line per decision area, naming its chosen option; the rejected options stay in their decision area.
    - A Mermaid diagram when the chosen design has more than three components.
 6. **Risks and approvals.**
    - Residual risks, one bullet each.
@@ -124,7 +125,15 @@ Every claim belongs to one of three classes:
 - **Assumption.** Carries *(assumed)* inline and appears again in Open items.
 - **Open item.** A question the analysis could not answer, listed in Open items.
 
-Copy each primary source from `ANALYSIS_RESOURCES.md` into the sentence it supports, so a reviewer checks a claim in one click.
+Cite each fact once, in the sentence where the document first states it, with the primary source copied from `ANALYSIS_RESOURCES.md`, so a reviewer checks it in one click. A later sentence that relies on the same fact restates it in plain words, without the source.
+
+### Plain names
+
+Approvers read the whole document; implementers act on a few sections. Write for the approver everywhere except those **implementer sections**: Current state, Defects found, Target design and Prerequisites (implementation), and Adoption approach (selection).
+
+- **Name each thing once.** Introduce a component, role or mechanism with its plain name and, when it has one, its identifier (resource type, API call, flag, tag, file path). From then on, use the plain name: "the trigger module", "the Bootstrap tag".
+- **Identifiers and repo paths live in the implementer sections.** Elsewhere, one appears only when the option's verdict turns on it, and then once.
+- **One section spells out each change.** Describe a change (a module edit, a permission, a tag) in full in one section. Other sections name it in a few words.
 
 ### Verdicts
 
@@ -136,7 +145,7 @@ One vocabulary for options, in both branches:
 
 Every alternative and discarded option carries a **revisit trigger**: the condition that would change its verdict, or "none" with the reason.
 
-Write each evaluated option as an **option block**, chosen first: a heading that names the option, then one paragraph of at most three sentences.
+Write each evaluated option as an **option block**, chosen first: a heading that names the option in plain words, then one paragraph of at most three sentences. Each sentence carries one idea; a clause chained on with a semicolon or a comma to stay under the limit counts as another sentence.
 
 1. The verdict in bold as the first words (`**Chosen.**`, `**Chosen, pending <check>.**`, `**Alternative.**`, `**Discarded.**`), then what the option is.
 2. What it gains. When it gains nothing material, say so in a clause instead of inventing an advantage.
@@ -162,4 +171,4 @@ A table earns its place only when every cell is a marker (`Yes`, `Partial`, `No`
 
 ### Headings and cross-references
 
-Headings carry no numbers. A cross-reference is a Markdown anchor to the heading, for example `[Aurora readiness](#aurora-readiness)`. Add one only where the reader needs to jump; repeat a single fact instead of pointing at a whole section for it.
+Headings carry no numbers. A cross-reference is a Markdown anchor to the heading, for example `[Aurora readiness](#aurora-readiness)`. Add one only where the reader needs to jump. When a later section needs one fact from an earlier one, restate it in a plain clause, without its source, instead of pointing at the whole section.

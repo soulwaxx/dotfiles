@@ -88,4 +88,15 @@ awk 'FNR==1{f=0} /^[[:space:]]*```/{f=!f; next} !f {print FILENAME":"FNR": "$0}'
 
 Rewrite each flagged sentence. Two hits are clean and stay: a word inside a URL, and a word inside a quoted source title. Every other hit is a fix.
 
-The gate covers only unambiguous tokens. The read-through gate checks the rest: enable, drive, framework, world, wedge, vector, primitive, surface, scaffolding, ratchet, rather, may, might, "significantly", negative parallelism, tricolons, paragraph length, heading case, and imperative wording in reader-facing procedures.
+The gate covers only unambiguous tokens. The read-through gate checks the rest: enable, drive, framework, world, wedge, vector, primitive, surface, scaffolding, ratchet, rather, may, might, "significantly", negative parallelism, tricolons, paragraph length, heading case, imperative wording in reader-facing procedures, and the Plain names rules in SKILL.md.
+
+## Repetition count
+
+Run from the output folder on `ANALYSIS.md`. The first command lists every inline code span used more than three times; the second lists every inline link used more than once.
+
+```sh
+awk '/^[[:space:]]*```/{f=!f; next} !f' ANALYSIS.md | grep -o '`[^`]*`' | sort | uniq -c | sort -rn | awk '$1 > 3'
+awk '/^[[:space:]]*```/{f=!f; next} !f' ANALYSIS.md | grep -o '](http[^)]*)' | sort | uniq -c | sort -rn | awk '$1 > 1'
+```
+
+For each code span, keep the mentions in the implementer sections and the one where a verdict turns on it; replace the others with the plain name. For each link, keep it only where it supports a different fact; drop the repeats.

@@ -23,6 +23,7 @@ One subsection per decision. Its heading names the decision, for example "Where 
 - One option block per option, chosen first, in the verdict-first paragraph format in SKILL.md.
 - Every alternative and discarded option carries a revisit trigger.
 - Each option whose trade-off needs sign-off carries its approver, for example *(Security)*.
+- Option blocks use plain names (Plain names in SKILL.md). The identifiers and paths go in Target design and Prerequisites.
 
 ## Target design
 
@@ -49,4 +50,4 @@ Required when the work touches credentials, IAM or network boundaries. Otherwise
 
 ## Prerequisites
 
-A numbered list of actions needed before the build, grouped by repo or system. Each action names what changes and where.
+A numbered list of actions needed before the build, grouped by repo or system. Each action names what changes and where. This is the one place that spells out each code change; Target design and Security analysis name the change in a few words.
