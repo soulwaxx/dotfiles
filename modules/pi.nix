@@ -43,7 +43,7 @@ let
       source = mkPiAgent "reviewer" ../config/shared/agents/reviewer.md ''
         description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
         advertise: true
-        tools: read, bash, grep, find, ls, watchdog_diff, contact_supervisor
+        tools: read, bash, grep, find, ls, watchdog_diff, contact_supervisor, mcp:datadog, mcp:kubernetes, mcp:aws-mcp
         model: ${subagentModels.reviewer}
         thinking: high
         async: true
