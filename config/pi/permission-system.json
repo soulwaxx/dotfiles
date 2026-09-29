@@ -157,6 +157,8 @@
       "~/.ssh/*": "deny",
       "~/.aws/credentials": "deny",
       "~/.pi/agent/auth.json": "deny",
+      "mcp-auth.json": "deny",
+      "*/mcp-auth.json": "deny",
       "~/.claude.json": "deny"
     },
     "mcp": {
@@ -174,6 +176,20 @@
       "github*dismiss*": "ask",
       "notion*move*": "ask",
       "notion*archive*": "ask"
-    }
+    },
+    "mcp__*": "allow",
+    "mcp__*delete*": "ask",
+    "mcp__*merge*": "ask",
+    "mcp__*push*": "ask",
+    "mcp__*terminate*": "ask",
+    "mcp__*deregister*": "ask",
+    "mcp__github*create_or_update_file*": "ask",
+    "mcp__github*remove*": "ask",
+    "mcp__github*fork*": "ask",
+    "mcp__github*lock*": "ask",
+    "mcp__github*mark*": "ask",
+    "mcp__github*dismiss*": "ask",
+    "mcp__notion*move*": "ask",
+    "mcp__notion*archive*": "ask"
   }
 }

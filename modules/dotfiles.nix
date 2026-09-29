@@ -100,7 +100,7 @@ in
 
         worker = lib.mkOption {
           type = lib.types.str;
-          default = "claude-sonnet-5";
+          default = "claude-sonnet-5-5";
           description = "Pi model used by the worker subagent.";
         };
       };

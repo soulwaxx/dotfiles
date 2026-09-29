@@ -272,6 +272,26 @@
           python3 ${./tests/herdr-config.py} ${./config/herdr/config.toml}
           touch $out
         '';
+        pi-config =
+          let
+            mkPiMcp = import ./modules/lib/pi-mcp.nix { inherit lib pkgs; };
+            piMcpConfig =
+              isWork:
+              pkgs.writeText "pi-mcp-test.json" (
+                builtins.toJSON (mkPiMcp {
+                  inherit isWork;
+                  awsMcp = {
+                    endpointRegion = "us-east-1";
+                    operationRegion = "us-east-1";
+                  };
+                })
+              );
+          in
+          pkgs.runCommand "check-pi-config" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+            python3 ${./tests/pi-config.py} ${./config/pi/permission-system.json} \
+              ${piMcpConfig false} ${piMcpConfig true}
+            touch $out
+          '';
         semantic-command-scanner =
           pkgs.runCommand "check-semantic-command-scanner"
             {

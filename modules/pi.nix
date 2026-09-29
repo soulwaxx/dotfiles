@@ -43,7 +43,7 @@ let
       source = mkPiAgent "reviewer" ../config/shared/agents/reviewer.md ''
         description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
         advertise: true
-        tools: read, bash, grep, find, ls, watchdog_diff, contact_supervisor, mcp:datadog
+        tools: read, bash, grep, find, ls, watchdog_diff, contact_supervisor
         model: ${subagentModels.reviewer}
         thinking: high
         async: true
@@ -75,7 +75,6 @@ let
   };
 
   piPackages = [
-    "npm:pi-mcp-adapter"
     "npm:@gotgenes/pi-permission-system"
     "npm:@gotgenes/pi-anthropic-auth"
     "npm:pi-web-access"
@@ -99,7 +98,8 @@ let
     defaultProvider = config.dotfiles.pi.defaultProvider;
     defaultModel = config.dotfiles.pi.defaultModel;
     defaultThinkingLevel = "high";
-    theme = "catppuccin-mocha";
+    theme = "dark";
+    defaultTools = [ "+codemode" ];
     # Opt out of the anonymous install/update ping and provider attribution
     # headers; keep analytics sharing off explicitly rather than relying on the
     # default.
@@ -155,7 +155,7 @@ let
   piAllowedPackagesFile = jsonFormat.generate "pi-allowed-packages.json" piPackageNames;
 
   piSettingsFile = jsonFormat.generate "pi-settings.json" piSettings;
-  piMcpFile = jsonFormat.generate "pi-mcp-adapter.json" piMcp;
+  piMcpFile = jsonFormat.generate "pi-mcp.json" piMcp;
 in
 {
   home = {
@@ -213,7 +213,7 @@ in
         source = piSettingsFile;
         force = true;
       };
-      ".pi/agent/mcp-adapter.json" = {
+      ".pi/agent/mcp.json" = {
         source = piMcpFile;
         force = true;
       };
