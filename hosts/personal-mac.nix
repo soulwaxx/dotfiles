@@ -14,5 +14,6 @@
       ../modules/profiles/personal-home.nix
     ];
     home.homeDirectory = "/Users/${username}";
+    dotfiles.pi.vaultAgentModel = "openai-codex/gpt-6-luna";
   };
 }

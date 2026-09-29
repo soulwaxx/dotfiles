@@ -137,7 +137,12 @@ let
       editorStart = null;
       editorEnd = null;
     };
-    subagents.disableBuiltins = true;
+    subagents = {
+      disableBuiltins = true;
+    }
+    // lib.optionalAttrs (config.dotfiles.pi.vaultAgentModel != null) {
+      agentOverrides."obsidian-second-brain.wiki-vault".model = config.dotfiles.pi.vaultAgentModel;
+    };
   };
 
   mkPiMcp = import ./lib/pi-mcp.nix { inherit lib pkgs; };

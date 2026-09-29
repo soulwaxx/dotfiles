@@ -81,6 +81,10 @@ in
   ];
 
   home = {
+    sessionVariables = lib.mkIf config.dotfiles.claude.enableWorkIntegrations {
+      CLAUDE_CODE_SUBAGENT_MODEL = "haiku";
+    };
+
     activation = {
       migrateClaudeHooks = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
         if [[ -L "$HOME/.claude/hooks" && "$(readlink -f "$HOME/.claude/hooks")" == "${dotfiles}/config/claude/hooks" ]]; then
