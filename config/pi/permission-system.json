@@ -124,13 +124,7 @@
       "sudo shutdown": "deny",
       "sudo shutdown *": "deny"
     },
-    "external_directory_write": {
-      "*": "ask",
-      "/tmp/*": "allow",
-      "/private/tmp/*": "allow",
-      "/var/folders/*": "allow",
-      "~/workspace/*": "allow"
-    },
+    "external_directory": "allow",
     "path": {
       "*": "allow",
       ".env": "deny",
