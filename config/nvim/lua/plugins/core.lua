@@ -96,10 +96,6 @@ return {
 						ignored = true,
 						exclude = ignored_globs,
 						git_status_open = true,
-						layout = {
-							preset = "sidebar",
-							preview = "main",
-						},
 					},
 				},
 			},
