@@ -8,3 +8,6 @@ prefix = "ctrl+a"
 
 [ui.sidebar.agents]
 rows = [["state_icon", "workspace", "tab"], ["agent", "state_text"]]
+
+[ui]
+status_indicators = "symbols"

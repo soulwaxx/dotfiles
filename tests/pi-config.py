@@ -30,7 +30,7 @@ for name, expected in {
     "mcp__github__fork_repository": "ask",
     "mcp__notion__move_page": "ask",
     "mcp__notion__archive_page": "ask",
-    "mcp__aws-mcp__terminate_instances": "ask",
+    "mcp__aws_mcp__terminate_instances": "ask",
     "mcp__datadog__list_monitors": "allow",
 }.items():
     assert native_permission(name) == expected, name
@@ -47,8 +47,9 @@ for config in (personal, work):
     assert set(config) == {"mcpServers"}
     for name, server in config["mcpServers"].items():
         assert ("command" in server) != ("url" in server), name
-        assert server["exposure"] == "codemode-deferred", name
+        assert server["exposure"] == "codemode", name
         assert server["timeout"] == 60, name
+        assert isinstance(server["description"], str) and server["description"].strip(), name
     assert config["mcpServers"]["github"]["headers"]["Authorization"] == "Bearer ${GH_TOKEN}"
 
 print("PASS: native MCP role configuration, selective confirmations, and OAuth path protection")

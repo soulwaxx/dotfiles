@@ -17,7 +17,10 @@ let
   # Definitions shared with modules/pi.nix. Claude's schema requires an
   # explicit type field that pi infers from url (http) vs command (stdio).
   mcpServersLib = import ../mcp-servers.nix { inherit lib pkgs; };
-  addType = entry: entry // { type = if entry ? url then "http" else "stdio"; };
+  # Descriptions are used by Pi tool discovery, not Claude configuration.
+  addType =
+    entry:
+    (lib.removeAttrs entry [ "description" ]) // { type = if entry ? url then "http" else "stdio"; };
 
   mcpServers = lib.mapAttrs (_: addType) (
     mcpServersLib.commonServers

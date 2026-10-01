@@ -10,7 +10,7 @@ in
         _: server:
         server
         // {
-          exposure = "codemode-deferred";
+          exposure = "codemode";
           timeout = 60;
         }
       )

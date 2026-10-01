@@ -27,6 +27,7 @@ in
 {
   commonServers = {
     github = {
+      description = "Search and manage GitHub repositories, code, issues, and pull requests.";
       url = "https://api.githubcopilot.com/mcp";
       headers."Authorization" = "Bearer \${GH_TOKEN}";
     };
@@ -40,6 +41,7 @@ in
     in
     {
       aws-mcp = {
+        description = "Inspect and manage AWS resources using configured AWS CLI profiles.";
         command = "${awsMcpLauncher}";
         args = [
           awsMcpEndpoint
@@ -53,16 +55,19 @@ in
       };
 
       aws-pricing-mcp-server = {
+        description = "Look up AWS service pricing and estimate infrastructure costs.";
         command = "uvx";
         args = [ "awslabs.aws-pricing-mcp-server@latest" ];
         env = { };
       };
 
       aws-knowledge-mcp = {
+        description = "Search and read AWS documentation, guidance, and best practices.";
         url = "https://knowledge-mcp.global.api.aws";
       };
 
       kubernetes = {
+        description = "Inspect Kubernetes clusters, workloads, resources, and logs in read-only mode.";
         command = "npx";
         args = [
           "-y"
@@ -73,10 +78,12 @@ in
       };
 
       notion = {
+        description = "Search, read, and manage Notion pages and databases.";
         url = "https://mcp.notion.com/mcp";
       };
 
       datadog = {
+        description = "Investigate Datadog metrics, logs, traces, monitors, and incidents.";
         url = "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp";
       };
     };
