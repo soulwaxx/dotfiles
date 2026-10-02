@@ -84,7 +84,7 @@ in
 
       datadog = {
         description = "Investigate Datadog metrics, logs, traces, monitors, and incidents.";
-        url = "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp";
+        url = "https://mcp.datadoghq.eu/v1/mcp";
       };
     };
 }
