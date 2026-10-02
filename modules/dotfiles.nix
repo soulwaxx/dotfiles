@@ -25,7 +25,7 @@ in
         type = lib.types.listOf lib.types.str;
         readOnly = true;
         internal = true;
-        description = "Home-relative user bin directories added to interactive shells and tmux.";
+        description = "Home-relative user bin directories added to interactive shells.";
       };
 
       nixProfileBinDir = lib.mkOption {
@@ -42,12 +42,6 @@ in
         description = "Darwin package-manager bin directories added when present.";
       };
 
-      systemBinDirs = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        readOnly = true;
-        internal = true;
-        description = "Fallback system bin directories kept in tmux's environment.";
-      };
     };
 
     eza = {
@@ -172,12 +166,6 @@ in
           "/usr/local/bin"
           "/opt/homebrew/opt/ncurses/bin"
           "/usr/local/opt/ncurses/bin"
-        ];
-        systemBinDirs = [
-          "/usr/bin"
-          "/bin"
-          "/usr/sbin"
-          "/sbin"
         ];
       };
     };

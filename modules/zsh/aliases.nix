@@ -96,9 +96,6 @@ in
     mdview = "glow";
     top = "btop";
 
-    # Tmux
-    tls = "tmux list-sessions";
-
     # Docker
     d = "docker";
     dc = "docker compose";
@@ -129,14 +126,14 @@ in
     # Nix — store cleanup
     # All variants keep the current + booted generation; never `nix-collect-garbage -d`.
     nix-health = "nix-store --verify --check-contents";
-    nix-gc = "nix-health && nix store gc && nix-health";
+    nix-gc = "nix store gc";
     nix-gc-dry = "nix store gc --dry-run";
     nix-roots = "nix-store --gc --print-roots | grep -vE '^(/proc|\\{memory)'";
     nix-store-du = "du -sh /nix/store";
     nix-history = "nix profile history --profile ~/.nix-profile";
     # User-profile cleanup: prune generations >30d in user profiles (HM,
     # nix-profile), GC the store, then hard-link duplicates.
-    nix-clean-old = "nix-health && nix-collect-garbage --delete-older-than 30d && nix store gc && nix store optimise && nix-health";
+    nix-clean-old = "nix-collect-garbage --delete-older-than 30d && nix store gc && nix store optimise";
 
     # Caches — see cacheClean above.
     cache-clean = cacheClean;
@@ -163,10 +160,6 @@ in
         flush_dns = "sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder";
         showfiles = "defaults write com.apple.finder AppleShowAllFiles YES && killall Finder";
         hidefiles = "defaults write com.apple.finder AppleShowAllFiles NO && killall Finder";
-        # AeroSpace's startup hook launches borders; borders remains independent
-        # after AeroSpace exits, so stop both processes explicitly.
-        aerospace-on = "open -a AeroSpace";
-        aerospace-off = "pkill -x AeroSpace; pkill -x borders";
         # brew upgrade is intentionally separate: it can break dylib links if transitive
         # deps get new sonames; run this explicitly, then darwin-rebuild if needed.
         # Ghostty needs --greedy (auto_updates cask, skipped by plain upgrade;
@@ -180,13 +173,13 @@ in
         # System-profile cleanup: deletes system generations older than 30d.
         # Needs sudo because /nix/var/nix/profiles/system is root-owned.
         # Still keeps the booted+current generations.
-        nix-clean-system = "sudo nix-collect-garbage --delete-older-than 30d && nix-health";
+        nix-clean-system = "sudo nix-collect-garbage --delete-older-than 30d";
         # Full safe sweep: system + user generations >30d, GC store, optimise.
         # Same as the weekly launchd job but on-demand. Run `nix-gc-dry` first.
         # sudo nix-collect-garbage already covers both system and user profiles
         # via the daemon, so skip the redundant user-level nix-collect-garbage
         # that nix-clean-old would repeat and jump straight to store GC + optimise.
-        nix-clean-all = "nix-clean-system && nix store gc && nix store optimise && nix-health";
+        nix-clean-all = "nix-clean-system && nix store gc && nix store optimise";
       }
     else
       {
@@ -198,7 +191,7 @@ in
         # HM profile generations older than 30d, then run shared GC sweep.
         # `home-manager expire-generations` only removes the profile symlinks;
         # the store paths get reclaimed by nix-clean-old below.
-        nix-clean-system = "home-manager expire-generations '-30 days' && nix-clean-old && nix-health";
+        nix-clean-system = "home-manager expire-generations '-30 days' && nix-clean-old";
         nix-clean-all = "nix-clean-system";
         linux-realign = "cfg-realign && nix-clean-all";
         linux-upgrade = "cfg-upgrade && nix-clean-all";

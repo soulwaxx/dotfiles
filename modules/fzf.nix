@@ -13,9 +13,6 @@
       # terminal theme without a rebuild. This base scheme keeps the background at
       # the terminal default; append e.g. `bg+:8` for a themed selection tint.
       "--color=16"
-      # Render in a centered tmux popup when inside tmux; --height is the
-      # fallback layout for shells running outside a tmux session.
-      "--tmux center,85%,75%"
       "--height 40%"
       "--border"
       "--preview '([[ -f {} ]] && (bat --style=numbers --color=always {} || head -20 {})) || ([[ -d {} ]] && eza -lagh ${config.dotfiles.eza.baseFlags} --color=always {}) || echo {}'"

@@ -23,12 +23,6 @@ let
     # Nix owns the binary — no self-update to advertise.
     update_check = false;
 
-    tmux = {
-      enabled = true;
-      width = "80%";
-      height = "60%";
-    };
-
     ui.columns = [
       "exit"
       "duration"

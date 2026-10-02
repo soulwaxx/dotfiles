@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 set -eo pipefail
+setopt extendedglob
 
 nvim_functions=${1:?nvim functions path required}
 git_functions=${2:?git functions path required}
@@ -61,7 +62,10 @@ case "$*" in
     fi
     printf '%s\n' main
     ;;
-  'rev-parse --verify HEAD^') printf '%s\n' parent ;;
+  'rev-parse --verify HEAD^')
+    [ "${GIT_ROOT_COMMIT:-}" != 1 ] || exit 1
+    printf '%s\n' parent
+    ;;
   'rev-parse --abbrev-ref --symbolic-full-name @{u}')
     [ -n "${GIT_PUBLISHED_COMMIT:-}" ] && printf '%s\n' origin/local || exit 1
     ;;
@@ -220,6 +224,31 @@ grep -Fx 'stash list --format=%gd %s' "$log/git" >/dev/null
 grep -Fx 'stash show -p stash@{0}' "$log/git" >/dev/null
 
 : >"$log/git"
+: >"$log/gh"
+export GH_PROTECTED=true
+[[ "$(_git_last_commit_rewrite_range)" == 'HEAD^..HEAD' ]]
+[[ "$(GIT_ROOT_COMMIT=1 _git_last_commit_rewrite_range)" == HEAD ]]
+git-amend
+git-amend-msg
+git-amend-files changed.txt
+GIT_ROOT_COMMIT=1 git-amend
+printf 'y\n' | git-squash 2
+git-rebase-interactive main
+printf 'y\n' | git-rebase-with-strategy ours main
+printf 'y\n' | git-autosquash main
+grep -Fx 'commit --amend --no-edit' "$log/git" >/dev/null
+grep -Fx 'commit --amend' "$log/git" >/dev/null
+grep -Fx 'add changed.txt' "$log/git" >/dev/null
+grep -Fx 'rebase -i HEAD~2' "$log/git" >/dev/null
+grep -Fx 'rebase -i main' "$log/git" >/dev/null
+grep -Fx 'rebase -X ours main' "$log/git" >/dev/null
+grep -Fx 'rebase -i --autosquash main' "$log/git" >/dev/null
+if [[ -s "$log/gh" ]]; then
+  echo 'local rewrite helpers queried GitHub branch protection' >&2
+  exit 1
+fi
+
+: >"$log/git"
 export GIT_PUBLISHED_COMMIT=published
 export GIT_AMEND_COMMIT=published
 if printf 'no\n' | git-amend; then
@@ -241,7 +270,7 @@ grep -Fx 'rebase -i HEAD~2' "$log/git" >/dev/null
 printf 'rewrite\n' | git-rebase-interactive main
 grep -Fx 'rev-list main..HEAD' "$log/git" >/dev/null
 grep -Fx 'rebase -i main' "$log/git" >/dev/null
-unset GIT_PUBLISHED_COMMIT GIT_AMEND_COMMIT
+unset GH_PROTECTED GIT_PUBLISHED_COMMIT GIT_AMEND_COMMIT
 
 : >"$log/git"
 export GIT_NO_BASE=1

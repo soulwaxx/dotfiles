@@ -76,7 +76,7 @@ nix run .#fmt-check
 nix run .#lint
 ```
 
-`nix run .#check` runs the dotfiles behavior checks, including `bootstrap`, `claude-state-jq`, `herdr-config`, `semantic-command-scanner`, and `zsh-functions`. Obsidian and skill-completion tests run in their standalone package repositories. It also evaluates all five host derivation paths, including hosts for other systems, without cross-building them. Tests and flake checks are executable verification, not model directives.
+`nix run .#check` runs the dotfiles behavior checks, including `bootstrap`, `claude-state-jq`, `semantic-command-scanner`, and `zsh-functions`. Obsidian and skill-completion tests run in their standalone package repositories. It also evaluates all five host derivation paths, including hosts for other systems, without cross-building them. Tests and flake checks are executable verification, not model directives.
 
 Before switching a host:
 
@@ -96,4 +96,4 @@ No CI workflow exists. All gates run locally.
 - Upstream Nix does not trust the installing Linux user by default. `bootstrap.sh` adds the user to `trusted-users`; without that, the daemon silently ignores user-level substituters and related settings.
 - Homebrew activation uses cleanup mode `zap`, so undeclared macOS packages are removed. It does not auto-update or upgrade declared packages.
 - Kubernetes tooling follows `dotfiles.kubernetes.enable`. macOS Kubernetes formulae are work-only; Linux hosts set the flag in the `flake.nix` inventory; `personal-mac` leaves it disabled.
-- Runtime installers and MCP commands need network access. Activation can install Claude Code, pi, selected Python tools, tmux TPM, and krew content from upstream sources.
+- Runtime installers and MCP commands need network access. Activation can install Claude Code, pi, selected Python tools, and krew content from upstream sources.

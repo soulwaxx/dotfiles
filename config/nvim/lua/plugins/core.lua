@@ -75,7 +75,7 @@ return {
 		opts = {
 			-- Inline image/mermaid/math rendering in markdown and image buffers.
 			-- Opt-in module (off by default): without this the imagemagick,
-			-- ghostscript, and mermaid-cli Homebrew deps and tmux allow-passthrough
+			-- ghostscript, and mermaid-cli Homebrew deps
 			-- would go unused. Ghostty supplies the Kitty graphics protocol.
 			image = { enabled = true },
 			notifier = {

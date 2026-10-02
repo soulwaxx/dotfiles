@@ -49,7 +49,6 @@ let
     pkgs.python3 # herdr's Claude session hook runs python3
     pkgs.ripgrep
     pkgs.shellcheck
-    pkgs.tmux # config lives in modules/tmux.nix
     pkgs.tree-sitter
     pkgs.unar
     pkgs.yamlfmt # Zed YAML external formatter (parity with nvim conform)

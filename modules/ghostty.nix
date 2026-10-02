@@ -57,7 +57,7 @@ in
             "cmd+t=new_tab"
             "cmd+n=new_window"
             "cmd+shift+r=reload_config"
-            # Forward cmd+w as CSI-u (super+w) through tmux instead of closing
+            # Forward cmd+w as CSI-u (super+w) instead of closing
             # the surface, so Neovim can decode it as <D-w> and close a buffer.
             "cmd+w=text:\\x1b[119;9u"
           ]

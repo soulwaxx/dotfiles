@@ -94,9 +94,6 @@ in
   nixpkgs.config.allowUnfree = true;
 
   security.pam.services.sudo_local.touchIdAuth = true;
-  # reattach re-connects to the user bootstrap session so Touch ID works
-  # inside tmux / screen.
-  security.pam.services.sudo_local.reattach = true;
 
   system = {
     primaryUser = username;

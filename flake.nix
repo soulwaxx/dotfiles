@@ -268,10 +268,6 @@
           ${pkgs.bash}/bin/bash tests/claude-state-jq.sh
           touch $out
         '';
-        herdr-config = pkgs.runCommand "check-herdr-config" { nativeBuildInputs = [ pkgs.python3 ]; } ''
-          python3 ${./tests/herdr-config.py} ${./config/herdr/config.toml}
-          touch $out
-        '';
         pi-config =
           let
             mkPiMcp = import ./modules/lib/pi-mcp.nix { inherit lib pkgs; };

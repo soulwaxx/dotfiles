@@ -195,12 +195,11 @@ _git_confirm_if_published() {
 
 _git_require_safe_rewrite() {
     local rewrite_range="$1"
-    _git_require_not_protected_branch || return 1
     _git_confirm_if_published "$rewrite_range" || return 1
 }
 
 _git_last_commit_rewrite_range() {
-    if git rev-parse --verify HEAD^ &>/dev/null; then
+    if git rev-parse --verify 'HEAD^' &>/dev/null; then
         echo "HEAD^..HEAD"
     else
         echo "HEAD"

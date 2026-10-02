@@ -1,6 +1,0 @@
-{
-  "compaction": "auto",
-  "compactionEngine": "blackhole",
-  "tailBehavior": "pi-default",
-  "memory": false
-}

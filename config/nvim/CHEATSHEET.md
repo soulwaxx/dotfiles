@@ -307,4 +307,4 @@ There is no in-editor browser preview: `markdown-preview.nvim` was dropped (unma
 
 AI in Neovim is tab-completion only, deliberately. There is no in-editor agent
 chat or diff-apply surface: `claudecode.nvim` was dropped, since agents are
-driven from the shell (tmux) where their own TUI is better than any embedded one.
+driven from the shell where their own TUI is better than any embedded one.

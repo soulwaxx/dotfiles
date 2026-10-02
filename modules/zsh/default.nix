@@ -29,9 +29,6 @@ in
     ./aliases.nix
   ];
 
-  # Owned here beside its shell init below. Must live in the Nix profile (not
-  # Homebrew) so it stays on PATH inside tmux display-popups, where sesh's
-  # zoxide source runs without an interactive shell to source brew shellenv.
   home.packages = [
     pkgs.zoxide
     pkgs.zsh-patina
@@ -268,16 +265,10 @@ in
         unset _fzf_functions
 
         # Copy a whole file to the local machine's clipboard. OSC 52 travels over
-        # the terminal connection, so this also works through SSH. Inside tmux,
-        # `set-clipboard external` drops OSC 52 from panes; load-buffer -w makes
-        # tmux forward it to the outer terminal instead.
+        # the terminal connection, so this also works through SSH.
         clip() {
           [[ $# -eq 1 && -f $1 && -r $1 ]] || { echo "usage: clip <file>" >&2; return 1; }
-          if [[ -n $TMUX ]]; then
-            command tmux load-buffer -w "$1"
-          else
-            printf '\e]52;c;%s\a' "$(base64 < "$1" | tr -d '\n')"
-          fi
+          printf '\e]52;c;%s\a' "$(base64 < "$1" | tr -d '\n')"
         }
 
         # Load secrets (untracked). Guarded so a syntax error in the file reports

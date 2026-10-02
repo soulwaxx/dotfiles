@@ -4,6 +4,6 @@
     ../zed.nix
     ../ghostty.nix
     ../docker-cli.nix
-    ../aerospace.nix
+    ../claude-obsidian.nix
   ];
 }

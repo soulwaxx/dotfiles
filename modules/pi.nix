@@ -89,9 +89,10 @@ let
     "npm:@juicesharp/rpiv-ask-user-question"
     "npm:@juicesharp/rpiv-btw"
     "npm:pi-powerline-footer"
-    "npm:pi-blackhole"
-    "git:github.com/soulwaxx/obsidian-second-brain"
     "git:github.com/soulwaxx/pi-skill-autocomplete"
+  ]
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+    "git:github.com/soulwaxx/obsidian-second-brain"
   ];
 
   piSettings = {
@@ -109,7 +110,7 @@ let
     markdown.mermaid = "final";
     tuiMode = "fullscreen"; # alternatives: "regular" (default), "fullscreen"
     # Force capabilities pi may under-detect behind a multiplexer.
-    # Kitty images work in Ghostty through Herdr or tmux graphics passthrough.
+    # Kitty images work in Ghostty through Herdr graphics passthrough.
     terminal = {
       hyperlinks = true;
       trueColor = true;
@@ -140,9 +141,11 @@ let
     subagents = {
       disableBuiltins = true;
     }
-    // lib.optionalAttrs (config.dotfiles.pi.vaultAgentModel != null) {
-      agentOverrides."obsidian-second-brain.wiki-vault".model = config.dotfiles.pi.vaultAgentModel;
-    };
+    //
+      lib.optionalAttrs (pkgs.stdenv.hostPlatform.isDarwin && config.dotfiles.pi.vaultAgentModel != null)
+        {
+          agentOverrides."obsidian-second-brain.wiki-vault".model = config.dotfiles.pi.vaultAgentModel;
+        };
   };
 
   mkPiMcp = import ./lib/pi-mcp.nix { inherit lib pkgs; };
@@ -233,8 +236,6 @@ in
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
       ".pi/agent/pi-fff.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/pi-fff.json";
-      ".pi/agent/pi-blackhole/pi-blackhole-config.json".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/pi-blackhole.json";
       ".pi/agent/extensions/subagent/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.json";
 
@@ -251,7 +252,6 @@ in
       ".pi/agent/AGENTS.md".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/AGENTS.md";
       ".pi/agent/skills".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/skills";
-      ".pi/agent/themes".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/themes";
 
       # Prompt templates.
       ".pi/agent/prompts".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/prompts";

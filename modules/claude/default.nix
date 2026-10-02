@@ -102,20 +102,30 @@ in
         extraPath = [ "/usr/bin" ];
       };
 
-      installObsidianPlugin = lib.hm.dag.entryAfter [ "installClaudeCode" "claudeSettings" ] ''
-        if ! "$HOME/.local/bin/claude" plugin marketplace list --json |
-          ${pkgs.jq}/bin/jq -e 'any(.[]; .name == "obsidian-second-brain")' >/dev/null; then
-          run "$HOME/.local/bin/claude" plugin marketplace add soulwaxx/obsidian-second-brain
-        fi
-        if ! "$HOME/.local/bin/claude" plugin list --json |
-          ${pkgs.jq}/bin/jq -e 'any(.[]; .id == "obsidian-second-brain@obsidian-second-brain" and .scope == "user")' >/dev/null; then
-          run "$HOME/.local/bin/claude" plugin install obsidian-second-brain@obsidian-second-brain --scope user
-        fi
-        if "$HOME/.local/bin/claude" plugin list --json |
-          ${pkgs.jq}/bin/jq -e 'any(.[]; .id == "obsidian-second-brain@obsidian-second-brain" and .scope == "user" and .enabled == false)' >/dev/null; then
-          run "$HOME/.local/bin/claude" plugin enable obsidian-second-brain@obsidian-second-brain --scope user
-        fi
-      '';
+      installObsidianPlugin = lib.hm.dag.entryAfter [ "installClaudeCode" "claudeSettings" ] (
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          ''
+            if ! "$HOME/.local/bin/claude" plugin marketplace list --json |
+              ${pkgs.jq}/bin/jq -e 'any(.[]; .name == "obsidian-second-brain")' >/dev/null; then
+              run "$HOME/.local/bin/claude" plugin marketplace add soulwaxx/obsidian-second-brain
+            fi
+            if ! "$HOME/.local/bin/claude" plugin list --json |
+              ${pkgs.jq}/bin/jq -e 'any(.[]; .id == "obsidian-second-brain@obsidian-second-brain" and .scope == "user")' >/dev/null; then
+              run "$HOME/.local/bin/claude" plugin install obsidian-second-brain@obsidian-second-brain --scope user
+            fi
+            if "$HOME/.local/bin/claude" plugin list --json |
+              ${pkgs.jq}/bin/jq -e 'any(.[]; .id == "obsidian-second-brain@obsidian-second-brain" and .scope == "user" and .enabled == false)' >/dev/null; then
+              run "$HOME/.local/bin/claude" plugin enable obsidian-second-brain@obsidian-second-brain --scope user
+            fi
+          ''
+        else
+          ''
+            if "$HOME/.local/bin/claude" plugin list --json |
+              ${pkgs.jq}/bin/jq -e 'any(.[]; .id == "obsidian-second-brain@obsidian-second-brain" and .scope == "user" and .enabled == true)' >/dev/null; then
+              run "$HOME/.local/bin/claude" plugin disable obsidian-second-brain@obsidian-second-brain --scope user
+            fi
+          ''
+      );
     };
 
     # Symlinked so edits take effect without a rebuild.

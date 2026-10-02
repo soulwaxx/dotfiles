@@ -17,7 +17,6 @@ in
       autoUpdate = false;
       upgrade = false;
     };
-    taps = packages.commonTaps;
     brews = packages.commonBrews ++ packages.darwinBrews;
     casks = packages.darwinCasks;
   };

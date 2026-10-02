@@ -1,9 +1,4 @@
 let
-  commonTaps = [
-    "nikitabobko/tap" # AeroSpace tiling WM cask
-    "FelixKratz/formulae" # borders
-  ];
-
   workTaps = [
     "argoproj/tap"
     "aws/tap"
@@ -35,7 +30,7 @@ let
   # Linux gets the same tools via Nix (modules/linux/packages.nix). LSPs and
   # formatters are no longer pinned by Nix here — nvim's Mason owns them on both
   # platforms. Config-generating Home Manager program modules (bat, fzf,
-  # starship, atuin, tmux config, git/delta, …) stay Nix-managed on both.
+  # starship, atuin, git/delta, …) stay Nix-managed on both.
   cliBrews = [
     "btop"
     "cmake"
@@ -51,7 +46,6 @@ let
     "p7zip"
     "ripgrep"
     "shellcheck"
-    "tmux" # config lives in modules/tmux.nix
     "statix" # nvim-lint nix source; Mason only builds it slowly from cargo
     "tree-sitter-cli" # nvim-treesitter parser compilation (the plain `tree-sitter` formula ships only the library)
     "unar"
@@ -92,8 +86,6 @@ let
     "imagemagick"
     "ghostscript"
     "mermaid-cli"
-    # keep: macOS-only desktop daemon launched by AeroSpace's after-startup-command
-    "borders"
   ];
 
   darwinCasks = [
@@ -108,7 +100,6 @@ let
     "font-jetbrains-mono-nerd-font"
     "font-fira-code"
     "font-fira-code-nerd-font"
-    "aerospace"
   ];
 
   # Work-host-only Homebrew packages, referenced from hosts/work-macbook.nix.
@@ -134,7 +125,6 @@ in
 # assembly detail and had no consumers.
 {
   inherit
-    commonTaps
     workTaps
     commonBrews
     darwinBrews
