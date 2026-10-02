@@ -1,7 +1,7 @@
 {
   imports = [
     ../cursor.nix
-    ../zed.nix
+    ../vscode.nix
     ../ghostty.nix
     ../docker-cli.nix
     ../claude-obsidian.nix

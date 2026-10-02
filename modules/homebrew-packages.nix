@@ -50,7 +50,7 @@ let
     "tree-sitter-cli" # nvim-treesitter parser compilation (the plain `tree-sitter` formula ships only the library)
     "unar"
     "yq" # Mike Farah's Go yq (== nixpkgs yq-go)
-    "yamlfmt" # Zed YAML external formatter (parity with nvim conform); also general-purpose
+    "yamlfmt" # YAML formatter (parity with nvim conform); also general-purpose
   ];
 
   devToolchainBrews = [
@@ -93,7 +93,7 @@ let
     "spotify"
     "discord"
     "ghostty"
-    "zed"
+    "visual-studio-code"
     "obsidian"
     "orbstack"
     "font-jetbrains-mono"

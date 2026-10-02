@@ -15,9 +15,7 @@ let
   symlinkedPaths = {
     ".claude/statusline-command.sh" = "statusline.sh";
     ".claude/commands" = "commands";
-    ".claude/hooks/block-no-verify.sh" = "hooks/block-no-verify.sh";
     ".claude/hooks/notify-attention.sh" = "hooks/notify-attention.sh";
-    ".claude/hooks/semantic-command-scanner.sh" = "hooks/semantic-command-scanner.sh";
   };
   # Harness-agnostic prose lives in config/shared and is symlinked into both
   # harnesses (pi mirrors these; see modules/pi.nix).
@@ -102,6 +100,7 @@ in
         extraPath = [ "/usr/bin" ];
       };
 
+      # Claude uses the GitHub plugin marketplace; the npm package is for pi.
       installObsidianPlugin = lib.hm.dag.entryAfter [ "installClaudeCode" "claudeSettings" ] (
         if pkgs.stdenv.hostPlatform.isDarwin then
           ''

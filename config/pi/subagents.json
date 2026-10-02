@@ -12,6 +12,7 @@
   "scheduledRuns": {
     "enabled": false
   },
+  "disabledFeatures": ["agent-management", "external-machines", "panes"],
   "toolDescriptionMode": "compact",
   "inlineToolDisplay": "summary",
   "fleetView": true,

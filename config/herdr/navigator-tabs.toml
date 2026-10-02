@@ -1,0 +1,23 @@
+[picker]
+vim_mode = true
+check_updates = false
+
+[jump_back]
+enabled = false
+
+[sources]
+open_workspaces = false
+herdr_plus_projects = false
+zoxide = false
+roots = false
+agents = false
+servers = false
+sessions = false
+herdr_plus_quick_actions = false
+
+[[integrations]]
+id = "new-tab"
+label = "New tab"
+collect = '''zoxide query -l | jq -R -s 'split("\n") | map(select(length > 0) | {id: ., title: (split("/") | last), path: .})''''
+open = '"$HERDR_BIN_PATH" tab create --workspace "$HERDR_TAB_PICKER_WORKSPACE_ID" --cwd {{path}} --focus'
+notify_success = false

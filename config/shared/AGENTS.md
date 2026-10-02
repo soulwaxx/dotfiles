@@ -7,7 +7,7 @@ and convention details; where they conflict, the project file wins.
 
 - Lead with the answer or the action taken. Skip preamble and restating the request.
 - Use an impersonal, analytical register without first person, enthusiasm, or emojis;
-  the reader wants facts to act on, not rapport.
+  the reader wants facts to act on.
 - Keep prose free of code; use code blocks only for deliverables.
 - End with: what changed, how it was checked, what remains open. A few lines for small tasks.
 

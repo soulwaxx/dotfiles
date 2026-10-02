@@ -27,7 +27,9 @@ let
   # modules/darwin/homebrew.nix's onActivation.cleanup = "zap": zap uninstalls
   # formulae absent from the Brewfile, it never prunes ~/Library/Caches/Homebrew.
   cacheClean =
-    "npm cache clean --force; uv cache prune" + (if isDarwin then "; brew cleanup --prune=all" else "");
+    "(failed=0; npm cache clean --force || failed=1; uv cache prune || failed=1"
+    + (if isDarwin then "; brew cleanup --prune=all || failed=1" else "")
+    + "; exit $failed)";
 in
 {
   programs.zsh.shellAliases = {
@@ -73,22 +75,6 @@ in
     # Python
     venv = "python3 -m venv";
 
-    # Git
-    gs = "git status";
-    ga = "git add";
-    gaa = "git add .";
-    gc = "git commit";
-    gcm = "git commit -m";
-    gp = "git push";
-    gl = "git pull";
-    gd = "git diff";
-    gb = "git branch";
-    gba = "git branch -a";
-    gco = "git checkout";
-    gcb = "git checkout -b";
-    glog = "git log --oneline --graph --decorate --all";
-    gclean = "git for-each-ref --merged HEAD --format='%(refname:short)' refs/heads | grep -v -E '^(main|master)$' | grep -vFx \"\$(git symbolic-ref --short HEAD 2>/dev/null)\" | xargs -n 1 git branch -d";
-
     # Better defaults
     cat = "bat";
     # Markdown preview: renders formatted markdown in the terminal via glow.
@@ -96,24 +82,11 @@ in
     mdview = "glow";
     top = "btop";
 
-    # Docker
-    d = "docker";
-    dc = "docker compose";
-    dps = "docker ps";
-    dpsa = "docker ps -a";
-    di = "docker images";
-    drm = "docker rm";
-    drmi = "docker rmi";
-    dprune = "docker-clean";
-
     # One-time: create a multi-platform buildx builder (amd64 via Rosetta + arm64).
     buildx-init = "docker buildx inspect multiarch >/dev/null 2>&1 || docker buildx create --name multiarch --driver docker-container --bootstrap --use";
 
     # Kubernetes
     k = "kubectl";
-    kgp = "kubectl get pods";
-    kgs = "kubectl get services";
-    kgd = "kubectl get deployments";
 
     # Dotfiles desired state
     cfg-check = "(cd \"${dotfilesPathExpr}\" && nix run .#check)";
@@ -121,7 +94,6 @@ in
     cfg-update = "(cd \"${dotfilesPathExpr}\" && nix flake update)";
     cfg-realign = "cfg-check && nix-switch";
     nix-profile-add = "nix profile add";
-    hm-news = "home-manager news";
 
     # Nix — store cleanup
     # All variants keep the current + booted generation; never `nix-collect-garbage -d`.
@@ -184,6 +156,7 @@ in
     else
       {
         free = "free -m";
+        hm-news = "home-manager news";
         cfg-upgrade = "cfg-update && nix-switch";
         # List available home-manager generations (use 'home-manager switch --generation N' to roll back)
         nix-generations = "home-manager generations";

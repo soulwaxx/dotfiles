@@ -46,12 +46,11 @@ let
     pkgs.nixfmt # nvim conform (nix) + treefmt parity
     pkgs.statix # nvim-lint nix source
     pkgs.p7zip
-    pkgs.python3 # herdr's Claude session hook runs python3
     pkgs.ripgrep
     pkgs.shellcheck
     pkgs.tree-sitter
     pkgs.unar
-    pkgs.yamlfmt # Zed YAML external formatter (parity with nvim conform)
+    pkgs.yamlfmt # YAML formatter (parity with nvim conform)
     pkgs.yq-go
   ];
 

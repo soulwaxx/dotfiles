@@ -95,6 +95,9 @@ in
 
   security.pam.services.sudo_local.touchIdAuth = true;
 
+  # Home Manager owns zsh completion initialization for this user.
+  programs.zsh.enableGlobalCompInit = false;
+
   system = {
     primaryUser = username;
     stateVersion = 6;

@@ -2,7 +2,7 @@
 local colorscheme = vim.env.NVIM_COLORSCHEME or "catppuccin"
 
 -- Shared ignore globs for the pickers/explorer below. Mirrored by hand in
--- config/zed/settings.json (file_scan_exclusions) — no shared source between
+-- config/vscode/settings.json (files.exclude) — no shared source between
 -- that static JSON and this lua.
 local ignored_globs = {
 	"**/.pytest_cache",
@@ -96,6 +96,14 @@ return {
 						ignored = true,
 						exclude = ignored_globs,
 						git_status_open = true,
+						win = {
+							list = {
+								keys = {
+									-- Use the global workspace grep, not the hovered directory.
+									["<leader>/"] = false,
+								},
+							},
+						},
 					},
 				},
 			},

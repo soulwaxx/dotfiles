@@ -9,8 +9,19 @@ let
     if pkgs.stdenv.hostPlatform.isDarwin then "/opt/homebrew/bin/herdr" else "${pkgs.herdr}/bin/herdr";
 in
 {
-  xdg.configFile."herdr/config.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.path}/config/herdr/config.toml";
+  xdg.configFile = {
+    "herdr/config.toml".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.path}/config/herdr/config.toml";
+
+    "herdr/plugins/config/herdr-navigator/config.toml".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.path}/config/herdr/navigator.toml";
+
+    "herdr/new-tab-picker.sh".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.path}/config/herdr/new-tab-picker.sh";
+
+    "herdr/plugins/config/herdr-navigator-tabs/config.toml".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfiles.path}/config/herdr/navigator-tabs.toml";
+  };
 
   home.activation.herdrIntegrations =
     lib.hm.dag.entryAfter [ "linkGeneration" "installObsidianPlugin" "installPi" ]
@@ -18,6 +29,22 @@ in
         if [[ ! -x "${herdrBin}" ]]; then
           echo "herdr: binary not found at ${herdrBin}" >&2
           exit 1
+        fi
+
+        if ! ${herdrBin} plugin list --plugin herdr-navigator --json \
+          | ${pkgs.jq}/bin/jq -e '.result.plugins | any(.version == "0.3.3" and .enabled)' >/dev/null; then
+          run env PATH="${lib.makeBinPath [ pkgs.git ]}:${
+            if pkgs.stdenv.hostPlatform.isDarwin then
+              # cargo links through the Xcode CLT `cc` shim; activation PATH omits /usr/bin.
+              "/opt/homebrew/bin:/usr/bin"
+            else
+              lib.makeBinPath [
+                pkgs.cargo
+                pkgs.rustc
+                pkgs.stdenv.cc
+              ]
+          }:$PATH" \
+            ${herdrBin} plugin install thanhdat77/herdr-navigator --ref v0.3.3 --yes
         fi
 
         run ${herdrBin} integration install pi
