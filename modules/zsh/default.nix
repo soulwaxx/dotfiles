@@ -14,7 +14,11 @@ let
     unset _path_dir
   '';
   userPath = lib.concatStringsSep ":" (map (dir: "$HOME/${dir}") config.dotfiles.env.userBinDirs);
-  nixProfilePath = "$HOME/${config.dotfiles.env.nixProfileBinDir}";
+  nixProfilePath =
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      "/etc/profiles/per-user/${config.home.username}/bin"
+    else
+      "$HOME/${config.dotfiles.env.nixProfileBinDir}";
   # dircolors' default database uses the 16 ANSI slots (e.g. di=01;34), not
   # truecolor, so completion entry colors follow Ghostty's active theme like
   # bat/fzf/delta do. Baked at build time to avoid a dircolors fork per shell.
@@ -86,17 +90,64 @@ in
     # 20h rather than 24h so the full rebuild lands on the first shell of each
     # day instead of drifting later with every rebuild.
     completionInit = ''
+      # Homebrew's completions are native zsh functions (Docker/kubectl are
+      # excluded from Carapace), so expose both common prefixes before compinit.
+      for _brew_completion_dir in /opt/homebrew/share/zsh/site-functions /usr/local/share/zsh/site-functions; do
+        [[ -d "$_brew_completion_dir" ]] && fpath=("$_brew_completion_dir" $fpath)
+      done
+      unset _brew_completion_dir
       autoload -Uz compinit
       zmodload zsh/complist
       setopt local_options extended_glob
       _dump_file="''${ZDOTDIR:-$HOME}/.zcompdump"
-      # -C skips the function check; only safe while the dump is fresh AND at
-      # least as new as the .zshrc that determines fpath.
-      if [[ -n ''${_dump_file}(#qNmh-20) && "$_dump_file" -nt "''${ZDOTDIR:-$HOME}/.zshrc" ]]; then
+      _fpath_signature="$_dump_file.fpath"
+      # The generated .zshrc lives in the Nix store and always has a fixed old
+      # mtime. Track its content and mutable completion entries instead.
+      if ! _completion_identity=$( {
+        command cksum < "''${ZDOTDIR:-$HOME}/.zshrc" || exit 1
+        typeset -A _seen_completion_dirs
+        _seen_completion_dirs=()
+        _signature_files=()
+        for _completion_dir in $fpath; do
+          [[ -d "$_completion_dir" ]] || continue
+          _resolved_completion_dir="$_completion_dir:A"
+          [[ -d "$_resolved_completion_dir" ]] || continue
+          [[ -n ''${_seen_completion_dirs[$_resolved_completion_dir]-} ]] && continue
+          _seen_completion_dirs[$_resolved_completion_dir]=1
+          print -r -- "$_resolved_completion_dir"
+          # Nix store trees are immutable; their resolved store path is their
+          # content identity. Mutable directories are fingerprinted below.
+          [[ $_resolved_completion_dir == /nix/store/* ]] && continue
+          for _completion_file in "$_resolved_completion_dir"/*(N); do
+            [[ -f "$_completion_file" ]] || continue
+            _resolved_completion_file="$_completion_file:A"
+            print -r -- "$_completion_file -> $_resolved_completion_file"
+            _signature_files+=("$_completion_file")
+          done
+        done
+        if (( $#_signature_files )); then
+          command cksum "$_signature_files[@]" || exit 1
+        fi
+      } ); then
+        return 1
+      fi
+      _identity_matches=false
+      if [[ -r "$_fpath_signature" && "$(<"$_fpath_signature")" == "$_completion_identity" ]]; then
+        _identity_matches=true
+      fi
+      if [[ -n ''${_dump_file}(#qNmh-20) && $_identity_matches == true ]]; then
         compinit -C -d "$_dump_file"
       else
-        compinit -d "$_dump_file"
-        touch "$_dump_file"
+        if [[ $_identity_matches != true ]]; then
+          command rm -f "$_dump_file" "$_dump_file.zwc"
+        fi
+        if compinit -d "$_dump_file"; then
+          print -r -- "$_completion_identity" > "$_fpath_signature.tmp.$$"
+          command mv -f "$_fpath_signature.tmp.$$" "$_fpath_signature"
+          touch "$_dump_file"
+        else
+          return 1
+        fi
       fi
       # Backgrounded (&!) so a cold zcompile never blocks the first prompt. The
       # mkdir is the lock: it is atomic, so concurrent shells cannot interleave
@@ -109,7 +160,7 @@ in
           fi
         fi
       } &!
-      unset _dump_file
+      unset _dump_file _fpath_signature _completion_identity _identity_matches
     '';
 
     profileExtra = lib.optionalString pkgs.stdenv.hostPlatform.isDarwin (
@@ -133,7 +184,7 @@ in
         ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
           # pip install --user lands in ~/Library/Python/X.Y/bin on macOS.
           # Avoid spawning python during every interactive shell startup.
-          for _py_user_bin in "$HOME"/Library/Python/*/bin; do
+          for _py_user_bin in "$HOME"/Library/Python/*/bin(N); do
             [[ -d "$_py_user_bin" ]] && export PATH="$_py_user_bin:$PATH"
           done
           unset _py_user_bin

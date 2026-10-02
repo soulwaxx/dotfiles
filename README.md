@@ -104,11 +104,11 @@ Start with `flake.nix`, then read `modules/profiles/base-home.nix` plus the rele
 - **Terraform/OpenTofu**: Apple Silicon macOS hosts use Nix-managed Terraform 1.12.2. Linux hosts use Nix-managed `opentofu`.
 - **Kubernetes tooling**: `dotfiles.kubernetes.enable` controls shared Kubernetes CLIs and K9s integration. Work hosts turn it on through `modules/profiles/work-home.nix`; Linux hosts set it explicitly in the `flake.nix` inventory.
 - **Shell completion**: native zsh completions feed `fzf-tab`, `fzf` stays in place for shell widgets and fuzzy pickers, and Atuin owns history search.
-- **Config files** in `config/` are symlinked into `$HOME` via `mkOutOfStoreSymlink` only where this repo intentionally owns the live file. Claude settings are generated from `config/claude/settings.json` and copied into place by Nix; Claude instructions, statusline, rules, shared hooks, and shared skills are symlinked; package hooks are installed by their owning plugins. Cursor settings are symlinked by `modules/cursor.nix`; Zed settings are symlinked by `modules/zed.nix`. pi reads the shared global instructions via `~/.pi/agent/AGENTS.md` (a context/memory file, symmetric with Claude's `CLAUDE.md`) and the shared skills tree via `~/.pi/agent/skills`.
-- **AI MCP servers** live in `modules/mcp-servers.nix`. Claude and pi each render their own schema from the same source; common servers are shared, and work-only servers are gated by the work profile. The standalone `obsidian-second-brain` integration is enabled in Claude Code and pi only on macOS, using `~/.config/obsidian-second-brain/properties.json` for its vault and feature selection. Linux switches disable an existing user-scoped Claude plugin; pi omits the package.
-- **AI harness security**: `@gotgenes/pi-permission-system` owns declarative authorization in pi through `config/pi/permission-system.json`; Claude Code uses `config/claude/settings.json`. Permissions protect secret content and catastrophic machine operations, and ask before external or destructive effects. Claude's semantic scanner covers direct download-to-shell hazards, not Git process policy.
+- **Config files** in `config/` are symlinked into `$HOME` via `mkOutOfStoreSymlink` only where this repo intentionally owns the live file. Claude settings are generated from `config/claude/settings.json` and copied into place by Nix; Claude instructions, statusline, rules, shared hooks, and shared skills are symlinked; package hooks are installed by their owning plugins. Cursor settings are symlinked by `modules/cursor.nix`; VS Code settings are symlinked by `modules/vscode.nix` and mirror Cursor without Cursor-specific options. pi reads the shared global instructions via `~/.pi/agent/AGENTS.md` (a context/memory file, symmetric with Claude's `CLAUDE.md`) and the shared skills tree via `~/.pi/agent/skills`.
+- **AI MCP servers** live in `modules/mcp-servers.nix`. Claude and pi each render their own schema from the same source; common servers are shared, and work-only servers are gated by the work profile. The standalone [obsidian-second-brain](https://www.npmjs.com/package/@soulwaxx/obsidian-second-brain) integration is enabled only on macOS: pi loads `npm:@soulwaxx/obsidian-second-brain`, while Claude Code installs the same npm artifact as `obsidian-second-brain@obsidian-second-brain` at user scope through the `soulwaxx/obsidian-second-brain` GitHub marketplace. Both use `~/.config/obsidian-second-brain/properties.json` for the vault and feature selection; activation seeds this editable file only when absent. Guard, generated navigation, and retrieval refresh default on; deprecated agent auto-commit defaults off. Obsidian Git exclusively owns commits, pulls, and pushes and must be installed/enabled by the owner; use the package's preview/hash-confirmed [configuration workflow](https://github.com/soulwaxx/obsidian-second-brain/blob/main/docs/setup.md) to configure it and exclude derived state from Git. Linux switches disable an existing user-scoped Claude plugin; pi omits the package. From any working directory, invoke `/obsidian-second-brain:wiki` in Claude Code or `/skill:wiki` in pi. The focused `wiki-query`, `wiki-save`, `wiki-ingest`, `wiki-research`, and `wiki-health` skills use the same prefixes. The optional vault shell (`brain`) only enters the vault; it does not sync it. Home Manager exposes `obsidian-second-brain` in `~/.local/bin`, reusing pi's installed npm package for CLI search/doctor/build commands without a second installation. `dotfiles.pi.vaultAgentModel` controls the packaged pi specialist: personal-mac uses `openai/gpt-6-luna`, work-macbook uses `anthropic/claude-haiku-4-5`; Claude's specialist inherits its Claude session settings (work sessions select Haiku). Package updates are explicit: `pi update npm:@soulwaxx/obsidian-second-brain`; for Claude Code, run `claude plugin marketplace update obsidian-second-brain` followed by `claude plugin update obsidian-second-brain@obsidian-second-brain --scope user`.
+- **AI harness security**: `@gotgenes/pi-permission-system` owns declarative authorization in pi through `config/pi/permission-system.json`; Claude Code uses `config/claude/settings.json`. Permissions protect secret content and catastrophic machine operations, and ask before external or destructive effects.
 - **Repository skills**: `~/.claude/skills` is a symlink to `config/shared/skills`; pi reads the same tree via `~/.pi/agent/skills`. Shared skills are explicit-only; the Obsidian `wiki` skill is owned by [obsidian-second-brain](https://github.com/soulwaxx/obsidian-second-brain) and inline skill completion by [pi-skill-autocomplete](https://github.com/soulwaxx/pi-skill-autocomplete).
-- **Vendored skills**: several skills are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT). They are an adapted fork rather than a verbatim mirror. Harness-neutral tool wording, local workflow changes, and cross-skill references were added locally, so re-vendoring blindly regresses that work. Adapted skills and their upstream paths: `codebase-design`, `code-review`, `diagnosing-bugs`, `domain-modeling`, `grill-with-docs`, `implement`, `prototype`, `research`, `resolving-merge-conflicts` (under `skills/engineering/`); `grilling`, `handoff` (under `skills/productivity/`); and `writing-great-skills` (upstream `skills/productivity/writing-for-agents`, renamed). Last reconciled against upstream commit `0ab1b63` (2026-08-20). To check for updates: `git clone --depth 1 https://github.com/mattpocock/skills` and diff each `skills/<bucket>/<name>/` against `config/shared/skills/<name>/`. Ignore the upstream em-dash→colon prose sweep and harness-specific tool names already handled locally. Port substantive workflow changes by hand.
+- **Vendored skills**: several skills are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT). They are an adapted fork rather than a verbatim mirror. Harness-neutral tool wording, local workflow changes, and cross-skill references were added locally, so re-vendoring blindly regresses that work. Adapted skills and their upstream paths: `code-review`, `implement`, `research` (under `skills/engineering/`); `grilling`, `handoff` (under `skills/productivity/`); and `writing-great-skills` (upstream `skills/productivity/writing-for-agents`, renamed). To check for updates: `git clone --depth 1 https://github.com/mattpocock/skills` and diff each `skills/<bucket>/<name>/` against `config/shared/skills/<name>/`. Ignore the upstream em-dash→colon prose sweep and harness-specific tool names already handled locally. Port substantive workflow changes by hand.
 - **Shared host shape** lives in `modules/profiles/base-home.nix` plus platform (`darwin-home.nix`, `linux-home.nix`) and role (`work-home.nix`, `personal-home.nix`) profiles; host files import these profiles explicitly.
 - **Host-specific logic** lives in `hosts/<name>.nix` and `modules/host-specific/` — no hostname checks in shell files.
 
@@ -119,10 +119,10 @@ Start with `flake.nix`, then read `modules/profiles/base-home.nix` plus the rele
 - Add Linux CLI packages to `modules/linux/packages.nix`; Linuxbrew is intentionally not used.
 - Add Kubernetes tools on macOS via Homebrew (`modules/homebrew-packages.nix` `kubernetesBrews`, folded into `workBrews`) and on Linux via Nix (`modules/linux/packages.nix` `kubernetesPackages`, gated by `dotfiles.kubernetes.enable`), or a dedicated module such as `modules/k9s.nix`. Both paths follow `dotfiles.kubernetes.enable`, which is false on `personal-mac`.
 - Add a package to another Nix module when Home Manager needs it for generated config, shell activation, runtime integration, or platform-specific ownership.
-- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap`, `claude-state-jq`, `semantic-command-scanner`, and `zsh-functions`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
+- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap` and `claude-state-jq`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
 - Run `nix run .#check-build` when changing activation scripts, generated files, MCP wiring, or Home Manager/nix-darwin module structure. It builds every declared host output for the current system; other-system hosts are evaluation-checked only.
 - Add shared MCP servers in `modules/mcp-servers.nix`; add tool-specific differences inside that server entry instead of duplicating definitions in `modules/claude/mcp.nix`.
-- Treat `~/.pi/agent/settings.json` and `~/.pi/agent/mcp-adapter.json` as read-only. Home Manager owns both files. Change Pi settings, packages, extensions, and MCP servers in this repository, then switch the host.
+- Treat `~/.pi/agent/settings.json` and `~/.pi/agent/mcp.json` as read-only. Home Manager owns both files. Change Pi settings, packages, extensions, and MCP servers in this repository, then switch the host.
 - Add shared skills under `config/shared/skills/<name>/SKILL.md`. Home Manager links `config/shared/skills` to `~/.claude/skills`; pi reads the same tree via `~/.pi/agent/skills`. Mark repository skills explicit-only so they are invoked by name.
 - Some shared skills are vendored (and re-authored) from upstream projects. When a skill is derived from an external source, record its provenance and update-check steps in a `VENDOR.md` beside its `SKILL.md` (see `config/shared/skills/aws-architecture-diagram/VENDOR.md`), so a future agent can diff against upstream and port improvements without re-discovering the source.
 
@@ -141,6 +141,45 @@ Useful shell aliases:
 | `brew-upgrade`          | macOS only: update and upgrade Homebrew packages                                |
 | `linux-realign`         | Linux only: check/switch, then clean Nix store                                  |
 | `linux-upgrade`         | Linux only: update flake inputs, switch, then clean Nix store                   |
+
+## Pi maintenance
+
+Pi deliberately uses a floating npm installation under `~/.npm-global`. Activation installs the core only when its executable is missing; switching a host or updating flake inputs does not upgrade an existing Pi installation. Extension sources in `modules/pi.nix` are also unversioned. Pi 1.0.1 and later do not pin transitive dependencies in the published npm package.
+
+Update the core and extensions explicitly:
+
+```bash
+NPM_CONFIG_PREFIX="$HOME/.npm-global" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+pi --version
+pi update --extensions
+# Or update one declared extension:
+pi update npm:@gotgenes/pi-permission-system
+pi list
+npm list --prefix "$HOME/.pi/agent/npm" --depth=0
+```
+
+Use npm for the core rather than migrating to the managed installer suggested by `pi update`. Package updates reconcile installed resources without changing their declarations. Add or remove declarations in `modules/pi.nix`, not through `pi install`, `pi remove`, or `pi config`, which write Home Manager-owned settings. Run the repository checks before switching changed generated settings or MCP wiring. Restart Pi after package updates or changes to subagent `disabledFeatures`; static permission configuration is symlinked from `config/pi/permission-system.json`.
+
+The restore policy asks before worktree-discarding restores. Its narrow staging-only exceptions require an explicit `--` immediately after `--staged` or `-S`, so subsequent pathspecs cannot enable worktree restoration:
+
+```bash
+git restore --staged -- <pathspec>
+git restore -S -- <pathspec>
+```
+
+Other option layouts, including staging-only commands with Git global options, conservatively require confirmation. Permission prompts emit a terminal bell; whether it produces a sound or visual indication depends on the terminal settings.
+
+### Subagent limits
+
+`config/pi/subagents.json` retains these defaults:
+
+- `globalConcurrencyLimit: 4` caps simultaneous children within one run, not across every run or Pi process. `parallel` permits up to eight tasks with four executing concurrently.
+- `maxActiveAsyncRunsPerSession: 3` caps active top-level async runs owned by one parent session. Workflow children do not each consume another top-level slot, so it is not a three-child limit. Paused and needs-attention runs retain capacity.
+- The cumulative spawn budgets are 50 children per parent session and 16 per top-level run tree. Completed and failed launches still count; resuming a retained child reuses its claim.
+- `timeoutMs: 3600000` is a one-hour default for foreground runs and plain single-agent async runs; agent/call overrides can take precedence. Composite async workflows are not capped at the top level by this value: their children have individual deadlines. Pi's model-response idle timeout is separate.
+- `checkpointBeforeDeadlineMs: 300000` requests a best-effort checkpoint five minutes before an async single-agent deadline. It is delivered at a tool boundary, not by interrupting the current tool; the terminal deadline still applies.
+
+Agent management, per-call external-machine overrides, and tool-level pane controls are disabled. Missions and scripted workflows remain enabled. Shared-checkout execution, fresh context, depth limits, and instruction-only read-only roles are unchanged.
 
 ## Nix distribution choice
 

@@ -1,6 +1,7 @@
 {
   "permissionReviewLog": false,
   "doublePressToConfirm": false,
+  "promptNotifications": ["bell"],
   "permission": {
     "*": "allow",
     "bash": {
@@ -17,10 +18,10 @@
       "git * clean *-f*": "ask",
       "git checkout -- *": "ask",
       "git * checkout -- *": "ask",
-      "git restore * .": "ask",
-      "git restore * :/*": "ask",
-      "git * restore * .": "ask",
-      "git * restore * :/*": "ask",
+      "git restore *": "ask",
+      "git * restore *": "ask",
+      "git restore --staged -- *": "allow",
+      "git restore -S -- *": "allow",
       "git tag -d *": "ask",
       "git * tag -d *": "ask",
       "git branch -D *": "ask",
@@ -169,21 +170,21 @@
       "github*mark*": "ask",
       "github*dismiss*": "ask",
       "notion*move*": "ask",
-      "notion*archive*": "ask"
-    },
-    "mcp__*": "allow",
-    "mcp__*delete*": "ask",
-    "mcp__*merge*": "ask",
-    "mcp__*push*": "ask",
-    "mcp__*terminate*": "ask",
-    "mcp__*deregister*": "ask",
-    "mcp__github*create_or_update_file*": "ask",
-    "mcp__github*remove*": "ask",
-    "mcp__github*fork*": "ask",
-    "mcp__github*lock*": "ask",
-    "mcp__github*mark*": "ask",
-    "mcp__github*dismiss*": "ask",
-    "mcp__notion*move*": "ask",
-    "mcp__notion*archive*": "ask"
+      "notion*archive*": "ask",
+      "mcp__*": "allow",
+      "mcp__*delete*": "ask",
+      "mcp__*merge*": "ask",
+      "mcp__*push*": "ask",
+      "mcp__*terminate*": "ask",
+      "mcp__*deregister*": "ask",
+      "mcp__github*create_or_update_file*": "ask",
+      "mcp__github*remove*": "ask",
+      "mcp__github*fork*": "ask",
+      "mcp__github*lock*": "ask",
+      "mcp__github*mark*": "ask",
+      "mcp__github*dismiss*": "ask",
+      "mcp__notion*move*": "ask",
+      "mcp__notion*archive*": "ask"
+    }
   }
 }

@@ -1,31 +1,65 @@
 # Agent Guidelines
 
-Personal defaults for every repository. Project AGENTS.md files add build, test,
-and convention details; where they conflict, the project file wins.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## Communication
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-- Lead with the answer or the action taken. Skip preamble and restating the request.
-- Use an impersonal, analytical register without first person, enthusiasm, or emojis;
-  the reader wants facts to act on, not rapport.
-- Keep prose free of code; use code blocks only for deliverables.
-- End with: what changed, how it was checked, what remains open. A few lines for small tasks.
+## 1. Think Before Coding
 
-## Before acting
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-- Resolve ambiguity from code, docs, and history first. Ask only when the remaining
-  ambiguity would change the result, and batch all questions into one message.
-- If a simpler approach than the requested one exists, say so before implementing.
-- Read code before making claims about it. Check official documentation before relying
-  on external API or library behavior; training data may be stale.
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-## Scope
+## 2. Simplicity First
 
-- Implement what was asked. No speculative features, single-use abstractions,
-  unrequested configurability, or handling for impossible states.
-- Change only the lines the task requires. Match surrounding style; leave unrelated
-  code, comments, and formatting untouched.
-- Mention unrelated problems instead of fixing them.
-- Remove imports, functions, and scratch files that these changes orphaned.
-- Match the file's comment density and idiom. Comment only what the code cannot say:
-  why, which constraint, what breaks otherwise.
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

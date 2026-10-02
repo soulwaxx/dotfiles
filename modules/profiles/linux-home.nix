@@ -8,7 +8,7 @@
 {
   imports = [
     ../nix.nix
-    ../zed.nix
+    ../vscode.nix
     ../ghostty.nix
     ../linux/packages.nix
   ];

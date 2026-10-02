@@ -7,11 +7,11 @@ in
   mcpServers =
     lib.mapAttrs
       (
-        _: server:
+        name: server:
         server
         // {
           exposure = "codemode";
-          timeout = 60;
+          timeout = if name == "aws-mcp" then 300 else 60;
         }
       )
       (

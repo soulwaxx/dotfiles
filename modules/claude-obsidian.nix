@@ -15,7 +15,8 @@ let
       features = {
         guard = true;
         toc = true;
-        autoCommit = true;
+        # Deprecated: Obsidian Git exclusively owns commits and sync.
+        autoCommit = false;
         retrievalRefresh = true;
       };
     }
@@ -79,6 +80,16 @@ in
     # is declared in modules/homebrew-packages.nix. Best effort: warn, never
     # fail, if the app is absent.
     (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+      # Reuse pi's managed npm package; its stable path follows package updates
+      # without installing a second copy or pointing at a versioned Claude cache.
+      home.file.".local/bin/obsidian-second-brain" = {
+        source = pkgs.writeShellScript "obsidian-second-brain" ''
+          exec ${pkgs.nodejs_24}/bin/node \
+            "$HOME/.pi/agent/npm/node_modules/@soulwaxx/obsidian-second-brain/scripts/obsidian-second-brain.mjs" "$@"
+        '';
+        executable = true;
+      };
+
       home.activation.obsidianCliLink = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         obsidianCli="/Applications/Obsidian.app/Contents/MacOS/obsidian-cli"
         if [[ -x "$obsidianCli" ]]; then
@@ -96,17 +107,13 @@ in
     })
 
     (lib.mkIf (cfg.vaultPath != null) {
-      # The standalone integration is vault-cwd-scoped; `brain` cd's into the
-      # vault, pulls the latest
-      # vault commits, drops the user into an interactive shell in the vault (they
-      # launch `claude` or `pi` themselves from there), then pushes on exit.
+      # Optional vault shell; Claude and pi can use the configured wiki from
+      # any cwd. Obsidian Git exclusively owns commits, pulls, and pushes.
       programs.zsh.initContent = ''
         brain() {
           (
             cd ${lib.escapeShellArg cfg.vaultPath} || exit 1
-            git pull --ff-only --quiet || echo 'WARN: vault pull failed (offline or diverged); continuing on local state' >&2
             zsh -i
-            git push --quiet || true
           )
         }
       '';

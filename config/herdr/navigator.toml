@@ -1,0 +1,11 @@
+[picker]
+vim_mode = true
+check_updates = false
+
+[sources]
+herdr_plus_projects = false
+roots = false
+agents = false
+servers = false
+sessions = false
+herdr_plus_quick_actions = false

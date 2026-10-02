@@ -414,7 +414,7 @@ git-amend() {
     local rewrite_range
     rewrite_range=$(_git_last_commit_rewrite_range) || return 1
     _git_require_safe_rewrite "$rewrite_range" || return 1
-    git commit --amend --no-edit "$@"
+    git commit --amend --no-edit "$@" || return 1
     _git_success "Last commit amended"
 }
 
@@ -439,8 +439,8 @@ git-amend-files() {
     local rewrite_range
     rewrite_range=$(_git_last_commit_rewrite_range) || return 1
     _git_require_safe_rewrite "$rewrite_range" || return 1
-    git add "$@"
-    git commit --amend --no-edit
+    git add "$@" || return 1
+    git commit --amend --no-edit || return 1
     _git_success "Files added to last commit: $*"
 }
 
@@ -566,7 +566,7 @@ git-fixup() {
         shift
     fi
 
-    git commit --fixup="$commit" "$@"
+    git commit --fixup="$commit" "$@" || return 1
     printf "\n"
     _git_success "Fixup commit created for $commit"
     _git_info "To autosquash, run: git-autosquash"
@@ -605,7 +605,7 @@ git-undo-hard() {
     read -r response
 
     if [[ "$response" == "yes" ]]; then
-        git reset --hard "HEAD~$num_commits"
+        git reset --hard "HEAD~$num_commits" || return 1
         printf "\n"
         _git_success "Commit(s) and changes permanently removed."
         git status
@@ -625,7 +625,7 @@ git-undo-soft() {
 
     printf "\n"
     if _git_confirm "Continue? (y/N): "; then
-        git reset --soft "HEAD~$num_commits"
+        git reset --soft "HEAD~$num_commits" || return 1
         printf "\n"
         _git_success "Commit(s) undone. Changes remain staged."
         git status
@@ -684,11 +684,20 @@ git-resolve-all() {
     echo "$conflicts"
     printf "\n"
     if _git_confirm "Continue? (y/N): "; then
-        echo "$conflicts" | while read -r file; do
-            git checkout "--$strategy" "$file"
-            git add "$file"
+        local file unmerged selected_stage
+        while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            unmerged=$(git ls-files -u -- "$file") || return 1
+            selected_stage=2
+            [[ "$strategy" == "theirs" ]] && selected_stage=3
+            if ! print -r -- "$unmerged" | awk -F '[ \t]+' -v stage="$selected_stage" '$3 == stage { found=1 } END { exit !found }'; then
+                git rm -- "$file" || return 1
+            else
+                git checkout "--$strategy" -- "$file" || return 1
+                git add -- "$file" || return 1
+            fi
             _git_success "Resolved: $file (using $strategy)"
-        done
+        done <<< "$conflicts"
         printf "\n"
         _git_success "All conflicts resolved. Review and commit."
     else
@@ -734,7 +743,7 @@ git-stash-save() {
         return 1
     fi
 
-    git stash push -m "$1"
+    git stash push -m "$1" || return 1
     _git_success "Stashed with message: $1"
 }
 
@@ -861,11 +870,11 @@ git-worktree-new() {
         return 1
     fi
 
-    local path="$1"
+    local worktree_path="$1"
     local branch="$2"
 
-    git worktree add "$path" -b "$branch"
-    _git_success "Worktree created at $path for branch $branch"
+    git worktree add "$worktree_path" -b "$branch" || return 1
+    _git_success "Worktree created at $worktree_path for branch $branch"
 }
 
 # List all worktrees

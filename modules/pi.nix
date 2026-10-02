@@ -92,7 +92,7 @@ let
     "git:github.com/soulwaxx/pi-skill-autocomplete"
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-    "git:github.com/soulwaxx/obsidian-second-brain"
+    "npm:@soulwaxx/obsidian-second-brain"
   ];
 
   piSettings = {
@@ -248,7 +248,7 @@ in
       # pi reads it as ~/.pi/agent/AGENTS.md, Claude reads it as CLAUDE.md. Both
       # are context files layered above project AGENTS.md, so the two harnesses
       # stay symmetric. Behavioral guidance only; safety lives in the permission
-      # system and semantic guards, so `-nc` dropping this file is not a risk.
+      # system, so `-nc` dropping this file is not a risk.
       ".pi/agent/AGENTS.md".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/AGENTS.md";
       ".pi/agent/skills".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/skills";

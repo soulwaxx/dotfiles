@@ -1,13 +1,36 @@
 onboarding = false
 
 [theme]
-name = "catppuccin"
+name = "terminal"
+
+[update]
+version_check = false
 
 [keys]
 prefix = "ctrl+a"
+new_worktree = ""
+
+[[keys.command]]
+key = "prefix+t"
+type = "plugin_action"
+command = "herdr-navigator.open"
+description = "jump to workspace or directory"
 
 [ui.sidebar.agents]
 rows = [["state_icon", "workspace", "tab"], ["agent", "state_text"]]
 
 [ui]
+sidebar_start_collapsed = true
+sidebar_collapsed_mode = "hidden"
+prompt_new_tab_name = false
+window_title = "{workspace}: {tab}"
 status_indicators = "symbols"
+
+[ui.toast]
+delivery = "herdr"
+
+[session]
+resume_agents_on_restore = false
+
+[advanced]
+scrollback_limit_bytes = 50000000

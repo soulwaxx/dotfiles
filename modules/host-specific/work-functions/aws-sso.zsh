@@ -55,7 +55,9 @@ awsp() {
     # login flow — run login explicitly so the token is fresh before the capture.
     aws-sso login || return 1
 
-    eval "$(aws-sso eval --profile "$profile")"
+    local credentials
+    credentials=$(aws-sso eval --profile "$profile") || return 1
+    eval "$credentials"
 }
 
 alias awsi='aws-sso list'

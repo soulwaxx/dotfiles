@@ -49,7 +49,6 @@ On macOS, nix-darwin owns system settings and Homebrew, then Home Manager owns u
 - Declare MCP servers once in `modules/mcp-servers.nix`; put harness-specific schema handling in the consumers.
 - Keep shared skills under `config/shared/skills/<name>/SKILL.md`; they are explicit-only and must be invoked by name rather than automatically selected by the model.
 - `config/pi/permission-system.json` and `config/claude/settings.json` protect secret content and catastrophic machine operations, and require confirmation for external or destructive effects.
-- Claude Code uses `config/claude/hooks/semantic-command-scanner.sh` for direct download-to-shell hazards; it is not Git process policy. Keep compound-shell parsing out of simple permission globs.
 - Treefmt owns formatting and currently runs nixfmt only. Use `nix fmt` or `nix run .#fmt`; do not reformat unrelated files.
 - `home.stateVersion` is `26.05` in `modules/profiles/base-home.nix`; nix-darwin `system.stateVersion` is `6`. Treat these as compatibility levels, not package versions.
 
@@ -76,7 +75,7 @@ nix run .#fmt-check
 nix run .#lint
 ```
 
-`nix run .#check` runs the dotfiles behavior checks, including `bootstrap`, `claude-state-jq`, `semantic-command-scanner`, and `zsh-functions`. Obsidian and skill-completion tests run in their standalone package repositories. It also evaluates all five host derivation paths, including hosts for other systems, without cross-building them. Tests and flake checks are executable verification, not model directives.
+`nix run .#check` runs the dotfiles behavior checks, including `bootstrap` and `claude-state-jq`. Obsidian and skill-completion tests run in their standalone package repositories. It also evaluates all five host derivation paths, including hosts for other systems, without cross-building them. Tests and flake checks are executable verification, not model directives.
 
 Before switching a host:
 

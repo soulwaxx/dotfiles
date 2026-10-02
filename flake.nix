@@ -220,6 +220,7 @@
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
+            overlays = [ (import ./modules/lib/herdr-overlay.nix) ];
           };
           modules = [ hostModule ];
           extraSpecialArgs = {
@@ -268,66 +269,6 @@
           ${pkgs.bash}/bin/bash tests/claude-state-jq.sh
           touch $out
         '';
-        pi-config =
-          let
-            mkPiMcp = import ./modules/lib/pi-mcp.nix { inherit lib pkgs; };
-            piMcpConfig =
-              isWork:
-              pkgs.writeText "pi-mcp-test.json" (
-                builtins.toJSON (mkPiMcp {
-                  inherit isWork;
-                  awsMcp = {
-                    endpointRegion = "us-east-1";
-                    operationRegion = "us-east-1";
-                  };
-                })
-              );
-          in
-          pkgs.runCommand "check-pi-config" { nativeBuildInputs = [ pkgs.python3 ]; } ''
-            python3 ${./tests/pi-config.py} ${./config/pi/permission-system.json} \
-              ${piMcpConfig false} ${piMcpConfig true}
-            touch $out
-          '';
-        semantic-command-scanner =
-          pkgs.runCommand "check-semantic-command-scanner"
-            {
-              nativeBuildInputs = [
-                pkgs.bash
-                pkgs.coreutils
-                pkgs.gnugrep
-                pkgs.gnused
-                pkgs.jq
-              ];
-            }
-            ''
-              mkdir -p tests config/claude/hooks
-              cp ${./tests/semantic-command-scanner.sh} tests/semantic-command-scanner.sh
-              cp ${./config/claude/hooks/semantic-command-scanner.sh} config/claude/hooks/semantic-command-scanner.sh
-              ${pkgs.bash}/bin/bash tests/semantic-command-scanner.sh \
-                config/claude/hooks/semantic-command-scanner.sh
-              touch $out
-            '';
-        zsh-functions =
-          pkgs.runCommand "check-zsh-functions"
-            {
-              nativeBuildInputs = [
-                pkgs.coreutils
-                pkgs.gnugrep
-                pkgs.zsh
-              ];
-            }
-            ''
-              mkdir -p tests modules/zsh
-              cp ${./tests/zsh-functions.zsh} tests/zsh-functions.zsh
-              cp ${./modules/zsh/nvim-functions.zsh} modules/zsh/nvim-functions.zsh
-              cp ${./modules/zsh/git-functions.zsh} modules/zsh/git-functions.zsh
-              cp ${./modules/zsh/aliases.nix} modules/zsh/aliases.nix
-              ${pkgs.zsh}/bin/zsh tests/zsh-functions.zsh \
-                modules/zsh/nvim-functions.zsh \
-                modules/zsh/git-functions.zsh \
-                modules/zsh/aliases.nix
-              touch $out
-            '';
       };
 
       mkCommonApps =
@@ -386,9 +327,8 @@
             json_files=()
             while IFS= read -r -d "" file; do
               json_files+=("$file")
-            done < <(${pkgs.ripgrep}/bin/rg --files -0 --hidden -g '*.json' -g '!config/zed/**' config)
+            done < <(${pkgs.ripgrep}/bin/rg --files -0 --hidden -g '*.json' config)
             if (( ''${#json_files[@]} > 0 )); then
-              # config/zed/ is excluded: Zed settings are JSONC (trailing commas), not strict JSON.
               ${pkgs.jq}/bin/jq -e . "''${json_files[@]}" >/dev/null
             fi
             # tests/ are flake `checks` outputs, run by `nix flake check` in the

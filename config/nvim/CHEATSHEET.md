@@ -33,14 +33,14 @@ Use `<leader>cr` over text replace when renaming a variable or function: it foll
 
 | Keys | Action |
 | --- | --- |
-| `<leader>/` / `<leader>sg` | Live grep with fff.nvim (Snacks Explorer root when open, otherwise cwd) |
+| `<leader>/` / `<leader>sg` | Live grep with fff.nvim (Snacks Explorer root when open, otherwise cwd; ignores the hovered folder) |
 | `<leader><space>` / `<leader>ff` | Find files with fff.nvim |
 | `<leader>sG` | Snacks live grep in the current working directory |
 | `<leader>sw` | Snacks grep for the word under the cursor (works in visual mode too) |
 
 fff honors `.gitignore` and picker-only `.ignore` files. Snacks shows hidden and gitignored files, excluding only the explicit ignored globs (`.pytest_cache`, `.terraform`, `.venv`, `__pycache__`, and `venv`); its `<a-h>` and `<a-i>` keys toggle hidden/ignored files.
 
-To scope a grep to one subfolder: open it in the explorer (`<leader>e`) and search from there, or use grug-far (`<leader>sr`) and set its Files field to the folder path or a glob.
+To scope a grep to one subfolder: hover it in the explorer and press `.` to make it the explorer root before searching, or use grug-far (`<leader>sr`) and set its Files field to the folder path or a glob.
 
 ## Files and buffers
 

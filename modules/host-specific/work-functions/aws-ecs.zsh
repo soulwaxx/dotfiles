@@ -337,8 +337,10 @@ ecs-logs() {
     echo ""
     local short_q="${(q)short}"
     _ecs_ssm_run "$ec2_id" "docker logs $short_q 2>&1"
+    local ssm_status=$?
     echo ""
     echo "# Rerun: ecsl $container $cluster $service $task_id"
+    return $ssm_status
 }
 
 # ecs-logs-follow [container [cluster [service [task_id]]]]
@@ -401,8 +403,10 @@ ecs-exec() {
     local short_q="${(q)short}"
     local cmd_q="${(q)cmd}"
     _ecs_ssm_run "$ec2_id" "docker exec $short_q sh -lc $cmd_q 2>&1"
+    local ssm_status=$?
     echo ""
     echo "# Rerun: ecse $cluster $service $container \"$cmd\" $task_id"
+    return $ssm_status
 }
 
 # ecs-curl <cluster> <service> <url> [task_id]
@@ -424,14 +428,14 @@ ecs-curl() {
 
     # Exclude sidecar containers from the app-container pick.
     # Override per-session: ECS_CURL_EXCLUDE_CONTAINERS=log_router,opa,envoy
-    local exclude="${ECS_CURL_EXCLUDE_CONTAINERS:-log_router,opa}"
+    local exclude="${ECS_CURL_EXCLUDE_CONTAINERS-log_router,opa}"
     local jq_exclude=""
-    local IFS=','
+    local -a excluded_names
+    excluded_names=("${(@s:,:)exclude}")
     local _name
-    for _name in $exclude; do
+    for _name in "${excluded_names[@]}"; do
         [[ -n "$_name" ]] && jq_exclude+=" && name!='$_name'"
     done
-    unset IFS _name
 
     local task_info
     task_info=$(_ecs_debug_task "$cluster" "$service" "$task_hint") || return 1
@@ -455,8 +459,10 @@ ecs-curl() {
     echo ""
     _ecs_ssm_run "$ec2_id" \
         "PID=\$(docker inspect $short_q --format '{{.State.Pid}}') && nsenter -t \$PID --net -- curl -fsS -- $url_q 2>&1"
+    local ssm_status=$?
     echo ""
     echo "# Rerun: ecsc $cluster $service $url $task_id"
+    return $ssm_status
 }
 
 alias ecss='ecs-status'
