@@ -82,7 +82,7 @@ in
       subagentModels = {
         scout = lib.mkOption {
           type = lib.types.str;
-          default = "claude-haiku-4-5";
+          default = "claude-haiku-5-5";
           description = "Pi model used by the scout subagent.";
         };
 

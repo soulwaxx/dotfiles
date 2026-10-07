@@ -142,6 +142,40 @@ Useful shell aliases:
 | `linux-realign`         | Linux only: check/switch, then clean Nix store                                  |
 | `linux-upgrade`         | Linux only: update flake inputs, switch, then clean Nix store                   |
 
+## Herd phone access (Heeler + NetBird)
+
+[Heeler](https://github.com/ZingerLittleBee/Heeler) is an iOS 18+ companion for Herd. It controls existing agents over SSH; no extra agent server or public port forwarding is needed. `personal-mac` enables `dotfiles.herdr.heeler.enable`; other hosts leave it off. `modules/herdr.nix` installs plugin 0.6.0 from the pinned Heeler v0.1.13 commit and skips installation when that commit is already enabled. Updating the pin is explicit; activation reconciles it rather than following `main`. Activation also binds the managed plugin manifest's runtime scripts to an absolute Node executable: Ghostty starts Herd directly without the interactive shell's Homebrew PATH. This is a local manifest adjustment, not a change to upstream JavaScript or credentials.
+
+### One-time setup
+
+1. Install [Heeler from the App Store](https://apps.apple.com/us/app/heeler-for-herdr/id6797263135) and NetBird on the iPhone. Connect the phone and personal Mac to your existing NetBird network.
+2. In macOS **System Settings > General > Sharing > Remote Login**, enable SSH and allow only your login user. The dotfiles do not enable this service automatically. Keep OpenSSH's `AllowStreamLocalForwarding` enabled (the default); Heeler forwards to Herd's Unix socket.
+3. Use **ordinary macOS OpenSSH over NetBird**, not NetBird's built-in SSH server/JWT authentication. Heeler pairs against the OpenSSH host key and enrolls its device key in `~/.ssh/authorized_keys`; NetBird's embedded SSH server is not a substitute. If NetBird SSH is enabled on this peer, resolve its port-22 interception before pairing.
+4. In NetBird, allow the phone peer/group to reach the personal Mac peer/group with a **TCP port 22** access policy. Policies are additive: a narrower policy does not override the permissive Default policy or other broad rules. Review existing policies before restricting them so other access is not broken. NetBird policies govern overlay traffic only; Remote Login can also listen on LAN interfaces, so use host firewall/listener restrictions if you require VPN-only SSH.
+5. Keep Herd running, then open the pairing popup:
+
+   ```bash
+   herdr plugin list --plugin heeler
+   herdr plugin action invoke heeler.pair
+   ```
+
+   Find the Mac's NetBird address in `netbird status`. In the popup, select that address (it may not be the preselected LAN address), deselect addresses you do not want advertised, and scan the QR in Heeler. The QR contains a short-lived bootstrap credential: do not share or commit it.
+6. Open an agent in Heeler and test reading its terminal and sending a harmless prompt. For a named Herd session, run `herdr --session <name> plugin action invoke heeler.pair` and select that session in the app's Host settings; the plugin installation is shared across sessions.
+
+Pairing grants the phone SSH access as your macOS user, not an agent-only sandbox. The phone's private key stays in its Keychain; authorized public keys and Heeler pairing/notification state remain machine-local. Do not declare the plugin's writable config directory as a Nix-managed file or commit its contents. Removing a Host from the app or disabling the Nix option does not revoke its SSH key: remove the corresponding device public-key entry from `~/.ssh/authorized_keys` to revoke access, and remove its notification registration if needed.
+
+### Notifications and troubleshooting
+
+In Heeler, enable Agent Notifications, grant iOS notification permission, then enable Notifications for the Host. Live Activities are optional. The default relay is `https://heeler-apns.bybee.dev`: notification contents are end-to-end encrypted, but the relay/APNs still see delivery metadata. Leave notifications disabled if you do not want this external service involved; interactive SSH control does not need it.
+
+```bash
+herdr plugin list --plugin heeler --json
+herdr plugin log list --plugin heeler --limit 20
+herdr plugin config-dir heeler
+```
+
+If pairing fails, check NetBird connectivity/policies, Remote Login, the selected address, and OpenSSH forwarding. The invoke command returns JSON; the popup appears in Herd, not the invoking terminal. Invocation is asynchronous, so a JSON result is not proof the popup started: inspect the plugin logs. If a `node` command fails with `No such file or directory`, reapply the personal Mac configuration to restore the absolute-Node manifest adjustment (reinstalling the plugin manually resets it). Exporting PATH in a pane does not change the already-running server's environment. If the host has no SSH host public keys, generate them with `sudo ssh-keygen -A`. The Mac must stay awake and reachable for interactive control.
+
 ## Pi maintenance
 
 Pi deliberately uses a floating npm installation under `~/.npm-global`. Activation installs the core only when its executable is missing; switching a host or updating flake inputs does not upgrade an existing Pi installation. Extension sources in `modules/pi.nix` are also unversioned. Pi 1.0.1 and later do not pin transitive dependencies in the published npm package.
