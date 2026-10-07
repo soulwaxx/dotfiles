@@ -1,6 +1,6 @@
 # Writing-style: Sources and Provenance
 
-This file traces every rule in `SKILL.md` to its origin. It exists so the skill can be honest about what it inherits from a documented standard and what it invents. The sibling `asd-ste100` skill makes the same split between rules it can verify against a real standard and rules it only recommends; this skill borrows that discipline.
+This file traces every rule in `SKILL.md` to its origin. It exists so the skill can be honest about what it inherits from a documented standard and what it invents.
 
 ## The honest caveat first
 
@@ -15,11 +15,11 @@ Treat the AWS-sourced rules as "direction of travel corroborated across major st
 ## Part 1. AWS / Amazon-sourced rules
 
 | Rule in SKILL.md | Origin | Notes |
-|---|---|---|
+| --- | --- | --- |
 | Active voice | AWS docs convention; Strunk; Google/Microsoft style guides | Universal across tech style guides. AWS states active voice clarifies who performs the action. |
 | Present tense | AWS docs convention; Google/Microsoft style guides | "The function returns," not "will return." Describes system behavior as timeless. |
 | Second person + imperative procedures | AWS docs convention; Google developer style guide (Procedures); Cloudflare style guide | Address the reader as "you"; write steps as commands. Applies to docs/procedures, not chat. |
-| One term per concept | AWS terminology consistency; `asd-ste100` (one word, one meaning) | The one rule this skill and `asd-ste100` enforce identically. |
+| One term per concept | AWS terminology consistency. | The one rule this skill enforce. |
 | Sentence-case headings | AWS docs convention; Google style guide | First word + proper nouns only. |
 | Weasel-word / hedge elimination | Amazon writing culture (six-pager discipline) | "Eliminate weasel words"; replace vague qualifiers with data. Directly sourced to Amazon narrative-memo practice. |
 | Numbers beat adjectives | Amazon writing culture | "Cut p99 from 850ms to 120ms" over "significantly faster." Amazon memos favor concrete data over adjectives. |
@@ -30,7 +30,7 @@ Treat the AWS-sourced rules as "direction of travel corroborated across major st
 ## Part 2. Anti-AI-tell rules (house style, not AWS)
 
 | Rule in SKILL.md | Status | Why it's here anyway |
-|---|---|---|
+| --- | --- | --- |
 | Em-dash total ban | House rule. **AWS does not ban the em dash.** | The em dash is a strong AI-tell and the author overuses it as a rhythm crutch. Banning it outright is a deliberate overcorrection, not a style-guide citation. |
 | Negative-parallelism ban ("not just X, it's Y") | House rule | A recognizable LLM cadence. No style guide bans it; the skill does because it reads as machine-generated. |
 | Tricolon-padding ban ("fast, reliable, and scalable") | House rule | Rule of three used for rhythm rather than content. A stylistic tell, not a documented AWS rule. |
@@ -40,10 +40,6 @@ Treat the AWS-sourced rules as "direction of travel corroborated across major st
 | Formulaic-opener ban ("Whether you're X or Y…") | House rule | Marketing-copy cadence flagged as an AI-tell. |
 
 These rules are defensible on their own merits. They are simply not what "AWS style" means, and this file says so rather than laundering personal preference through a brand name.
-
-## Where AWS and this skill disagree with `asd-ste100`
-
-`asd-ste100` targets machine-parsed strings and **preserves hedges** ("may", "might") because a hedge is content for a downstream parser. This skill targets human-facing prose and **bans bare hedges**, because in an ADR a hedge usually signals the author skipped the measurement. Same words, opposite rulings, different readers. Route by reader. `asd-ste100`'s own header note documents this split from its side.
 
 ## Sources
 

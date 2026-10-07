@@ -220,7 +220,6 @@
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
-            overlays = [ (import ./modules/lib/herdr-overlay.nix) ];
           };
           modules = [ hostModule ];
           extraSpecialArgs = {

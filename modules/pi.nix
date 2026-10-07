@@ -11,6 +11,7 @@ let
   isWork = config.dotfiles.claude.enableWorkIntegrations;
   awsMcp = config.dotfiles.aws.mcp;
   subagentModels = config.dotfiles.pi.subagentModels;
+  observationalMemory = config.dotfiles.pi.observationalMemory;
 
   mkPiAgent =
     name: prompt: frontmatter:
@@ -78,7 +79,6 @@ let
     "npm:@gotgenes/pi-permission-system"
     "npm:@gotgenes/pi-anthropic-auth"
     "npm:pi-web-access"
-    "npm:@ff-labs/pi-fff"
     {
       source = "npm:pi-subagents";
       extensions = [ "index.js" ];
@@ -87,9 +87,8 @@ let
     }
     "npm:@juicesharp/rpiv-todo"
     "npm:@juicesharp/rpiv-ask-user-question"
-    "npm:@juicesharp/rpiv-btw"
     "npm:pi-powerline-footer"
-    "git:github.com/soulwaxx/pi-skill-autocomplete"
+    "npm:pi-observational-memory"
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
     "npm:@soulwaxx/obsidian-second-brain"
@@ -100,7 +99,10 @@ let
     defaultModel = config.dotfiles.pi.defaultModel;
     defaultThinkingLevel = "high";
     theme = "dark";
-    defaultTools = [ "+codemode" ];
+    defaultTools = [
+      "+tool_search"
+      "+codemode"
+    ];
     # Opt out of the anonymous install/update ping and provider attribution
     # headers; keep analytics sharing off explicitly rather than relying on the
     # default.
@@ -108,7 +110,7 @@ let
     enableAnalytics = false;
     # Render mermaid diagrams once complete instead of streaming partial frames.
     markdown.mermaid = "final";
-    tuiMode = "fullscreen"; # alternatives: "regular" (default), "fullscreen"
+    tuiMode = "fullscreen"; # alternatives: "fullscreen" (default since 1.0.0), "regular"
     # Force capabilities pi may under-detect behind a multiplexer.
     # Kitty images work in Ghostty through Herdr graphics passthrough.
     terminal = {
@@ -138,6 +140,16 @@ let
       editorStart = null;
       editorEnd = null;
     };
+    # Fixed ("calibrated") threshold rather than a context-window ratio, so the
+    # trigger does not depend on the window pi reports for the session model.
+    "observational-memory" = {
+      compactAfterTokensMode = "calibrated";
+      inherit (observationalMemory) compactAfterTokens;
+      model = {
+        inherit (observationalMemory.model) provider id;
+        thinking = "low";
+      };
+    };
     subagents = {
       disableBuiltins = true;
     }
@@ -162,6 +174,10 @@ let
 in
 {
   home = {
+    # pi already copies via OSC 52 over SSH, but a pi started inside a
+    # multiplexer and reattached later over SSH has no SSH_* variables.
+    sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux { PI_CLIPBOARD_OSC52 = "1"; };
+
     activation = {
       installPi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         _install_pi() {
@@ -234,14 +250,8 @@ in
       # Extension configs — static JSON, symlinked.
       ".pi/agent/extensions/pi-permission-system/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
-      ".pi/agent/pi-fff.json".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/pi-fff.json";
       ".pi/agent/extensions/subagent/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.json";
-
-      # Extension source symlinks. Pi auto-discovers these paths and supports /reload.
-      ".pi/agent/extensions/dotfiles-handoff/index.ts".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/extensions/handoff.ts";
 
       # Shared global instructions and skills — harness-agnostic prose owned by
       # config/shared and symlinked into both harnesses as a context/memory file:

@@ -60,6 +60,19 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
----
+## 5. Communication
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+**The user often switches between sessions. Make every reply easy to pick up cold.**
+
+Language:
+- Use plain English: short sentences, common words, active voice.
+- No idioms, slang, or wordplay. Define a technical term the first time if it is not standard.
+
+Structure:
+- Start with the bottom line: the answer or current status in 1-2 sentences.
+- Then details, as short paragraphs, bullets, or headers. No walls of text.
+- End with the next step: what the user needs to do or decide, or say that nothing is needed.
+- In multi-step work, include a short status: done, in progress, remaining.
+
+Length:
+- Short by default. Go longer only when the task needs it.

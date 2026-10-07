@@ -90,8 +90,7 @@ in
     # 20h rather than 24h so the full rebuild lands on the first shell of each
     # day instead of drifting later with every rebuild.
     completionInit = ''
-      # Homebrew's completions are native zsh functions (Docker/kubectl are
-      # excluded from Carapace), so expose both common prefixes before compinit.
+      # Expose native Homebrew completions from both common prefixes before compinit.
       for _brew_completion_dir in /opt/homebrew/share/zsh/site-functions /usr/local/share/zsh/site-functions; do
         [[ -d "$_brew_completion_dir" ]] && fpath=("$_brew_completion_dir" $fpath)
       done
@@ -218,8 +217,7 @@ in
         _comp_options+=(globdots)
 
         # fzf-tab strips escape sequences from group descriptions, so keep the
-        # format plain. An empty group-name turns on per-tag grouping for native
-        # completers too (carapace sets it per-context for its own candidates).
+        # format plain. An empty group-name turns on per-tag grouping.
         zstyle ':completion:*:descriptions' format '-- %d --'
         zstyle ':completion:*' group-name '''
         zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
@@ -234,16 +232,6 @@ in
         # completion menu follows Ghostty's active theme and the background stays
         # transparent. bg+:8 adds a subtle selection tint via the ANSI surface slot.
         zstyle ':fzf-tab:*' fzf-flags --color=16 --color=bg+:8
-
-        # Carapace registers a single _carapace_completer using zsh's generic
-        # _describe rather than _files/_path_files, so it never narrows $PREFIX
-        # to the unfinished path segment. fzf-tab's default query-string mode
-        # ('input') seeds its search box from that $PREFIX, so completing a path
-        # like "config/<TAB>" prefills the query with the whole typed path and
-        # matches none of the bare-name candidates carapace returns (menu looks
-        # empty). fzf-tab keys its context off the command name, not the
-        # completer function, so this has to be unscoped.
-        zstyle ':fzf-tab:complete:*' query-string 'prefix'
 
         # Preview directory contents in Tab menus, reusing the same tree command
         # as the zoxide and fzf directory pickers.
@@ -284,8 +272,7 @@ in
         autoload -Uz add-zsh-hook
         add-zsh-hook preexec _dotfiles_reset_cursor_preexec
 
-        # Live again now that carapace no longer claims git (CARAPACE_EXCLUDES in
-        # modules/carapace.nix): local branches before remotes for git checkout.
+        # Prefer local branches before remotes for git checkout.
         zstyle ':completion:*:*:git-checkout:*' tag-order 'heads remotes'
 
         # Git workflow functions

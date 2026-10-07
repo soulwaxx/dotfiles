@@ -8,7 +8,7 @@ description: Apply Andrea's prose style rules before drafting or revising any pr
 
 Applies to all prose I produce for Andrea: ADRs, technical analyses, PR descriptions, Slack drafts, commit messages, docs. Does **not** apply to code comments (which follow the no-comment default in CLAUDE.md) or to direct chat replies in this CLI.
 
-> **Provenance (honest split).** Two kinds of rule live in this file. **AWS/Amazon-sourced rules** come from documented Amazon writing practice and AWS documentation conventions: active voice, present tense, second person, imperative procedures, one term per concept, weasel-word elimination, numbers over adjectives, verdict-first structure. **Anti-AI-tell rules** are mine: the em-dash ban, negative-parallelism ban, tricolon-padding ban, and the specific banned-word list. Both earn their place, but only the first set can claim an external standard. `references/sources.md` traces each rule to its origin; `examples/before-after.md` shows the rules applied. This mirrors how the sibling `asd-ste100` skill separates what it can verify from what it only recommends. AWS's complete official style guide has limited public availability, so the AWS conventions here are corroborated across secondary sources and sibling tech style guides (Google, Microsoft), not quoted from one canonical page.
+> **Provenance (honest split).** Two kinds of rule live in this file. **AWS/Amazon-sourced rules** come from documented Amazon writing practice and AWS documentation conventions: active voice, present tense, second person, imperative procedures, one term per concept, weasel-word elimination, numbers over adjectives, verdict-first structure. **Anti-AI-tell rules** are mine: the em-dash ban, negative-parallelism ban, tricolon-padding ban, and the specific banned-word list. Both earn their place, but only the first set can claim an external standard. `references/sources.md` traces each rule to its origin; `examples/before-after.md` shows the rules applied.
 
 ## Banned words and phrases
 
@@ -73,7 +73,7 @@ AWS-sourced rules for **docs and procedures** (READMEs, runbooks, ADRs, PR bodie
 
 - **Present tense.** Describe what the system does, not what it will do. "The function returns a token," not "the function will return a token." Reserve the future for events genuinely later than the action being described.
 - **Second person, imperative for steps.** Address the reader as "you"; write procedure steps as commands. "Choose **Save**," not "the user should click the Save button" and not "one can save by clicking." One actor, one instruction, one step.
-- **One term per concept.** Pick a single name for a thing and reuse it every time. Do not rotate "user" / "customer" / "client" or "job" / "task" / "run" for the same referent. Synonym variety is a virtue in an essay and a defect in a spec: the reader cannot tell whether two names mean one thing or two. (This is the one rule `asd-ste100` and this skill enforce identically.)
+- **One term per concept.** Pick a single name for a thing and reuse it every time. Do not rotate "user" / "customer" / "client" or "job" / "task" / "run" for the same referent. Synonym variety is a virtue in an essay and a defect in a spec: the reader cannot tell whether two names mean one thing or two.
 - **Sentence-case headings.** Capitalize headings like sentences: first word and proper nouns only. "Configure the cache," not "Configure The Cache."
 
 ## Trade-off framing

@@ -79,10 +79,32 @@ in
         description = "Pi model for the packaged Obsidian vault specialist on this host.";
       };
 
+      observationalMemory = {
+        model = {
+          provider = lib.mkOption {
+            type = lib.types.str;
+            default = "anthropic";
+            description = "Provider of the pi-observational-memory worker model.";
+          };
+
+          id = lib.mkOption {
+            type = lib.types.str;
+            default = "claude-haiku-5-5";
+            description = "Model id of the pi-observational-memory worker model.";
+          };
+        };
+
+        compactAfterTokens = lib.mkOption {
+          type = lib.types.ints.positive;
+          default = 300000;
+          description = "Source-entry token threshold for pi-observational-memory proactive compaction; keep it below the session model's context window.";
+        };
+      };
+
       subagentModels = {
         scout = lib.mkOption {
           type = lib.types.str;
-          default = "claude-haiku-4-5";
+          default = "claude-haiku-5-5";
           description = "Pi model used by the scout subagent.";
         };
 

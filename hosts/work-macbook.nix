@@ -15,6 +15,6 @@
       ../modules/profiles/work-home.nix
     ];
     home.homeDirectory = "/Users/${username}";
-    dotfiles.pi.vaultAgentModel = "anthropic/claude-haiku-4-5";
+    dotfiles.pi.vaultAgentModel = "anthropic/claude-haiku-5-5";
   };
 }

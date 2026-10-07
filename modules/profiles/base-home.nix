@@ -36,7 +36,6 @@ in
     nixSwitchModule
     ../zsh
     ../fzf.nix
-    ../carapace.nix
     ../starship.nix
     ../neovim.nix
     ../herdr.nix
