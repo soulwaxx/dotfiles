@@ -282,15 +282,19 @@ Rule of thumb: **two files → builtin `:vert diffsplit`. Two git refs → `:Dif
 
 ## Messages and cmdline
 
-Handled by Neovim's builtin `ui2` (`:h ui2`), not `noice.nvim`. There is no
-"Press ENTER" prompt: long output opens the pager as an ordinary buffer, so
-normal-mode motions, search, and yank all work in it.
+Handled by `noice.nvim` with LazyVim defaults: the `:` cmdline opens as a
+popup at the top center, `/` and `?` search stay in the bottom line, and long
+output opens in a split.
 
 | Keys | Action |
 | --- | --- |
-| `:messages` | Message history in the pager buffer |
-| `q` | Close the pager |
-| `g<` | Reopen the last message output |
+| `<leader>snl` | Last message |
+| `<leader>snh` | Message history |
+| `<leader>sna` | All messages |
+| `<leader>snd` | Dismiss all messages |
+| `<leader>snt` | Message picker |
+| `<S-Enter>` (cmdline) | Redirect cmdline output to a split |
+| `<C-f>` / `<C-b>` | Scroll hover and signature docs |
 
 ## Markdown
 

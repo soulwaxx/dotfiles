@@ -86,5 +86,11 @@ in
         description = "Investigate Datadog metrics, logs, traces, monitors, and incidents.";
         url = "https://mcp.datadoghq.eu/v1/mcp";
       };
+
+      # OAuth (PKCE public client, dynamic registration); grants last 28 days.
+      incident-io = {
+        description = "Query and manage incident.io incidents, alerts, on-call schedules, and escalations.";
+        url = "https://mcp.incident.io/mcp";
+      };
     };
 }

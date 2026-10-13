@@ -75,7 +75,7 @@ nix run .#fmt-check
 nix run .#lint
 ```
 
-`nix run .#check` runs the dotfiles behavior checks, including `bootstrap` and `claude-state-jq`. Obsidian and skill-completion tests run in their standalone package repositories. It also evaluates all five host derivation paths, including hosts for other systems, without cross-building them. Tests and flake checks are executable verification, not model directives.
+`nix run .#check` runs the dotfiles behavior checks, including `bootstrap`, `claude-state-jq`, `pi-installer`, and `pi-subagents`. Obsidian and skill-completion tests run in their standalone package repositories. It also evaluates all five host derivation paths, including hosts for other systems, without cross-building them. Tests and flake checks are executable verification, not model directives.
 
 Before switching a host:
 

@@ -31,7 +31,7 @@ require("lazy").setup({
 		version = false, -- always use the latest git commit
 		-- version = "*", -- try installing the latest stable version for plugins that support semver
 	},
-	install = { colorscheme = { "catppuccin" } },
+	install = { colorscheme = { "catppuccin-mocha" } },
 	-- No plugin here requires luarocks; disable the integration entirely so
 	-- checkhealth stops probing for a system luarocks / lua 5.1 install.
 	rocks = { enabled = false },

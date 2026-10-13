@@ -1,5 +1,6 @@
 -- Catppuccin Mocha (dark only) — the user never uses macOS light appearance.
-local colorscheme = vim.env.NVIM_COLORSCHEME or "catppuccin"
+-- Use the plugin's flavour name to avoid Neovim's bundled catppuccin.vim.
+local colorscheme = vim.env.NVIM_COLORSCHEME or "catppuccin-mocha"
 
 -- Shared ignore globs for the pickers/explorer below. Mirrored by hand in
 -- config/vscode/settings.json (files.exclude) — no shared source between
@@ -20,8 +21,11 @@ return {
 		priority = 1000,
 		opts = {
 			flavour = "mocha",
-			-- Map highlights onto the terminal's 16 ANSI slots so colors follow
-			-- Ghostty's Catppuccin Mocha theme.
+			-- Inherit the terminal background and Ghostty transparency.
+			transparent_background = true,
+			-- Floating windows (including Snacks pickers) opt in separately.
+			float = { transparent = true },
+			-- Apply Mocha colors to Neovim's embedded terminal.
 			term_colors = true,
 			-- LazyVim leaves auto_integrations on, which walks the whole lazy.nvim
 			-- plugin list on every startup (~15ms of a ~100ms boot) to guess this
@@ -41,6 +45,7 @@ return {
 				mason = true,
 				mini = { enabled = true, indentscope_color = "overlay2" },
 				native_lsp = { enabled = true },
+				noice = true,
 				notifier = true,
 				render_markdown = true,
 				semantic_tokens = true,

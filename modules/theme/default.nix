@@ -1,9 +1,9 @@
 { lib, ... }:
 let
-  # Catppuccin Mocha palette (https://github.com/catppuccin/catppuccin).
+  # Catppuccin Mocha colors on black (https://github.com/catppuccin/catppuccin).
   # Layering: background < currentline < surface < overlay < foreground.
   palette = {
-    background = "#1e1e2e"; # Base
+    background = "#000000"; # Black base override
     currentline = "#313244"; # Surface0
     surface = "#45475a"; # Surface1
     overlay = "#585b70"; # Surface2

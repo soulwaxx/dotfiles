@@ -10,7 +10,16 @@
 -- Keep grep scoped to the visible workspace rather than the opened file's root.
 local function workspace_grep()
   local explorer = Snacks.picker.get({ source = "explorer" })[1]
-  require("fff").live_grep({ cwd = explorer and not explorer.closed and explorer:cwd() or vim.uv.cwd() })
+  local opts = { cwd = explorer and not explorer.closed and explorer:cwd() or vim.uv.cwd() }
+  if explorer and not explorer.closed and explorer:is_focused() then
+    -- fff rejects a dashboard as a file window and can leave the jump in Snacks.
+    -- Capture the explorer's main window before opening the fff floats.
+    local main = explorer.main
+    opts.select = {
+      select_window = function() return main end,
+    }
+  end
+  require("fff").live_grep(opts)
 end
 
 return {

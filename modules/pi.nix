@@ -12,6 +12,7 @@ let
   awsMcp = config.dotfiles.aws.mcp;
   subagentModels = config.dotfiles.pi.subagentModels;
   observationalMemory = config.dotfiles.pi.observationalMemory;
+  mkCurlInstaller = import ./lib/mk-curl-installer.nix { inherit lib pkgs; };
 
   mkPiAgent =
     name: prompt: frontmatter:
@@ -20,57 +21,100 @@ let
       name: ${name}
       ${frontmatter}
       ---
-      ${builtins.readFile prompt}
+      ${prompt}
     '';
 
   piAgentFiles = {
     ".pi/agent/agents/scout.md" = {
-      source = mkPiAgent "scout" ../config/shared/agents/scout.md ''
+      source = mkPiAgent "scout" (builtins.readFile ../config/shared/agents/scout.md) ''
         description: Use for read-only codebase investigation that traces behavior, locates relevant files, callers, and tests, and returns cited evidence.
-        advertise: true
-        tools: read, bash, grep, find, ls, contact_supervisor
+        tools: read, bash, grep, find, ls
         model: ${subagentModels.scout}
         thinking: low
-        async: true
-        systemPromptMode: replace
-        inheritProjectContext: true
-        inheritGlobalContext: false
-        inheritSkills: false
-        acceptanceRole: read-only
+        max_turns: 0
+        run_in_background: true
+        prompt_mode: replace
+        inherit_context: false
+        locked: model, thinking, max_turns, inherit_context
       '';
       force = true;
     };
     ".pi/agent/agents/reviewer.md" = {
-      source = mkPiAgent "reviewer" ../config/shared/agents/reviewer.md ''
-        description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
-        advertise: true
-        tools: read, bash, grep, find, ls, watchdog_diff, contact_supervisor
-        model: ${subagentModels.reviewer}
-        thinking: high
-        async: true
-        systemPromptMode: replace
-        inheritProjectContext: true
-        inheritGlobalContext: false
-        inheritSkills: false
-        skills: code-review
-        acceptanceRole: read-only
-      '';
+      source =
+        mkPiAgent "reviewer"
+          (
+            ''
+              Before reviewing, read ${config.home.homeDirectory}/.pi/agent/skills/code-review/SKILL.md and follow it as the review contract; this runner does not preload skills.
+
+            ''
+            + builtins.readFile ../config/shared/agents/reviewer.md
+          )
+          ''
+            description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
+            tools: read, bash, grep, find, ls
+            model: ${subagentModels.reviewer}
+            thinking: high
+            max_turns: 0
+            run_in_background: true
+            prompt_mode: replace
+            inherit_context: false
+            locked: model, thinking, max_turns, inherit_context
+          '';
       force = true;
     };
     ".pi/agent/agents/worker.md" = {
-      source = mkPiAgent "worker" ../config/shared/agents/worker.md ''
+      source = mkPiAgent "worker" (builtins.readFile ../config/shared/agents/worker.md) ''
         description: Use for an already well-scoped implementation task with clear success criteria; make minimal edits and run focused verification.
-        advertise: true
-        tools: read, bash, edit, write, grep, find, ls, contact_supervisor
+        tools: read, bash, edit, write, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
         model: ${subagentModels.worker}
         thinking: high
-        async: true
-        systemPromptMode: replace
-        inheritProjectContext: true
-        inheritGlobalContext: false
-        inheritSkills: false
-        acceptanceRole: writer
+        max_turns: 0
+        run_in_background: true
+        prompt_mode: replace
+        inherit_context: false
+        locked: model, thinking, max_turns, inherit_context
       '';
+      force = true;
+    };
+  }
+  //
+    lib.genAttrs
+      (map (name: ".pi/agent/agents/${name}.md") [
+        "Explore"
+        "Plan"
+        "general-purpose"
+      ])
+      (_: {
+        text = ''
+          ---
+          enabled: false
+          ---
+        '';
+        force = true;
+      })
+  // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+    ".pi/agent/agents/obsidian-second-brain.wiki-vault.md" = {
+      source =
+        mkPiAgent "obsidian-second-brain.wiki-vault"
+          ''
+            Before vault work, read these installed package files in order:
+            1. ${config.home.homeDirectory}/.pi/agent/npm/node_modules/@soulwaxx/obsidian-second-brain/agents/pi/wiki-vault.md
+            2. ${config.home.homeDirectory}/.pi/agent/npm/node_modules/@soulwaxx/obsidian-second-brain/skills/wiki/SKILL.md
+
+            Follow the specialist's instructions and the wiki skill, including guard, validation, and Obsidian Git ownership rules. Resolve the configured vault independently of the caller's working directory. Do not delegate. Keep one wiki writer at a time. If either instruction file is missing, stop and report the blocker rather than proceeding without it.
+          ''
+          ''
+            description: Work in the configured Obsidian vault using the packaged specialist contract and wiki skill.
+            tools: read, bash, edit, write, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
+            ${lib.optionalString (
+              config.dotfiles.pi.vaultAgentModel != null
+            ) "model: ${config.dotfiles.pi.vaultAgentModel}"}
+            max_turns: 0
+            run_in_background: true
+            prompt_mode: replace
+            inherit_context: false
+            locked: model, thinking, max_turns, inherit_context
+          '';
       force = true;
     };
   };
@@ -79,12 +123,7 @@ let
     "npm:@gotgenes/pi-permission-system"
     "npm:@gotgenes/pi-anthropic-auth"
     "npm:pi-web-access"
-    {
-      source = "npm:pi-subagents";
-      extensions = [ "index.js" ];
-      skills = [ "skills/pi-subagents/SKILL.md" ];
-      prompts = [ ];
-    }
+    "npm:@gotgenes/pi-subagents"
     "npm:@juicesharp/rpiv-todo"
     "npm:@juicesharp/rpiv-ask-user-question"
     "npm:pi-powerline-footer"
@@ -150,14 +189,6 @@ let
         thinking = "low";
       };
     };
-    subagents = {
-      disableBuiltins = true;
-    }
-    //
-      lib.optionalAttrs (pkgs.stdenv.hostPlatform.isDarwin && config.dotfiles.pi.vaultAgentModel != null)
-        {
-          agentOverrides."obsidian-second-brain.wiki-vault".model = config.dotfiles.pi.vaultAgentModel;
-        };
   };
 
   mkPiMcp = import ./lib/pi-mcp.nix { inherit lib pkgs; };
@@ -179,26 +210,30 @@ in
     sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux { PI_CLIPBOARD_OSC52 = "1"; };
 
     activation = {
-      installPi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        _install_pi() {
-          run env PATH="${pkgs.nodejs_24}/bin:${pkgs.coreutils}/bin:/usr/bin:/bin" \
-            NPM_CONFIG_PREFIX="$HOME/.npm-global" \
-            ${pkgs.nodejs_24}/bin/npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-        }
-
-        if [[ ! -x "$HOME/.npm-global/bin/pi" ]]; then
-          verboseEcho "pi: installing @earendil-works/pi-coding-agent into $HOME/.npm-global"
-          _install_pi || {
-            echo "pi: install failed (npm returned non-zero)" >&2
-            exit 1
-          }
-        fi
-
-        if [[ -x "$HOME/.npm-global/bin/pi" ]]; then
-          verboseEcho "pi: installed version: $("$HOME/.npm-global/bin/pi" --version 2>/dev/null || echo unknown)"
-        fi
-        unset -f _install_pi
-      '';
+      installPi = mkCurlInstaller {
+        name = "pi";
+        displayName = "Pi";
+        installDir = "$HOME/.pi/agent/install";
+        url = "https://pi.dev/install.sh";
+        binPath = "$HOME/.local/bin/pi";
+        installerCommand = [
+          "${pkgs.nodejs_24}/bin/node"
+          "${../config/pi/run-installer.cjs}"
+          "${pkgs.bash}/bin/bash"
+        ];
+        # Prefer the managed entrypoint and expose the old npm install so the
+        # upstream installer can migrate it after verifying the new release.
+        extraPath = [
+          "${pkgs.nodejs_24}/bin"
+          "$HOME/.local/bin"
+          "$HOME/.npm-global/bin"
+          "/usr/bin"
+          "/bin"
+        ];
+        postInstall = ''
+          verboseEcho "pi: installed version: $("$BIN_PATH" --version 2>/dev/null || echo unknown)"
+        '';
+      };
 
       # Wrapped in a function: activation entries are concatenated into one
       # `set -eu` script, so a bare `exit 0` here would silently skip every
@@ -250,8 +285,10 @@ in
       # Extension configs — static JSON, symlinked.
       ".pi/agent/extensions/pi-permission-system/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
-      ".pi/agent/extensions/subagent/config.json".source =
+      ".pi/agent/subagents.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.json";
+      ".pi/agent/APPEND_SYSTEM.md".source =
+        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.md";
 
       # Shared global instructions and skills — harness-agnostic prose owned by
       # config/shared and symlinked into both harnesses as a context/memory file:

@@ -7,6 +7,7 @@
   url,
   binPath,
   installerArgs ? [ ],
+  installerCommand ? [ "${pkgs.bash}/bin/bash" ],
   extraPath ? [ ],
   versionFloor ? null,
   versionCommand ? null,
@@ -52,7 +53,7 @@ lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     fi
     ${pkgs.coreutils}/bin/printf '%s\n' "$new_checksum" > "$checksum_file"
 
-    run env PATH="${path}" ${pkgs.bash}/bin/bash "$tmpfile" ${lib.escapeShellArgs installerArgs} || installer_status=$?
+    run env PATH="${path}" ${lib.escapeShellArgs installerCommand} "$tmpfile" ${lib.escapeShellArgs installerArgs} || installer_status=$?
     ${pkgs.coreutils}/bin/rm -f "$tmpfile"
     return $installer_status
   }
