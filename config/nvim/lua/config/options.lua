@@ -6,6 +6,10 @@
 -- diagnostics, vim.ui.input). Neovim 0.12+; the pcall keeps older builds quiet.
 vim.o.winborder = "rounded"
 
+-- Catppuccin only leaves completion backgrounds unset when pumblend is zero.
+-- Inherit the terminal background/transparency instead of blending a theme color.
+vim.opt.pumblend = 0
+
 -- Builtin undo-history browser shipped in $VIMRUNTIME/pack/dist/opt (0.12+).
 -- `undofile` is on by default under LazyVim, so the history is already persisted.
 pcall(vim.cmd.packadd, "nvim.undotree")

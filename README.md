@@ -119,7 +119,7 @@ Start with `flake.nix`, then read `modules/profiles/base-home.nix` plus the rele
 - Add Linux CLI packages to `modules/linux/packages.nix`; Linuxbrew is intentionally not used.
 - Add Kubernetes tools on macOS via Homebrew (`modules/homebrew-packages.nix` `kubernetesBrews`, folded into `workBrews`) and on Linux via Nix (`modules/linux/packages.nix` `kubernetesPackages`, gated by `dotfiles.kubernetes.enable`), or a dedicated module such as `modules/k9s.nix`. Both paths follow `dotfiles.kubernetes.enable`, which is false on `personal-mac`.
 - Add a package to another Nix module when Home Manager needs it for generated config, shell activation, runtime integration, or platform-specific ownership.
-- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap` and `claude-state-jq`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
+- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap`, `claude-state-jq`, and `pi-installer`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
 - Run `nix run .#check-build` when changing activation scripts, generated files, MCP wiring, or Home Manager/nix-darwin module structure. It builds every declared host output for the current system; other-system hosts are evaluation-checked only.
 - Add shared MCP servers in `modules/mcp-servers.nix`; add tool-specific differences inside that server entry instead of duplicating definitions in `modules/claude/mcp.nix`.
 - Treat `~/.pi/agent/settings.json` and `~/.pi/agent/mcp.json` as read-only. Home Manager owns both files. Change Pi settings, packages, extensions, and MCP servers in this repository, then switch the host.
@@ -142,9 +142,17 @@ Useful shell aliases:
 | `linux-realign`         | Linux only: check/switch, then clean Nix store                                  |
 | `linux-upgrade`         | Linux only: update flake inputs, switch, then clean Nix store                   |
 
+## Herd updates
+
+Herd itself follows the standard `cfg-upgrade` workflow: Homebrew updates it on macOS, and the updated nixpkgs input supplies it on Linux. These are the latest versions available from each package manager, which can lag upstream releases. A plain `nix-switch` does not update Homebrew or `flake.lock`; do not use `herdr update` for these package-manager-owned installs.
+
+On every switch, `modules/herdr.nix` checks GitHub's latest stable release for Navigator and, where enabled, Heeler. It installs the release tag only when that source/tag is not already enabled. Plugin manifest versions can differ from repository release tags, so activation compares the source tag rather than a hard-coded plugin version. Plugins no longer follow fixed pins or development branches. Release checks require network access; lookup or installation failures fail activation rather than silently keeping an outdated plugin. The `herdr` flake check tests this behavior with mocked upstream responses.
+
+Package updates leave compatible running Herd servers in place. Reopen Herd to use the updated client; restart a session only when you are ready to pick up server-side changes.
+
 ## Herd phone access (Heeler + NetBird)
 
-[Heeler](https://github.com/ZingerLittleBee/Heeler) is an iOS 18+ companion for Herd. It controls existing agents over SSH; no extra agent server or public port forwarding is needed. `personal-mac` enables `dotfiles.herdr.heeler.enable`; other hosts leave it off. `modules/herdr.nix` installs the plugin from the Heeler commit pinned there and skips installation when that commit is already enabled. Updating the pin is explicit; activation reconciles it rather than following `main`. Activation also binds the managed plugin manifest's runtime scripts to an absolute Node executable: Ghostty starts Herd directly without the interactive shell's Homebrew PATH. This is a local manifest adjustment, not a change to upstream JavaScript or credentials.
+[Heeler](https://github.com/ZingerLittleBee/Heeler) is an iOS 18+ companion for Herd. It controls existing agents over SSH; no extra agent server or public port forwarding is needed. `personal-mac` enables `dotfiles.herdr.heeler.enable`; other hosts leave it off. Activation also binds the managed plugin manifest's runtime scripts to an absolute Node executable: Ghostty starts Herd directly without the interactive shell's Homebrew PATH. This is a local manifest adjustment, not a change to upstream JavaScript or credentials.
 
 ### One-time setup
 
@@ -178,12 +186,12 @@ If pairing fails, check NetBird connectivity/policies, Remote Login, the selecte
 
 ## Pi maintenance
 
-Pi deliberately uses a floating npm installation under `~/.npm-global`. Activation installs the core only when its executable is missing; switching a host or updating flake inputs does not upgrade an existing Pi installation. Extension sources in `modules/pi.nix` are also unversioned. Pi 1.0.1 and later do not pin transitive dependencies in the published npm package.
+Pi uses the upstream managed installer from `https://pi.dev/install.sh`, which pins core dependencies under `~/.pi/agent/install` and exposes `pi` through `~/.local/bin/pi`. Activation installs only when that executable is missing. On the first switch after migration, the installer verifies the managed release before removing the old npm copy from `~/.npm-global`; configuration, credentials, sessions, and extensions under `~/.pi/agent` remain in place. Later switches and flake updates do not upgrade an existing Pi installation. Extension sources in `modules/pi.nix` remain unversioned.
 
 Update the core and extensions explicitly:
 
 ```bash
-NPM_CONFIG_PREFIX="$HOME/.npm-global" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+pi update
 pi --version
 pi update --extensions
 # Or update one declared extension:
@@ -192,7 +200,7 @@ pi list
 npm list --prefix "$HOME/.pi/agent/npm" --depth=0
 ```
 
-Use npm for the core rather than migrating to the managed installer suggested by `pi update`. Package updates reconcile installed resources without changing their declarations. Add or remove declarations in `modules/pi.nix`, not through `pi install`, `pi remove`, or `pi config`, which write Home Manager-owned settings. Run the repository checks before switching changed generated settings or MCP wiring. Restart Pi after package updates or changes to subagent `disabledFeatures`; static permission configuration is symlinked from `config/pi/permission-system.json`.
+Use `pi update` for the managed core and `pi update --extensions` for extensions. Package updates reconcile installed resources without changing their declarations. Add or remove declarations in `modules/pi.nix`, not through `pi install`, `pi remove`, or `pi config`, which write Home Manager-owned settings. Run the repository checks before switching changed generated settings or MCP wiring. Restart Pi after package updates or changes to subagent `disabledFeatures`; static permission configuration is symlinked from `config/pi/permission-system.json`.
 
 The restore policy asks before worktree-discarding restores. Its narrow staging-only exceptions require an explicit `--` immediately after `--staged` or `-S`, so subsequent pathspecs cannot enable worktree restoration:
 
@@ -237,7 +245,7 @@ On first macOS bootstrap, `bootstrap.sh` invokes the repository's generated `boo
 - Darwin hosts with `dotfiles.kubernetes.enable` install the `modify-secret` krew plugin when missing. This depends on upstream network availability.
 - Claude and pi MCP servers may launch pinned `npx`/`uvx` packages declared in `modules/mcp-servers.nix`.
 - Claude permissions intentionally allow broad research and platform tooling. Treat `config/claude/settings.json` as the trust boundary for tool access.
-- pi is installed by `npm install -g` into the repo-managed `~/.npm-global` prefix during activation; provider auth and MCP OAuth tokens remain runtime state under `~/.pi/` and are not managed by Nix.
+- pi activation executes the upstream managed installer from `https://pi.dev/install.sh` without interactive prompts when `~/.local/bin/pi` is absent. The installer uses its release lockfile and removes a discovered legacy npm installation only after verifying the new release. Provider auth and MCP OAuth tokens remain runtime state under `~/.pi/` and are not managed by Nix.
 
 ## Local machine files (untracked)
 

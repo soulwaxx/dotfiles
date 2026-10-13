@@ -149,7 +149,7 @@
       "secrets/*": "deny",
       "*/secrets/*": "deny",
       "~/.secrets": "deny",
-      "~/.ssh/*": "deny",
+      "~/.ssh/*": "ask",
       "~/.aws/credentials": "deny",
       "~/.pi/agent/auth.json": "deny",
       "mcp-auth.json": "deny",

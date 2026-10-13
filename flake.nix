@@ -30,6 +30,7 @@
 
   outputs =
     {
+      self,
       nixpkgs,
       nix-darwin,
       home-manager,
@@ -244,6 +245,86 @@
       treefmtWrapperFor = pkgs: (treefmt-nix.lib.evalModule pkgs ./treefmt.nix).config.build.wrapper;
 
       mkChecks = pkgs: {
+        herdr =
+          let
+            hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
+              darwinHosts // linuxHosts
+            );
+            fixtures = pkgs.writeText "herdr-fixtures.json" (
+              builtins.toJSON (
+                lib.mapAttrs (
+                  hostname: host:
+                  let
+                    home =
+                      if lib.hasSuffix "darwin" host.system then
+                        self.darwinConfigurations.${hostname}.config.home-manager.users.${host.username}
+                      else
+                        self.homeConfigurations.${hostname}.config;
+                  in
+                  {
+                    # Test the generated shell with mocked external commands,
+                    # without building Herd or the plugin build toolchains.
+                    script = builtins.unsafeDiscardStringContext home.home.activation.herdrIntegrations.data;
+                    heeler = home.dotfiles.herdr.heeler.enable;
+                  }
+                ) hosts
+              )
+            );
+          in
+          pkgs.runCommand "check-herdr"
+            {
+              nativeBuildInputs = [
+                pkgs.coreutils
+                pkgs.jq
+                pkgs.gnused
+              ];
+            }
+            ''
+              ${pkgs.python3}/bin/python3 ${./tests/herdr.py} ${fixtures} ${pkgs.bash}/bin/bash
+              touch $out
+            '';
+        pi-subagents =
+          let
+            hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
+              darwinHosts // linuxHosts
+            );
+            fixtures = pkgs.writeText "pi-subagent-fixtures.json" (
+              builtins.toJSON (
+                lib.mapAttrs (
+                  hostname: host:
+                  let
+                    home =
+                      if lib.hasSuffix "darwin" host.system then
+                        self.darwinConfigurations.${hostname}.config.home-manager.users.${host.username}
+                      else
+                        self.homeConfigurations.${hostname}.config;
+                    files = home.home.file;
+                  in
+                  {
+                    settings = files.".pi/agent/settings.json".source;
+                    agents = lib.mapAttrs (_: file: file.source) (
+                      lib.filterAttrs (name: _: lib.hasPrefix ".pi/agent/agents/" name) files
+                    );
+                    models = home.dotfiles.pi.subagentModels;
+                    vaultModel = home.dotfiles.pi.vaultAgentModel;
+                    darwin = lib.hasSuffix "darwin" host.system;
+                    runtimeTarget = files.".pi/agent/subagents.json".source;
+                    instructionsTarget = files.".pi/agent/APPEND_SYSTEM.md".source;
+                  }
+                ) hosts
+              )
+            );
+          in
+          pkgs.runCommand "check-pi-subagents" { } ''
+            ${pkgs.python3}/bin/python3 ${./tests/pi-subagents.py} \
+              ${fixtures} ${./config/pi/subagents.json} ${./config/pi/subagents.md}
+            touch $out
+          '';
+        pi-installer = pkgs.runCommand "check-pi-installer" { } ''
+          ${pkgs.python3}/bin/python3 ${./tests/pi-installer.py} \
+            ${pkgs.nodejs_24}/bin/node ${./config/pi/run-installer.cjs} ${pkgs.bash}/bin/bash
+          touch $out
+        '';
         bootstrap =
           pkgs.runCommand "check-bootstrap"
             {

@@ -73,6 +73,8 @@ in
     basePackages
     ++ cloudPackages
     ++ cliPackages
+    # Herd copies selections through wl-copy on Wayland desktops.
+    ++ lib.optionals config.dotfiles.linux.enableDesktop [ pkgs.wl-clipboard ]
     ++ lib.optionals config.dotfiles.kubernetes.enable kubernetesPackages
     ++ devToolchainPackages;
 }

@@ -16,8 +16,8 @@
         provider = "openai";
         id = "gpt-6-luna";
       };
-      # GPT sessions are limited to a 272K window; compact well before it.
-      compactAfterTokens = 220000;
+      # Source-count fallback; native compaction targets 220K of the 272K window.
+      compactAfterTokens = 272000;
     };
   };
 }

@@ -76,7 +76,7 @@ in
       vaultAgentModel = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Pi model for the packaged Obsidian vault specialist on this host.";
+        description = "Pi model for the Obsidian vault specialist on this host.";
       };
 
       observationalMemory = {
@@ -96,8 +96,8 @@ in
 
         compactAfterTokens = lib.mkOption {
           type = lib.types.ints.positive;
-          default = 300000;
-          description = "Source-entry token threshold for pi-observational-memory proactive compaction; keep it below the session model's context window.";
+          default = 1000000;
+          description = "Estimated source-entry fallback threshold for pi-observational-memory; native context-based compaction normally runs first.";
         };
       };
 

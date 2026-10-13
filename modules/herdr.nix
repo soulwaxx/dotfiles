@@ -5,8 +5,6 @@
   ...
 }:
 let
-  # Heeler v0.1.13 ships plugin 0.6.0; pin the checkout as well as the version.
-  heelerRef = "f98028b426f927feb75dc263dbf659e92fc57657";
   heelerNode =
     if pkgs.stdenv.hostPlatform.isDarwin then
       "/opt/homebrew/opt/node@24/bin/node"
@@ -35,35 +33,44 @@ in
           exit 1
         fi
 
-        if ! ${herdrBin} plugin list --plugin herdr-navigator --json \
-          | ${pkgs.jq}/bin/jq -e '.result.plugins | any(.version == "0.3.3" and .enabled)' >/dev/null; then
-          run env PATH="${lib.makeBinPath [ pkgs.git ]}:${
-            if pkgs.stdenv.hostPlatform.isDarwin then
-              "/opt/homebrew/bin"
-            else
-              lib.makeBinPath [
-                pkgs.cargo
-                pkgs.rustc
-                pkgs.stdenv.cc
-              ]
-          }:$PATH" \
-            ${herdrBin} plugin install thanhdat77/herdr-navigator --ref v0.3.3 --yes
-        fi
+        # Resolve stable releases at activation time, not during Nix evaluation.
+        # Plugin manifest versions need not match repository release tags (Heeler).
+        update_herdr_plugin() {
+          local plugin="$1" repo="$2" subdir="''${3:-}" ref
+          ref=$(${pkgs.curl}/bin/curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 60 \
+            "https://api.github.com/repos/$repo/releases/latest" \
+            | ${pkgs.jq}/bin/jq -er '.tag_name | select(type == "string" and length > 0)')
 
-        ${lib.optionalString config.dotfiles.herdr.heeler.enable ''
-          if ! ${herdrBin} plugin list --plugin heeler --json \
-            | ${pkgs.jq}/bin/jq -e '.result.plugins | any(.version == "0.6.0" and .enabled and .source.resolved_commit == "${heelerRef}")' >/dev/null; then
+          if ! ${herdrBin} plugin list --plugin "$plugin" --json \
+            | ${pkgs.jq}/bin/jq -e --arg ref "$ref" --arg repo "$repo" --arg subdir "$subdir" '
+              .result.plugins | any(.enabled and .source.kind == "github"
+                and (.source.owner + "/" + .source.repo) == $repo
+                and (.source.subdir // "") == $subdir
+                and .source.requested_ref == $ref)
+            ' >/dev/null; then
             run env PATH="${lib.makeBinPath [ pkgs.git ]}:${
               if pkgs.stdenv.hostPlatform.isDarwin then
                 lib.concatStringsSep ":" config.dotfiles.env.darwinPackageBinDirs
               else
-                lib.makeBinPath [ pkgs.nodejs_24 ]
+                lib.makeBinPath [
+                  pkgs.cargo
+                  pkgs.rustc
+                  pkgs.stdenv.cc
+                  pkgs.nodejs_24
+                ]
             }:$PATH" \
-              ${herdrBin} plugin install ZingerLittleBee/Heeler/plugin --ref ${heelerRef} --yes
+              ${herdrBin} plugin install "$repo''${subdir:+/$subdir}" --ref "$ref" --yes
           fi
+        }
+
+        update_herdr_plugin herdr-navigator thanhdat77/herdr-navigator
+
+        ${lib.optionalString config.dotfiles.herdr.heeler.enable ''
+          update_herdr_plugin heeler ZingerLittleBee/Heeler plugin
 
           # Ghostty launches Herd directly, without the interactive shell PATH.
-          # Bind the pinned plugin's runtime scripts to Node; refresh on every
+          # Bind the plugin's runtime scripts to Node; refresh on every
           # activation so reinstalling or changing the Nix Node path is safe.
           heelerManifest=$(${herdrBin} plugin list --plugin heeler --json \
             | ${pkgs.jq}/bin/jq -er '.result.plugins[] | select(.plugin_id == "heeler") | .manifest_path')
