@@ -11,7 +11,6 @@ let
   isWork = config.dotfiles.claude.enableWorkIntegrations;
   awsMcp = config.dotfiles.aws.mcp;
   subagentModels = config.dotfiles.pi.subagentModels;
-  observationalMemory = config.dotfiles.pi.observationalMemory;
   mkCurlInstaller = import ./lib/mk-curl-installer.nix { inherit lib pkgs; };
 
   mkPiAgent =
@@ -24,97 +23,60 @@ let
       ${prompt}
     '';
 
+  # pi-subagents agent definitions. Builtin agents are disabled in settings;
+  # on macOS the obsidian-second-brain package also ships its own vault agent.
   piAgentFiles = {
     ".pi/agent/agents/scout.md" = {
       source = mkPiAgent "scout" (builtins.readFile ../config/shared/agents/scout.md) ''
         description: Use for read-only codebase investigation that traces behavior, locates relevant files, callers, and tests, and returns cited evidence.
+        advertise: true
         tools: read, bash, grep, find, ls
         model: ${subagentModels.scout}
         thinking: low
-        max_turns: 0
-        run_in_background: true
-        prompt_mode: replace
-        inherit_context: false
-        locked: model, thinking, max_turns, inherit_context
+        async: true
+        inheritProjectContext: true
+        inheritGlobalContext: true
+        acceptanceRole: read-only
       '';
       force = true;
     };
     ".pi/agent/agents/reviewer.md" = {
+      # pi-subagents never injects skills marked disable-model-invocation (all
+      # shared skills are explicit-only), so point the reviewer at the file.
       source =
         mkPiAgent "reviewer"
           (
             ''
-              Before reviewing, read ${config.home.homeDirectory}/.pi/agent/skills/code-review/SKILL.md and follow it as the review contract; this runner does not preload skills.
+              Before reviewing, read ${config.home.homeDirectory}/.pi/agent/skills/code-review/SKILL.md and follow it as the review contract.
 
             ''
             + builtins.readFile ../config/shared/agents/reviewer.md
           )
           ''
             description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
+            advertise: true
             tools: read, bash, grep, find, ls
             model: ${subagentModels.reviewer}
             thinking: high
-            max_turns: 0
-            run_in_background: true
-            prompt_mode: replace
-            inherit_context: false
-            locked: model, thinking, max_turns, inherit_context
+            async: true
+            inheritProjectContext: true
+            inheritGlobalContext: true
+            acceptanceRole: read-only
           '';
       force = true;
     };
     ".pi/agent/agents/worker.md" = {
       source = mkPiAgent "worker" (builtins.readFile ../config/shared/agents/worker.md) ''
         description: Use for an already well-scoped implementation task with clear success criteria; make minimal edits and run focused verification.
+        advertise: true
         tools: read, bash, edit, write, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
         model: ${subagentModels.worker}
         thinking: high
-        max_turns: 0
-        run_in_background: true
-        prompt_mode: replace
-        inherit_context: false
-        locked: model, thinking, max_turns, inherit_context
+        async: true
+        inheritProjectContext: true
+        inheritGlobalContext: true
+        acceptanceRole: writer
       '';
-      force = true;
-    };
-  }
-  //
-    lib.genAttrs
-      (map (name: ".pi/agent/agents/${name}.md") [
-        "Explore"
-        "Plan"
-        "general-purpose"
-      ])
-      (_: {
-        text = ''
-          ---
-          enabled: false
-          ---
-        '';
-        force = true;
-      })
-  // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-    ".pi/agent/agents/obsidian-second-brain.wiki-vault.md" = {
-      source =
-        mkPiAgent "obsidian-second-brain.wiki-vault"
-          ''
-            Before vault work, read these installed package files in order:
-            1. ${config.home.homeDirectory}/.pi/agent/npm/node_modules/@soulwaxx/obsidian-second-brain/agents/pi/wiki-vault.md
-            2. ${config.home.homeDirectory}/.pi/agent/npm/node_modules/@soulwaxx/obsidian-second-brain/skills/wiki/SKILL.md
-
-            Follow the specialist's instructions and the wiki skill, including guard, validation, and Obsidian Git ownership rules. Resolve the configured vault independently of the caller's working directory. Do not delegate. Keep one wiki writer at a time. If either instruction file is missing, stop and report the blocker rather than proceeding without it.
-          ''
-          ''
-            description: Work in the configured Obsidian vault using the packaged specialist contract and wiki skill.
-            tools: read, bash, edit, write, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
-            ${lib.optionalString (
-              config.dotfiles.pi.vaultAgentModel != null
-            ) "model: ${config.dotfiles.pi.vaultAgentModel}"}
-            max_turns: 0
-            run_in_background: true
-            prompt_mode: replace
-            inherit_context: false
-            locked: model, thinking, max_turns, inherit_context
-          '';
       force = true;
     };
   };
@@ -123,11 +85,15 @@ let
     "npm:@gotgenes/pi-permission-system"
     "npm:@gotgenes/pi-anthropic-auth"
     "npm:pi-web-access"
-    "npm:@gotgenes/pi-subagents"
+    {
+      source = "npm:pi-subagents";
+      extensions = [ "index.js" ];
+      skills = [ "skills/pi-subagents/SKILL.md" ];
+      prompts = [ ];
+    }
     "npm:@juicesharp/rpiv-todo"
     "npm:@juicesharp/rpiv-ask-user-question"
     "npm:pi-powerline-footer"
-    "npm:pi-observational-memory"
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
     "npm:@soulwaxx/obsidian-second-brain"
@@ -137,7 +103,6 @@ let
     defaultProvider = config.dotfiles.pi.defaultProvider;
     defaultModel = config.dotfiles.pi.defaultModel;
     defaultThinkingLevel = "high";
-    # Native compaction measures context, not the memory extension's source count.
     # Keep ordinary reserves for unlisted models, including smaller subagents.
     compaction = {
       enabled = true;
@@ -192,14 +157,18 @@ let
       editorStart = null;
       editorEnd = null;
     };
-    # Higher source-count fallback; native context targets should normally fire first.
-    # Background observations and reflections remain enabled.
-    "observational-memory" = {
-      compactAfterTokensMode = "calibrated";
-      inherit (observationalMemory) compactAfterTokens;
-      model = {
-        inherit (observationalMemory.model) provider id;
-        thinking = "low";
+    # pi-subagents settings-level keys; runtime limits live in config/pi/subagents.json.
+    # Only the agents declared in this module (plus the macOS vault package agent) are used.
+    subagents = {
+      disableBuiltins = true;
+    }
+    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+      # The package agent already inherits project context; add the global AGENTS.md.
+      agentOverrides."obsidian-second-brain.wiki-vault" = {
+        inheritGlobalContext = true;
+      }
+      // lib.optionalAttrs (config.dotfiles.pi.vaultAgentModel != null) {
+        model = config.dotfiles.pi.vaultAgentModel;
       };
     };
   };
@@ -298,7 +267,7 @@ in
       # Extension configs — static JSON, symlinked.
       ".pi/agent/extensions/pi-permission-system/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
-      ".pi/agent/subagents.json".source =
+      ".pi/agent/extensions/subagent/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.json";
       ".pi/agent/APPEND_SYSTEM.md".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.md";

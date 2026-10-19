@@ -117,7 +117,6 @@
   "terraform.validation.enableEnhancedValidation": true,
   "window.confirmSaveUntitledWorkspace": false,
   "window.titleBarStyle": "custom",
-  "workbench.activityBar.orientation": "vertical",
   "workbench.editor.labelFormat": "default",
   "workbench.iconTheme": "material-icon-theme",
   "workbench.startupEditor": "none",

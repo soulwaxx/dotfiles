@@ -1,5 +1,4 @@
 # VS Code is installed via Homebrew on macOS and Nix on desktop Linux hosts.
-# Settings mirror Cursor, without its product-specific options.
 {
   pkgs,
   lib,

@@ -1,6 +1,5 @@
 {
   imports = [
-    ../cursor.nix
     ../vscode.nix
     ../ghostty.nix
     ../docker-cli.nix

@@ -1,15 +1,26 @@
 {
-  "maxConcurrent": 4,
-  "defaultMaxTurns": 0,
-  "wrapUpTurns": 2,
-  "consumedSessionRetentionMinutes": 10,
-  "unconsumedSessionRetentionMinutes": 720,
-  "abortAllOnInterrupt": true,
-  "midRunUpdates": true,
-  "excludedExtensionPackages": [
-    "npm:@juicesharp/rpiv-todo",
-    "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:pi-powerline-footer",
-    "npm:pi-observational-memory"
-  ]
+  "disabledFeatures": [
+    "agent-management",
+    "watchdog",
+    "panes",
+    "missions",
+    "lane-management",
+    "spawn-budget-grants",
+    "preflight",
+    "lane-metadata",
+    "gates",
+    "usage-budgets",
+    "tool-budgets",
+    "control-overrides",
+    "extension-bindings",
+    "external-machines",
+    "workflow-scripts"
+  ],
+  "scheduledRuns": {
+    "enabled": false
+  },
+  "missions": {
+    "enabled": false
+  },
+  "maxSubagentDepth": 1
 }

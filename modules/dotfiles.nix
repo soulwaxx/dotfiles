@@ -79,28 +79,6 @@ in
         description = "Pi model for the Obsidian vault specialist on this host.";
       };
 
-      observationalMemory = {
-        model = {
-          provider = lib.mkOption {
-            type = lib.types.str;
-            default = "anthropic";
-            description = "Provider of the pi-observational-memory worker model.";
-          };
-
-          id = lib.mkOption {
-            type = lib.types.str;
-            default = "claude-haiku-5-5";
-            description = "Model id of the pi-observational-memory worker model.";
-          };
-        };
-
-        compactAfterTokens = lib.mkOption {
-          type = lib.types.ints.positive;
-          default = 1000000;
-          description = "Estimated source-entry fallback threshold for pi-observational-memory; native context-based compaction normally runs first.";
-        };
-      };
-
       subagentModels = {
         scout = lib.mkOption {
           type = lib.types.str;
@@ -159,7 +137,6 @@ in
         description = "nixGL wrapper used for Nix-built OpenGL applications on non-NixOS Linux desktops.";
       };
     };
-    cursor.enable = lib.mkEnableOption "Cursor settings symlink on Darwin work hosts";
   };
   config = {
     dotfiles = {

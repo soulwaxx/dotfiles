@@ -10,6 +10,5 @@
     };
     claude.enableWorkIntegrations = true;
     kubernetes.enable = true;
-    cursor.enable = true;
   };
 }

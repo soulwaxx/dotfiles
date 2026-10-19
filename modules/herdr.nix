@@ -50,8 +50,9 @@ in
                 and .source.requested_ref == $ref)
             ' >/dev/null; then
             run env PATH="${lib.makeBinPath [ pkgs.git ]}:${
+              # Home Manager's activation PATH omits /usr/bin; cargo needs Apple's cc linker.
               if pkgs.stdenv.hostPlatform.isDarwin then
-                lib.concatStringsSep ":" config.dotfiles.env.darwinPackageBinDirs
+                lib.concatStringsSep ":" (config.dotfiles.env.darwinPackageBinDirs ++ [ "/usr/bin" ])
               else
                 lib.makeBinPath [
                   pkgs.cargo

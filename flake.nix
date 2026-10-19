@@ -308,7 +308,7 @@
                     models = home.dotfiles.pi.subagentModels;
                     vaultModel = home.dotfiles.pi.vaultAgentModel;
                     darwin = lib.hasSuffix "darwin" host.system;
-                    runtimeTarget = files.".pi/agent/subagents.json".source;
+                    runtimeTarget = files.".pi/agent/extensions/subagent/config.json".source;
                     instructionsTarget = files.".pi/agent/APPEND_SYSTEM.md".source;
                   }
                 ) hosts
