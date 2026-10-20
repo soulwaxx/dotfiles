@@ -20,7 +20,7 @@ in
       aws = {
         disabled = false;
         symbol = "☁ ";
-        style = "orange";
+        style = "peach";
         format = "[$symbol$profile]($style)";
       };
 
@@ -31,7 +31,7 @@ in
       };
 
       directory = {
-        style = "bold purple";
+        style = "bold mauve";
         truncation_length = 3;
         truncate_to_repo = false;
         truncation_symbol = "…/";

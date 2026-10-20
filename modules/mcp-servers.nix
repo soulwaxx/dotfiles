@@ -72,7 +72,6 @@ in
         args = [
           "-y"
           "kubernetes-mcp-server@latest"
-          "--read-only"
         ];
         env = { };
       };

@@ -54,7 +54,7 @@ in
     enable = true;
     enableCompletion = true;
     autosuggestion.enable = true;
-    autosuggestion.highlight = "fg=${p.comment}";
+    autosuggestion.highlight = "fg=${p.overlay0}";
     syntaxHighlighting.enable = false; # We use zsh-patina, activated below
 
     history = {
@@ -228,10 +228,9 @@ in
         # Not a zsh default: without this, file completion behaves as if there
         # were a `*` between consecutive slashes.
         zstyle ':completion:*' squeeze-slashes true
-        # Ride the terminal's 16-color ANSI palette like programs.fzf does, so the
-        # completion menu follows Ghostty's active theme and the background stays
-        # transparent. bg+:8 adds a subtle selection tint via the ANSI surface slot.
-        zstyle ':fzf-tab:*' fzf-flags --color=16 --color=bg+:8
+        # fzf-tab clears FZF_DEFAULT_OPTS, so pass the shared Catppuccin colors
+        # explicitly to match programs.fzf.
+        zstyle ':fzf-tab:*' fzf-flags '${config.dotfiles.theme.current.fzfColors}'
 
         # Preview directory contents in Tab menus, reusing the same tree command
         # as the zoxide and fzf directory pickers.

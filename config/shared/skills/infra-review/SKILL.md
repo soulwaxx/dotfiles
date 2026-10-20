@@ -1,6 +1,5 @@
 ---
 name: infra-review
-disable-model-invocation: true
 description: Review infrastructure changes for operational, security, reliability, cost, and migration risk. Use when asked for any kind of infrastructure review — and proactively when the user shares Terraform, Kubernetes manifests, Helm charts, GitOps config, CI/CD pipelines, or AWS CDK and asks 'what do you think', 'is this ok', or 'does this look right', even without the word 'review'.
 ---
 

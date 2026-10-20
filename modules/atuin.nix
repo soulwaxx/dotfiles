@@ -1,5 +1,9 @@
+{ config, ... }:
 let
+  p = config.dotfiles.theme.current.palette;
+  themeName = "catppuccin-mocha-mauve";
   atuinConfig = {
+    theme.name = themeName;
     command_chaining = true;
     dialect = "uk";
     enter_accept = true;
@@ -36,5 +40,19 @@ in
     enable = true;
     enableZshIntegration = true;
     settings = atuinConfig;
+    # Official catppuccin/atuin Mocha theme with the Mauve accent.
+    themes.${themeName} = {
+      theme.name = themeName;
+      colors = {
+        AlertInfo = p.green;
+        AlertWarn = p.peach;
+        AlertError = p.red;
+        Annotation = p.mauve;
+        Base = p.text;
+        Guidance = p.overlay2;
+        Important = p.red;
+        Title = p.mauve;
+      };
+    };
   };
 }

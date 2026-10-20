@@ -83,6 +83,31 @@ If a service is NOT found in any `aws-icons-*.md` reference file, do not guess a
 sketch=0;outlineConnect=0;fontColor=#232F3E;fillColor=#232F3E;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.general_AWScloud
 ```
 
+## Broken icons — do not use
+
+These render as empty or black squares:
+
+- `resIcon=mxgraph.aws4.dynamodb_table`, `resIcon=mxgraph.aws4.dynamodb_stream` — use `resIcon=mxgraph.aws4.dynamodb` with a descriptive label.
+- `resIcon=mxgraph.aws4.general_saml_token` — renders black.
+- `resIcon=mxgraph.aws4.endpoint` — may not render; use the standalone `shape=mxgraph.aws4.endpoints` for VPC endpoints.
+- `resIcon=mxgraph.aws4.kinesis_data_streams` — unreliable.
+
+External systems → `shape=mxgraph.aws4.traditional_server`. Browsers/clients → `shape=mxgraph.aws4.client`.
+
+## Renamed-service gotchas
+
+draw.io stencil names do not always match current AWS service names; renamed services keep their legacy names.
+
+| AWS service | draw.io name | Note |
+|---|---|---|
+| Amazon OpenSearch Service | `elasticsearch_service` | Renamed from Elasticsearch in 2021 |
+| Amazon EventBridge | `eventbridge` | Was CloudWatch Events |
+| VPC Peering | `peering` | Resource-level: `shape=mxgraph.aws4.peering;strokeColor=none`. NOT `vpc_peering` or `peering_connection` (blank squares) |
+| Amazon MSK | `managed_streaming_for_kafka` | NOT `msk` (blank square) |
+| IAM Identity Center | `single_sign_on` | NOT `iam_identity_center` (blank square) |
+
+If an icon renders as an empty box, the stencil name is wrong. Canonical names are in draw.io's `src/main/webapp/js/diagramly/sidebar/Sidebar-AWS4.js` (`Sidebar-AWS3D.js` for the 3D library, whose names are camelCase, and `Sidebar-AlliedTelesis.js` for generic hardware).
+
 ## PNG Export Background Fix
 Place a light gray rectangle covering the entire diagram as background layer:
 ```

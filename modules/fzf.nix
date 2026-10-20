@@ -8,11 +8,9 @@
     # with a TTY guard instead.
     enableZshIntegration = false;
     defaultOptions = [
-      # Ride the terminal's 16-color ANSI palette (Ghostty's Catppuccin Mocha theme
-      # populates slots 0-15) instead of hardcoded hex, so fzf follows the active
-      # terminal theme without a rebuild. This base scheme keeps the background at
-      # the terminal default; append e.g. `bg+:8` for a themed selection tint.
-      "--color=16"
+      # Catppuccin Mocha colors from modules/theme/default.nix. zoxide's picker
+      # inherits them through FZF_DEFAULT_OPTS.
+      config.dotfiles.theme.current.fzfColors
       "--height 40%"
       "--border"
       "--preview '([[ -f {} ]] && (bat --style=numbers --color=always {} || head -20 {})) || ([[ -d {} ]] && eza -lagh ${config.dotfiles.eza.baseFlags} --color=always {}) || echo {}'"

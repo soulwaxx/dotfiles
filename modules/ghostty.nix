@@ -19,8 +19,8 @@ in
 
     settings = {
       theme = config.dotfiles.theme.current.ghostty;
-      background = config.dotfiles.theme.current.palette.background;
-      background-opacity = 0.90;
+      background = config.dotfiles.theme.current.palette.base;
+      background-opacity = 1.0;
 
       command =
         if pkgs.stdenv.hostPlatform.isDarwin then
@@ -71,6 +71,9 @@ in
           ];
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+      # Map theme colors onto the Display P3 gamut instead of sRGB. Not
+      # hex-accurate, but avoids the washed-out look on wide-gamut Mac displays.
+      window-colorspace = "display-p3";
       macos-titlebar-style = "transparent";
       macos-option-as-alt = "left";
       bell-features = "system";

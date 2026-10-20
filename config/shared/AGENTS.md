@@ -2,17 +2,17 @@
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+Use judgment: keep the process proportional to the task's risk and scope.
 
 ## 1. Think Before Coding
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+**Make consequential assumptions visible. Ask when the answer matters.**
 
 Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+- For low-risk ambiguity, state a reasonable assumption and proceed.
+- Ask when the answer changes scope, safety, correctness, or a hard-to-reverse decision.
+- Inspect available evidence before asking the user for facts you can verify.
+- If a simpler approach meets the goal, prefer it. Explain material tradeoffs.
 
 ## 2. Simplicity First
 
@@ -40,25 +40,22 @@ When your changes create orphans:
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
 
+If the evidence does not support a change, making no change is a valid result; say so.
+
 The test: Every changed line should trace directly to the user's request.
 
 ## 4. Goal-Driven Execution
 
-**Define success criteria. Loop until verified.**
+**Define success criteria. Verify the result with focused checks.**
 
 Transform tasks into verifiable goals:
 - "Add validation" → "Write tests for invalid inputs, then make them pass"
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
 
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
+Show a brief plan when it helps coordination or makes complex work easier to follow. Keep routine task planning internal.
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+Run the checks relevant to the change and follow repository verification gates. Retry a failed check when new evidence or a concrete fix justifies it. Stop and report the blocker when verification is unavailable or repeated attempts make no progress.
 
 ## 5. Communication
 
@@ -71,8 +68,8 @@ Language:
 Structure:
 - Start with the bottom line: the answer or current status in 1-2 sentences.
 - Then details, as short paragraphs, bullets, or headers. No walls of text.
-- End with the next step: what the user needs to do or decide, or say that nothing is needed.
-- In multi-step work, include a short status: done, in progress, remaining.
+- End with a next step when action or a decision is needed.
+- For longer work, report meaningful progress and blockers rather than narrating routine steps.
 
 Length:
 - Short by default. Go longer only when the task needs it.

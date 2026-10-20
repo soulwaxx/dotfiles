@@ -118,7 +118,7 @@ in
         }
       '';
 
-      home.activation.claudeObsidianVaultCheck = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      home.activation.obsidianSecondBrainVaultCheck = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         if [[ ! -d ${lib.escapeShellArg cfg.vaultPath} ]]; then
           echo "WARN: brain vault path '${cfg.vaultPath}' does not exist on this host." >&2
         fi

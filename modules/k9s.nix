@@ -149,15 +149,15 @@ lib.mkIf config.dotfiles.kubernetes.enable {
   home.file."${k9sConfigDir}/skins/${k9sSkin}.yaml".text = ''
     k9s:
       body:
-        fgColor: '${p.foreground}'
+        fgColor: '${p.text}'
         bgColor: 'default'
-        logoColor: '${p.purple}'
+        logoColor: '${p.mauve}'
       prompt:
-        fgColor: '${p.foreground}'
+        fgColor: '${p.text}'
         bgColor: 'default'
         suggestColor: '${p.blue}'
       help:
-        fgColor: '${p.foreground}'
+        fgColor: '${p.text}'
         bgColor: 'default'
         sectionColor: '${p.green}'
         keyColor: '${p.blue}'
@@ -170,44 +170,44 @@ lib.mkIf config.dotfiles.kubernetes.enable {
           counterColor: '${p.yellow}'
           filterColor: '${p.green}'
         border:
-          fgColor: '${p.purple}'
+          fgColor: '${p.mauve}'
           focusColor: '${p.lavender}'
         menu:
-          fgColor: '${p.foreground}'
+          fgColor: '${p.text}'
           keyColor: '${p.blue}'
           numKeyColor: '${p.maroon}'
         crumbs:
-          fgColor: '${p.background}'
+          fgColor: '${p.base}'
           bgColor: '${p.maroon}'
           activeColor: '${p.flamingo}'
         status:
           newColor: '${p.blue}'
           modifyColor: '${p.lavender}'
           addColor: '${p.green}'
-          pendingColor: '${p.orange}'
+          pendingColor: '${p.peach}'
           errorColor: '${p.red}'
-          highlightColor: '${p.cyan}'
-          killColor: '${p.purple}'
-          completedColor: '${p.comment}'
+          highlightColor: '${p.sky}'
+          killColor: '${p.mauve}'
+          completedColor: '${p.overlay0}'
       info:
-        fgColor: '${p.orange}'
-        sectionColor: '${p.foreground}'
+        fgColor: '${p.peach}'
+        sectionColor: '${p.text}'
       views:
         table:
-          fgColor: '${p.foreground}'
+          fgColor: '${p.text}'
           bgColor: 'default'
-          cursorFgColor: '${p.currentline}'
-          cursorBgColor: '${p.surface}'
+          cursorFgColor: '${p.surface0}'
+          cursorBgColor: '${p.surface1}'
           markColor: '${p.rosewater}'
           header:
             fgColor: '${p.yellow}'
             bgColor: 'default'
-            sorterColor: '${p.cyan}'
+            sorterColor: '${p.sky}'
         xray:
-          fgColor: '${p.foreground}'
+          fgColor: '${p.text}'
           bgColor: 'default'
-          cursorColor: '${p.surface}'
-          cursorTextColor: '${p.background}'
+          cursorColor: '${p.surface1}'
+          cursorTextColor: '${p.base}'
           graphicColor: '${p.pink}'
         charts:
           bgColor: 'default'
@@ -221,17 +221,17 @@ lib.mkIf config.dotfiles.kubernetes.enable {
             - '${p.red}'
           resourceColors:
             cpu:
-              - '${p.purple}'
+              - '${p.mauve}'
               - '${p.blue}'
             mem:
               - '${p.yellow}'
-              - '${p.orange}'
+              - '${p.peach}'
         yaml:
           keyColor: '${p.blue}'
-          valueColor: '${p.foreground}'
+          valueColor: '${p.text}'
           colonColor: '${p.subtext0}'
         logs:
-          fgColor: '${p.foreground}'
+          fgColor: '${p.text}'
           bgColor: 'default'
           indicator:
             fgColor: '${p.lavender}'
@@ -241,11 +241,11 @@ lib.mkIf config.dotfiles.kubernetes.enable {
       dialog:
         fgColor: '${p.yellow}'
         bgColor: '${p.overlay2}'
-        buttonFgColor: '${p.background}'
+        buttonFgColor: '${p.base}'
         buttonBgColor: '${p.overlay1}'
-        buttonFocusFgColor: '${p.background}'
+        buttonFocusFgColor: '${p.base}'
         buttonFocusBgColor: '${p.pink}'
         labelFgColor: '${p.rosewater}'
-        fieldFgColor: '${p.foreground}'
+        fieldFgColor: '${p.text}'
   '';
 }

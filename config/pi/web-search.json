@@ -1,5 +1,6 @@
 {
   "workflow": "none",
+  "toolExposure": "deferred",
   "tools": {
     "sourceCheck": {
       "enabled": false

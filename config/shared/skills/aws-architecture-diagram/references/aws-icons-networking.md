@@ -36,7 +36,6 @@ fillColor: `#8C4FFF` | strokeColor: `none`
 | `internet_gateway` | Internet Gateway |
 | `nat_gateway` | NAT Gateway |
 | `vpc_virtual_private_cloud_vpc` | VPC |
-| `vpc_peering` | VPC Peering |
 | `vpc_traffic_mirroring` | Traffic Mirroring |
 | `edge_location` | Edge Location |
 | `download_distribution` | Download Distribution |
@@ -51,7 +50,6 @@ fillColor: `#8C4FFF` | strokeColor: `none`
 | `vpn_gateway` | VPN Gateway |
 | `vpn_connection` | VPN Connection |
 | `customer_gateway` | Customer Gateway |
-| `peering_connection` | Peering Connection |
 | `peering` | VPC Peering (renders glyph) |
 | `flow_logs` | VPC Flow Logs |
 | `transit_gateway_attachment` | Transit Gateway Attachment |

@@ -1,7 +1,7 @@
 ---
 name: writing-style
 disable-model-invocation: true
-description: Apply Andrea's prose style rules before drafting or revising any prose deliverable (ADRs, technical analyses, PR descriptions, Slack drafts, commit messages, release notes, documentation). Bans AI-tell vocabulary and constructions, sets structure limits and trade-off framing. Invoke BEFORE writing the draft, and re-check the finished draft against it. Not for code comments or direct conversational replies.
+description: "Apply Andrea's prose style to written deliverables: structure, wording, clarity, and trade-off framing. Check before drafting and after revision. Excludes code comments and direct chat replies."
 ---
 
 # Writing style

@@ -31,7 +31,7 @@ def plugin(plugin_id, repo, ref, enabled=True, subdir="", manifest_path=""):
 
 
 def run_case(
-    fixture, initial=(), releases=None, *, curl_failure=False, invalid_release_json=False, install_failure=False
+    fixture, initial=(), releases=None, *, curl_failure=False, invalid_redirect=False, install_failure=False
 ):
     with tempfile.TemporaryDirectory(prefix="herdr-test-") as tmp:
         root = Path(tmp)
@@ -66,11 +66,12 @@ def run_case(
             "import json, os, sys\n"
             "args=sys.argv[1:]\n"
             "url=args[-1]\n"
-            "repo=url.split('/repos/',1)[1].split('/releases/latest',1)[0]\n"
+            "repo=url.split('https://github.com/',1)[1].split('/releases/latest',1)[0]\n"
             "open(os.environ['HERDR_LOG'],'a').write(json.dumps(['curl',repo])+'\\n')\n"
             "if os.environ.get('CURL_FAILURE') == '1': sys.exit(22)\n"
-            "if os.environ.get('INVALID_RELEASE_JSON') == '1': print('{invalid'); sys.exit(0)\n"
-            "print(json.dumps(json.loads(os.environ['RELEASES']).get(repo, {'tag_name':'v1'})))\n"
+            "if os.environ.get('INVALID_REDIRECT') == '1': print(f'https://github.com/{repo}/releases', end=''); sys.exit(0)\n"
+            "tag=json.loads(os.environ['RELEASES']).get(repo, {'tag_name':'v1'})['tag_name']\n"
+            "print(f'https://github.com/{repo}/releases/tag/{tag}', end='')\n"
         )
         herdr = bindir / "herdr"
         herdr.write_text(
@@ -116,7 +117,7 @@ def run_case(
             "MANIFEST": str(manifest),
             "RELEASES": json.dumps(release_data),
             "CURL_FAILURE": "1" if curl_failure else "0",
-            "INVALID_RELEASE_JSON": "1" if invalid_release_json else "0",
+            "INVALID_REDIRECT": "1" if invalid_redirect else "0",
             "INSTALL_FAILURE": "1" if install_failure else "0",
         })
         result = subprocess.run([BASH, str(script_file)], env=env, text=True, capture_output=True)
@@ -177,7 +178,7 @@ def run_host(host, fixture):
         result, calls, _, manifest_text, _ = run_case(fixture, [nav("v9.8.7"), heel("v2.3.4")], releases={nav_repo: {"tag_name": "v9.8.7"}, heel_repo: {"tag_name": "v2.3.5"}})
         expect(result.returncode == 0 and '/runtime/node' in manifest_text, "Heeler Node path not adjusted after reinstall")
 
-    for kwargs in ({"curl_failure": True}, {"invalid_release_json": True}, {"releases": {nav_repo: {"tag_name": ""}}}, {"install_failure": True}):
+    for kwargs in ({"curl_failure": True}, {"invalid_redirect": True}, {"releases": {nav_repo: {"tag_name": ""}}}, {"install_failure": True}):
         result, calls, _, _, _ = run_case(fixture, **kwargs)
         expect(result.returncode != 0, "failure did not fail activation")
         expect(not any(c[:1] == ["integration"] for c in calls), "integration ran after plugin failure")

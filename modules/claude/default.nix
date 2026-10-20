@@ -31,12 +31,12 @@ let
       name: ${name}
       ${frontmatter}
       ---
-      ${builtins.readFile prompt}
+      ${prompt}
     '';
 
   claudeAgentFiles = {
     ".claude/agents/scout.md" = {
-      source = mkClaudeAgent "scout" ../../config/shared/agents/scout.md ''
+      source = mkClaudeAgent "scout" (builtins.readFile ../../config/shared/agents/scout.md) ''
         description: Use for read-only codebase investigation that traces behavior, locates relevant files, callers, and tests, and returns cited evidence.
         tools: Read, Grep, Glob, Bash
         model: haiku
@@ -47,20 +47,70 @@ let
       force = true;
     };
     ".claude/agents/reviewer.md" = {
-      source = mkClaudeAgent "reviewer" ../../config/shared/agents/reviewer.md ''
-        description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
-        tools: Read, Grep, Glob, Bash
-        model: sonnet
-        permissionMode: plan
-        effort: high
-        background: true
-        skills:
-          - code-review
-      '';
+      # Explicit-only skills cannot be preloaded through the skills field.
+      source =
+        mkClaudeAgent "reviewer"
+          (
+            ''
+              For diff reviews only, read ${config.home.homeDirectory}/.claude/skills/code-review/SKILL.md and follow it as the review contract.
+
+            ''
+            + builtins.readFile ../../config/shared/agents/reviewer.md
+          )
+          ''
+            description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
+            tools: Read, Grep, Glob, Bash
+            model: sonnet
+            permissionMode: plan
+            effort: high
+            background: true
+          '';
+      force = true;
+    };
+    ".claude/agents/researcher.md" = {
+      source =
+        mkClaudeAgent "researcher"
+          (
+            ''
+              Read ${config.home.homeDirectory}/.claude/skills/research/SKILL.md for its sourcing and verification rules. Return the brief in your response; do not follow its file-writing steps.
+
+            ''
+            + builtins.readFile ../../config/shared/agents/researcher.md
+          )
+          ''
+            description: Use for read-only local and web research on a bounded question; return inspected primary-source citations, findings, and unknowns without editing or publishing.
+            tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
+            model: sonnet
+            permissionMode: plan
+            effort: high
+            background: true
+          '';
+      force = true;
+    };
+    ".claude/agents/infra-reviewer.md" = {
+      source =
+        mkClaudeAgent "infra-reviewer"
+          (
+            ''
+              For Kubernetes, Helm, Kustomize, or GitOps reviews, also read ${config.home.homeDirectory}/.claude/skills/kubernetes-skill/SKILL.md and its relevant references.
+
+            ''
+            + builtins.readFile ../../config/shared/agents/infra-reviewer.md
+          )
+          ''
+            description: Use for read-only operational-risk review of Terraform/OpenTofu, Kubernetes/GitOps, and infrastructure security; verify official docs and report evidence-backed findings without applying changes.
+            tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
+            model: sonnet
+            permissionMode: plan
+            effort: high
+            background: true
+            skills:
+              - infra-review
+          '';
       force = true;
     };
     ".claude/agents/worker.md" = {
-      source = mkClaudeAgent "worker" ../../config/shared/agents/worker.md ''
+      source = mkClaudeAgent "worker" (builtins.readFile ../../config/shared/agents/worker.md) ''
         description: Use for an already well-scoped implementation task with clear success criteria; make minimal edits and run focused verification.
         tools: Read, Edit, Write, Grep, Glob, Bash
         model: opus

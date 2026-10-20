@@ -67,6 +67,25 @@ in
 
       lazygit = {
         enable = true;
+        # Official catppuccin/lazygit Mocha (blue accent).
+        settings.gui.theme = with theme.palette; {
+          activeBorderColor = [
+            blue
+            "bold"
+          ];
+          inactiveBorderColor = [ subtext0 ];
+          searchingActiveBorderColor = [ yellow ];
+          optionsTextColor = [ blue ];
+          selectedLineBgColor = [ surface0 ];
+          inactiveViewSelectedLineBgColor = [ overlay0 ];
+          cherryPickedCommitFgColor = [ blue ];
+          cherryPickedCommitBgColor = [ surface1 ];
+          markedBaseCommitFgColor = [ blue ];
+          markedBaseCommitBgColor = [ yellow ];
+          unstagedChangesColor = [ red ];
+          defaultFgColor = [ text ];
+        };
+        settings.gui.authorColors."*" = theme.palette.lavender;
       };
 
       nh = {

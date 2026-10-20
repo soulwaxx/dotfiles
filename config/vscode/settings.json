@@ -128,5 +128,8 @@
     "**/.gitea/workflows/*.yaml",
     "**/.forgejo/workflows/*.yml",
     "**/.forgejo/workflows/*.yaml"
-  ]
+  ],
+  "vs-kubernetes": {
+    "vs-kubernetes.crd-code-completion": "enabled"
+  }
 }

@@ -1,7 +1,7 @@
 ---
 name: kubernetes-skill
 disable-model-invocation: true
-description: "Consult before writing, reviewing, or debugging any Kubernetes, Helm, Kustomize, or ArgoCD/Flux YAML — including when the user only shows a manifest, values.yaml, kustomization, Application, HelmRelease, NetworkPolicy, Ingress, or Gateway without saying \"Kubernetes\". Also for diagnosing scheduling failures, hung rollouts, failed helm upgrades, OOMKills/evictions, and GitOps sync/drift issues. Not for cluster substrate provisioning (Terraform), broad infra PR reviews (infra-review), or decision records."
+description: "Diagnose-first guidance for writing, reviewing, and debugging Kubernetes, Helm, Kustomize, and ArgoCD/Flux manifests and GitOps delivery."
 ---
 
 # Kubernetes Skill for Claude

@@ -1,15 +1,14 @@
 { config, ... }:
 let
   theme = config.dotfiles.theme.current;
+  p = theme.palette;
 in
 {
   programs.delta = {
     enable = true;
     enableGitIntegration = true;
-    # UI styles use ANSI color names, not hex: delta resolves them against the
-    # terminal's 16 palette slots, so colors follow the active terminal theme
-    # without a rebuild. `syntax` keeps the diff body syntax-highlighted via the
-    # base16 syntax-theme set centrally in modules/theme/default.nix.
+    # Colors follow the official catppuccin/delta Mocha config. The diff body
+    # is syntax-highlighted by the bat theme set in modules/theme/default.nix.
     options = {
       navigate = true;
       line-numbers = true;
@@ -18,24 +17,28 @@ in
       keep-plus-minus-markers = false;
       line-numbers-left-format = "{nm:>4} ";
       line-numbers-right-format = "{np:>4} ";
-      line-numbers-zero-style = "brightblack";
-      hunk-header-style = "file line-number syntax";
-      minus-style = "syntax";
-      minus-emph-style = "syntax bold";
-      plus-style = "syntax";
-      plus-emph-style = "syntax bold";
+      dark = true;
       syntax-theme = theme.bat;
-      line-numbers-left-style = "brightblack";
-      line-numbers-right-style = "brightblack";
-      line-numbers-minus-style = "red";
-      line-numbers-plus-style = "green";
-      commit-decoration-style = "yellow box";
-      commit-style = "yellow bold";
-      file-decoration-style = "blue ul";
-      file-style = "blue bold";
-      hunk-header-decoration-style = "blue box";
-      hunk-header-file-style = "blue bold";
-      hunk-header-line-number-style = "yellow bold";
+      blame-palette = "${p.base} ${p.mantle} ${p.crust} ${p.surface0} ${p.surface1}";
+      commit-decoration-style = "${p.overlay0} bold box ul";
+      file-decoration-style = p.overlay0;
+      file-style = p.text;
+      hunk-header-decoration-style = "${p.overlay0} box ul";
+      hunk-header-file-style = "bold";
+      hunk-header-line-number-style = "bold ${p.subtext0}";
+      hunk-header-style = "file line-number syntax";
+      line-numbers-left-style = p.overlay0;
+      line-numbers-right-style = p.overlay0;
+      line-numbers-zero-style = p.overlay0;
+      line-numbers-minus-style = "bold ${p.red}";
+      line-numbers-plus-style = "bold ${p.green}";
+      # Upstream blends: emph = 35% accent over Base, plain = 20%.
+      minus-emph-style = "bold syntax #694559";
+      minus-style = "syntax #493447";
+      plus-emph-style = "bold syntax #4e6356";
+      plus-style = "syntax #394545";
+      # Moved-line colors for diff.colorMoved.
+      map-styles = "bold purple => syntax #5b4e74, bold blue => syntax #445375, bold cyan => syntax #446170, bold yellow => syntax #6b635b";
       whitespace-error-style = "red reverse";
     };
   };

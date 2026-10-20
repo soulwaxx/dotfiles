@@ -66,7 +66,6 @@ let
   darwinBrews = [
     # Linux installs neovim via Nix (programs.neovim in modules/neovim.nix).
     "neovim"
-    # keep: macOS ships no flock binary; claude-obsidian wiki-lock.sh requires it
     "flock"
     "docker"
     "docker-buildx"
@@ -90,6 +89,7 @@ let
 
   darwinCasks = [
     "the-unarchiver"
+    "drawio"
     "spotify"
     "discord"
     "ghostty"
@@ -98,8 +98,6 @@ let
     "orbstack"
     "font-jetbrains-mono"
     "font-jetbrains-mono-nerd-font"
-    "font-fira-code"
-    "font-fira-code-nerd-font"
   ];
 
   # Work-host-only Homebrew packages, referenced from hosts/work-macbook.nix.

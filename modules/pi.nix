@@ -12,6 +12,81 @@ let
   awsMcp = config.dotfiles.aws.mcp;
   subagentModels = config.dotfiles.pi.subagentModels;
   mkCurlInstaller = import ./lib/mk-curl-installer.nix { inherit lib pkgs; };
+  theme = config.dotfiles.theme.current;
+
+  # Catppuccin Mocha pi theme. Roles follow the Catppuccin style guide:
+  # keywords Mauve, strings Green, functions Blue, types Yellow, operators Sky,
+  # numbers Peach, comments and delimiters Overlay 2, active border Lavender.
+  # Tool backgrounds reuse the catppuccin/delta 20% Red/Green blends.
+  piThemeFile = jsonFormat.generate "pi-theme-${theme.name}.json" {
+    "$schema" = "https://pi.dev/schemas/theme.schema.json";
+    inherit (theme) name;
+    appearance = "dark";
+    vars = theme.palette;
+    colors = {
+      accent = "mauve";
+      border = "lavender";
+      borderAccent = "mauve";
+      borderMuted = "overlay0";
+      success = "green";
+      error = "red";
+      warning = "yellow";
+      muted = "subtext0";
+      dim = "overlay1";
+      text = "text";
+      thinkingText = "overlay2";
+      selectedBg = "surface1";
+      scrollbarTrack = "surface0";
+      scrollbarThumb = "overlay1";
+      searchMatchBg = "surface2";
+      searchMatchText = "yellow";
+      userMessageBg = "surface0";
+      userMessageText = "text";
+      customMessageBg = "mantle";
+      customMessageText = "subtext0";
+      customMessageLabel = "mauve";
+      toolPendingBg = "mantle";
+      toolSuccessBg = "#394545";
+      toolErrorBg = "#493447";
+      toolTitle = "text";
+      toolOutput = "subtext0";
+      mdHeading = "red";
+      mdLink = "blue";
+      mdLinkUrl = "overlay2";
+      mdCode = "mauve";
+      mdCodeBlock = "green";
+      mdCodeBlockBorder = "overlay0";
+      mdQuote = "subtext0";
+      mdQuoteBorder = "overlay0";
+      mdHr = "overlay0";
+      mdListBullet = "mauve";
+      toolDiffAdded = "green";
+      toolDiffRemoved = "red";
+      toolDiffContext = "overlay2";
+      syntaxComment = "overlay2";
+      syntaxKeyword = "mauve";
+      syntaxFunction = "blue";
+      syntaxVariable = "text";
+      syntaxString = "green";
+      syntaxNumber = "peach";
+      syntaxType = "yellow";
+      syntaxOperator = "sky";
+      syntaxPunctuation = "overlay2";
+      thinkingOff = "overlay0";
+      thinkingMinimal = "overlay2";
+      thinkingLow = "sapphire";
+      thinkingMedium = "blue";
+      thinkingHigh = "mauve";
+      thinkingXhigh = "pink";
+      thinkingMax = "red";
+      bashMode = "green";
+    };
+    export = {
+      pageBg = "base";
+      cardBg = "mantle";
+      infoBg = "surface0";
+    };
+  };
 
   mkPiAgent =
     name: prompt: frontmatter:
@@ -41,21 +116,67 @@ let
       force = true;
     };
     ".pi/agent/agents/reviewer.md" = {
-      # pi-subagents never injects skills marked disable-model-invocation (all
-      # shared skills are explicit-only), so point the reviewer at the file.
+      # pi-subagents never injects skills marked disable-model-invocation
+      # (code-review is explicit-only), so point the reviewer at the file.
       source =
         mkPiAgent "reviewer"
           (
             ''
-              Before reviewing, read ${config.home.homeDirectory}/.pi/agent/skills/code-review/SKILL.md and follow it as the review contract.
+              For diff reviews only, read ${config.home.homeDirectory}/.pi/agent/skills/code-review/SKILL.md and follow it as the review contract.
 
             ''
             + builtins.readFile ../config/shared/agents/reviewer.md
           )
           ''
-            description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
+            description: Use for read-only diff reviews against an explicit fixed point, or current-state audits of named files, configuration, or behavior against supplied criteria.
             advertise: true
             tools: read, bash, grep, find, ls
+            model: ${subagentModels.reviewer}
+            thinking: high
+            async: true
+            inheritProjectContext: true
+            inheritGlobalContext: true
+            acceptanceRole: read-only
+          '';
+      force = true;
+    };
+    ".pi/agent/agents/researcher.md" = {
+      source =
+        mkPiAgent "researcher"
+          (
+            ''
+              Read ${config.home.homeDirectory}/.pi/agent/skills/research/SKILL.md for its sourcing and verification rules. Return the brief in your response; do not follow its file-writing steps.
+
+            ''
+            + builtins.readFile ../config/shared/agents/researcher.md
+          )
+          ''
+            description: Use for read-only local and web research on a bounded question; return inspected primary-source citations, findings, and unknowns without editing or publishing.
+            advertise: true
+            tools: read, bash, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
+            model: ${subagentModels.worker}
+            thinking: high
+            async: true
+            inheritProjectContext: true
+            inheritGlobalContext: true
+            acceptanceRole: read-only
+          '';
+      force = true;
+    };
+    ".pi/agent/agents/infra-reviewer.md" = {
+      source =
+        mkPiAgent "infra-reviewer"
+          (
+            ''
+              Read ${config.home.homeDirectory}/.pi/agent/skills/infra-review/SKILL.md and follow it as the review contract. For Kubernetes, Helm, Kustomize, or GitOps reviews, also read ${config.home.homeDirectory}/.pi/agent/skills/kubernetes-skill/SKILL.md and its relevant references.
+
+            ''
+            + builtins.readFile ../config/shared/agents/infra-reviewer.md
+          )
+          ''
+            description: Use for read-only operational-risk review of Terraform/OpenTofu, Kubernetes/GitOps, and infrastructure security; verify official docs and report evidence-backed findings without applying changes.
+            advertise: true
+            tools: read, bash, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
             model: ${subagentModels.reviewer}
             thinking: high
             async: true
@@ -85,6 +206,7 @@ let
     "npm:@gotgenes/pi-permission-system"
     "npm:@gotgenes/pi-anthropic-auth"
     "npm:pi-web-access"
+    "npm:@ff-labs/pi-fff"
     {
       source = "npm:pi-subagents";
       extensions = [ "index.js" ];
@@ -115,7 +237,7 @@ let
         "openai/gpt-6.1-sol".reserveTokens = 272000 - 220000;
       };
     };
-    theme = "dark";
+    theme = theme.name;
     defaultTools = [
       "+tool_search"
       "+codemode"
@@ -181,6 +303,19 @@ let
     builtins.filter (package: lib.hasPrefix "npm:" (piPackageSource package)) piPackages
   );
   piAllowedPackagesFile = jsonFormat.generate "pi-allowed-packages.json" piPackageNames;
+
+  # Use explicit per-host paths: pi-fff does not expand ~ in database paths,
+  # and its automatic defaults would reuse existing Neovim FFF databases.
+  piFffFile = jsonFormat.generate "pi-fff.json" {
+    "$schema" =
+      "https://raw.githubusercontent.com/dmtrKovalenko/fff/main/packages/pi-fff/pi-fff.schema.json";
+    mode = "override";
+    frecencyDbPath = "${config.home.homeDirectory}/.pi/agent/fff/frecency";
+    historyDbPath = "${config.home.homeDirectory}/.pi/agent/fff/history";
+    enableFsRootScanning = false;
+    enableHomeDirScanning = false;
+    followSymlinks = true;
+  };
 
   piSettingsFile = jsonFormat.generate "pi-settings.json" piSettings;
   piMcpFile = jsonFormat.generate "pi-mcp.json" piMcp;
@@ -253,6 +388,14 @@ in
         source = piMcpFile;
         force = true;
       };
+      ".pi/agent/pi-fff.json" = {
+        source = piFffFile;
+        force = true;
+      };
+      ".pi/agent/themes/${theme.name}.json" = {
+        source = piThemeFile;
+        force = true;
+      };
 
       # Static configs — symlinked from config/pi/ so edits take effect without rebuild.
       # pi-web-access resolves its config dir as PI_CODING_AGENT_DIR ->
@@ -269,8 +412,6 @@ in
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
       ".pi/agent/extensions/subagent/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.json";
-      ".pi/agent/APPEND_SYSTEM.md".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.md";
 
       # Shared global instructions and skills — harness-agnostic prose owned by
       # config/shared and symlinked into both harnesses as a context/memory file:

@@ -7,7 +7,7 @@ porting upstream changes: essentials in `SKILL.md`, depth in `references/`.
 
 - **Upstream:** https://github.com/vidanov/aws-architecture-diagram-skill (MIT)
 - **Canonical upstream files:** `claude/SKILL.md` + `references/*.md`
-- **Last reconciled:** 2026-08-20 (checked against upstream `main`)
+- **Last reconciled:** 2026-10-23 (checked against upstream `main` at `d0f8550`)
 
 ## Checking for upstream updates
 
@@ -24,3 +24,8 @@ porting upstream changes: essentials in `SKILL.md`, depth in `references/`.
 - 3D / isometric support: `references/aws-icons-3d.md`, `references/aws-icons-allied-telesis.md`, and the "3D / Isometric Diagrams" section in `SKILL.md`.
 - "Layout self-check" (straight arrows / no-overlap checklist) in `SKILL.md`.
 - Unmapped-service `general_AWScloud` fallback in `references/aws-icons-common.md`.
+- "Broken icons" and "Renamed-service gotchas" from upstream `claude/SKILL.md`, in `references/aws-icons-common.md`.
+
+## Intentional divergences from upstream
+
+- `references/aws-icons-networking.md` drops upstream's `vpc_peering` and `peering_connection` rows. Upstream's own `SKILL.md` says they render blank, and draw.io's `Sidebar-AWS4.js` has only `peering`. Keep them out when re-diffing.

@@ -305,11 +305,14 @@
                     agents = lib.mapAttrs (_: file: file.source) (
                       lib.filterAttrs (name: _: lib.hasPrefix ".pi/agent/agents/" name) files
                     );
+                    claudeAgents = lib.mapAttrs (_: file: file.source) (
+                      lib.filterAttrs (name: _: lib.hasPrefix ".claude/agents/" name) files
+                    );
                     models = home.dotfiles.pi.subagentModels;
                     vaultModel = home.dotfiles.pi.vaultAgentModel;
                     darwin = lib.hasSuffix "darwin" host.system;
                     runtimeTarget = files.".pi/agent/extensions/subagent/config.json".source;
-                    instructionsTarget = files.".pi/agent/APPEND_SYSTEM.md".source;
+                    hasAppendSystem = builtins.hasAttr ".pi/agent/APPEND_SYSTEM.md" files;
                   }
                 ) hosts
               )
@@ -317,9 +320,14 @@
           in
           pkgs.runCommand "check-pi-subagents" { } ''
             ${pkgs.python3}/bin/python3 ${./tests/pi-subagents.py} \
-              ${fixtures} ${./config/pi/subagents.json} ${./config/pi/subagents.md}
+              ${fixtures} ${./config/pi/subagents.json} ${./config/shared/agents}
             touch $out
           '';
+        skills = pkgs.runCommand "check-skills" { } ''
+          ${pkgs.python3}/bin/python3 ${./tests/skills.py} ${./config/shared/skills} \
+            ${./config/shared/AGENTS.md}
+          touch $out
+        '';
         pi-installer = pkgs.runCommand "check-pi-installer" { } ''
           ${pkgs.python3}/bin/python3 ${./tests/pi-installer.py} \
             ${pkgs.nodejs_24}/bin/node ${./config/pi/run-installer.cjs} ${pkgs.bash}/bin/bash

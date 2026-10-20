@@ -4,7 +4,6 @@
     "watchdog",
     "panes",
     "missions",
-    "lane-management",
     "spawn-budget-grants",
     "preflight",
     "lane-metadata",
@@ -13,8 +12,7 @@
     "tool-budgets",
     "control-overrides",
     "extension-bindings",
-    "external-machines",
-    "workflow-scripts"
+    "external-machines"
   ],
   "scheduledRuns": {
     "enabled": false
@@ -22,5 +20,9 @@
   "missions": {
     "enabled": false
   },
-  "maxSubagentDepth": 1
+  "maxSubagentDepth": 1,
+  "authorityPolicy": {
+    "discardWorktree": "confirm",
+    "destructiveCleanup": "confirm"
+  }
 }

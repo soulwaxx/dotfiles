@@ -1,7 +1,7 @@
 ---
 name: aws-architecture-diagram
 disable-model-invocation: true
-description: Always use when user asks to create, generate, or build an AWS architecture diagram, cloud infrastructure diagram, or system diagram with AWS services. Also activates for draw.io diagrams mentioning AWS services like Lambda, DynamoDB, S3, API Gateway, etc.
+description: Generate AWS architecture diagrams as editable draw.io files with official AWS icons, with optional PNG, SVG, or PDF export.
 ---
 
 # AWS Architecture Diagram Skill

@@ -3,6 +3,6 @@
     ../vscode.nix
     ../ghostty.nix
     ../docker-cli.nix
-    ../claude-obsidian.nix
+    ../obsidian-second-brain.nix
   ];
 }

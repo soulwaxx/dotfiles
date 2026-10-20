@@ -35,12 +35,19 @@ in
 
         # Resolve stable releases at activation time, not during Nix evaluation.
         # Plugin manifest versions need not match repository release tags (Heeler).
+        # Read the tag from the web redirect; the REST API allows only 60
+        # unauthenticated requests per hour per IP.
         update_herdr_plugin() {
-          local plugin="$1" repo="$2" subdir="''${3:-}" ref
-          ref=$(${pkgs.curl}/bin/curl --fail --silent --show-error --location \
+          local plugin="$1" repo="$2" subdir="''${3:-}" ref url
+          url=$(${pkgs.curl}/bin/curl --fail --silent --show-error \
             --connect-timeout 10 --max-time 60 \
-            "https://api.github.com/repos/$repo/releases/latest" \
-            | ${pkgs.jq}/bin/jq -er '.tag_name | select(type == "string" and length > 0)')
+            --output /dev/null --write-out '%{redirect_url}' \
+            "https://github.com/$repo/releases/latest")
+          ref=''${url##*/releases/tag/}
+          if [[ -z "$ref" || "$ref" == "$url" ]]; then
+            echo "herdr: cannot resolve latest release of $repo (got '$url')" >&2
+            return 1
+          fi
 
           if ! ${herdrBin} plugin list --plugin "$plugin" --json \
             | ${pkgs.jq}/bin/jq -e --arg ref "$ref" --arg repo "$repo" --arg subdir "$subdir" '
