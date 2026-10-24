@@ -215,7 +215,7 @@ let
     }
     "npm:@juicesharp/rpiv-todo"
     "npm:@juicesharp/rpiv-ask-user-question"
-    "npm:pi-powerline-footer"
+    "npm:@soulwaxx/pi-skill-autocomplete"
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
     "npm:@soulwaxx/obsidian-second-brain"
@@ -263,22 +263,6 @@ let
     autocompleteMaxVisible = 8;
     enableSkillCommands = true;
     packages = piPackages;
-    powerline = {
-      preset = "default";
-      placement = "above";
-      welcome = false;
-      cost.subscriptionDisplay = "reported-cost";
-      cache_read.format = "both";
-      queue.compactPromptMode = "native";
-    };
-    powerlineShortcuts = {
-      stashHistory = null;
-      copyEditor = null;
-      cutEditor = null;
-      queueOpen = null;
-      editorStart = null;
-      editorEnd = null;
-    };
     # pi-subagents settings-level keys; runtime limits live in config/pi/subagents.json.
     # Only the agents declared in this module (plus the macOS vault package agent) are used.
     subagents = {
@@ -406,6 +390,10 @@ in
       # at the same source so `workflow: none` is honored on every host.
       ".pi/agent/web-search.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/web-search.json";
+
+      # Display-only footer, auto-discovered by pi on every host.
+      ".pi/agent/extensions/dotfiles-statusline".source =
+        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/statusline";
 
       # Extension configs — static JSON, symlinked.
       ".pi/agent/extensions/pi-permission-system/config.json".source =

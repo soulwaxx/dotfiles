@@ -45,6 +45,7 @@ return {
         mason = true,
         mini = { enabled = true, indentscope_color = "overlay2" },
         native_lsp = { enabled = true },
+        neotree = true,
         noice = true,
         notifier = true,
         render_markdown = true,

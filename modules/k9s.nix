@@ -9,6 +9,111 @@ let
   p = config.dotfiles.theme.current.palette;
   k9sConfigDir =
     if pkgs.stdenv.hostPlatform.isDarwin then "Library/Application Support/k9s" else ".config/k9s";
+  # Role mapping mirrors luca-trifilio's Catppuccin skin (filled crumb pills and
+  # dialog panel, full accent spread) ported onto this repo's Mocha palette.
+  # Body/table/log backgrounds stay 'default' so they inherit the terminal bg.
+  mkSkin = production: ''
+    k9s:
+      body:
+        fgColor: '${p.text}'
+        bgColor: 'default'
+        logoColor: '${p.mauve}'
+      prompt:
+        fgColor: '${p.text}'
+        bgColor: 'default'
+        suggestColor: '${p.blue}'
+      help:
+        fgColor: '${p.text}'
+        bgColor: 'default'
+        sectionColor: '${p.green}'
+        keyColor: '${p.blue}'
+        numKeyColor: '${p.maroon}'
+      frame:
+        title:
+          fgColor: '${p.teal}'
+          bgColor: 'default'
+          highlightColor: '${p.pink}'
+          counterColor: '${p.yellow}'
+          filterColor: '${p.green}'
+        border:
+          fgColor: '${if production then p.red else p.mauve}'
+          focusColor: '${if production then p.red else p.lavender}'
+        menu:
+          fgColor: '${p.text}'
+          keyColor: '${p.blue}'
+          numKeyColor: '${p.maroon}'
+        crumbs:
+          fgColor: '${p.base}'
+          bgColor: '${if production then p.red else p.maroon}'
+          activeColor: '${p.flamingo}'
+        status:
+          newColor: '${p.blue}'
+          modifyColor: '${p.lavender}'
+          addColor: '${p.green}'
+          pendingColor: '${p.peach}'
+          errorColor: '${p.red}'
+          highlightColor: '${p.sky}'
+          killColor: '${p.mauve}'
+          completedColor: '${p.overlay0}'
+      info:
+        fgColor: '${p.peach}'
+        sectionColor: '${p.text}'
+      views:
+        table:
+          fgColor: '${p.text}'
+          bgColor: 'default'
+          cursorFgColor: '${p.surface0}'
+          cursorBgColor: '${p.surface1}'
+          markColor: '${p.rosewater}'
+          header:
+            fgColor: '${p.yellow}'
+            bgColor: 'default'
+            sorterColor: '${p.sky}'
+        xray:
+          fgColor: '${p.text}'
+          bgColor: 'default'
+          cursorColor: '${p.surface1}'
+          cursorTextColor: '${p.base}'
+          graphicColor: '${p.pink}'
+        charts:
+          bgColor: 'default'
+          chartBgColor: 'default'
+          dialBgColor: 'default'
+          defaultDialColors:
+            - '${p.green}'
+            - '${p.red}'
+          defaultChartColors:
+            - '${p.green}'
+            - '${p.red}'
+          resourceColors:
+            cpu:
+              - '${p.mauve}'
+              - '${p.blue}'
+            mem:
+              - '${p.yellow}'
+              - '${p.peach}'
+        yaml:
+          keyColor: '${p.blue}'
+          valueColor: '${p.text}'
+          colonColor: '${p.subtext0}'
+        logs:
+          fgColor: '${p.text}'
+          bgColor: 'default'
+          indicator:
+            fgColor: '${p.lavender}'
+            bgColor: 'default'
+            toggleOnColor: '${p.green}'
+            toggleOffColor: '${p.subtext0}'
+      dialog:
+        fgColor: '${p.yellow}'
+        bgColor: '${p.overlay2}'
+        buttonFgColor: '${p.base}'
+        buttonBgColor: '${p.overlay1}'
+        buttonFocusFgColor: '${p.base}'
+        buttonFocusBgColor: '${p.pink}'
+        labelFgColor: '${p.rosewater}'
+        fieldFgColor: '${p.text}'
+  '';
   mkFblogPlugin =
     {
       scope,
@@ -24,7 +129,7 @@ let
       background = false;
       args = [
         "-c"
-        "${logsCommand} | fblog${lib.optionalString expanded " -d"}"
+        "${logsCommand} --tail=500 | fblog${lib.optionalString expanded " -d"}"
       ];
     };
 in
@@ -42,13 +147,28 @@ lib.mkIf config.dotfiles.kubernetes.enable {
     ''
   );
 
-  programs.zsh.shellAliases = {
-    ks = "k9s";
-    ksr = "k9s --readonly";
-  };
+  programs.zsh.initContent = ''
+    ks() {
+      local contexts context
+      contexts=$(kubectl config get-contexts -o name) || return
+      context=$(print -r -- "$contexts" | \
+        fzf --prompt='Kubernetes context > ' --height=50% --border) || return
+      [[ -n "$context" ]] || return 0
+      # Contexts authenticate through their kubeconfig AWS_PROFILE; inherited
+      # awsp credentials would take precedence, so drop them for k9s only.
+      env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY \
+        -u AWS_SESSION_TOKEN -u AWS_SECURITY_TOKEN \
+        k9s --context "$context" "$@"
+    }
+
+    ksr() {
+      ks --readonly "$@"
+    }
+  '';
 
   programs.k9s = {
     enable = true;
+    skins."${k9sSkin}-production" = pkgs.writeText "${k9sSkin}-production.yaml" (mkSkin true);
     settings.k9s = {
       ui = {
         headless = false;
@@ -127,7 +247,8 @@ lib.mkIf config.dotfiles.kubernetes.enable {
       modify-secret = {
         shortCut = "Ctrl-X";
         description = "Edit Decoded Secret";
-        confirm = false;
+        confirm = true;
+        dangerous = true;
         scopes = [ "secrets" ];
         command = "kubectl";
         background = false;
@@ -143,109 +264,5 @@ lib.mkIf config.dotfiles.kubernetes.enable {
     };
   };
 
-  # Role mapping mirrors luca-trifilio's Catppuccin skin (filled crumb pills and
-  # dialog panel, full accent spread) ported onto this repo's Mocha palette.
-  # Body/table/log backgrounds stay 'default' so they inherit the terminal bg.
-  home.file."${k9sConfigDir}/skins/${k9sSkin}.yaml".text = ''
-    k9s:
-      body:
-        fgColor: '${p.text}'
-        bgColor: 'default'
-        logoColor: '${p.mauve}'
-      prompt:
-        fgColor: '${p.text}'
-        bgColor: 'default'
-        suggestColor: '${p.blue}'
-      help:
-        fgColor: '${p.text}'
-        bgColor: 'default'
-        sectionColor: '${p.green}'
-        keyColor: '${p.blue}'
-        numKeyColor: '${p.maroon}'
-      frame:
-        title:
-          fgColor: '${p.teal}'
-          bgColor: 'default'
-          highlightColor: '${p.pink}'
-          counterColor: '${p.yellow}'
-          filterColor: '${p.green}'
-        border:
-          fgColor: '${p.mauve}'
-          focusColor: '${p.lavender}'
-        menu:
-          fgColor: '${p.text}'
-          keyColor: '${p.blue}'
-          numKeyColor: '${p.maroon}'
-        crumbs:
-          fgColor: '${p.base}'
-          bgColor: '${p.maroon}'
-          activeColor: '${p.flamingo}'
-        status:
-          newColor: '${p.blue}'
-          modifyColor: '${p.lavender}'
-          addColor: '${p.green}'
-          pendingColor: '${p.peach}'
-          errorColor: '${p.red}'
-          highlightColor: '${p.sky}'
-          killColor: '${p.mauve}'
-          completedColor: '${p.overlay0}'
-      info:
-        fgColor: '${p.peach}'
-        sectionColor: '${p.text}'
-      views:
-        table:
-          fgColor: '${p.text}'
-          bgColor: 'default'
-          cursorFgColor: '${p.surface0}'
-          cursorBgColor: '${p.surface1}'
-          markColor: '${p.rosewater}'
-          header:
-            fgColor: '${p.yellow}'
-            bgColor: 'default'
-            sorterColor: '${p.sky}'
-        xray:
-          fgColor: '${p.text}'
-          bgColor: 'default'
-          cursorColor: '${p.surface1}'
-          cursorTextColor: '${p.base}'
-          graphicColor: '${p.pink}'
-        charts:
-          bgColor: 'default'
-          chartBgColor: 'default'
-          dialBgColor: 'default'
-          defaultDialColors:
-            - '${p.green}'
-            - '${p.red}'
-          defaultChartColors:
-            - '${p.green}'
-            - '${p.red}'
-          resourceColors:
-            cpu:
-              - '${p.mauve}'
-              - '${p.blue}'
-            mem:
-              - '${p.yellow}'
-              - '${p.peach}'
-        yaml:
-          keyColor: '${p.blue}'
-          valueColor: '${p.text}'
-          colonColor: '${p.subtext0}'
-        logs:
-          fgColor: '${p.text}'
-          bgColor: 'default'
-          indicator:
-            fgColor: '${p.lavender}'
-            bgColor: 'default'
-            toggleOnColor: '${p.green}'
-            toggleOffColor: '${p.subtext0}'
-      dialog:
-        fgColor: '${p.yellow}'
-        bgColor: '${p.overlay2}'
-        buttonFgColor: '${p.base}'
-        buttonBgColor: '${p.overlay1}'
-        buttonFocusFgColor: '${p.base}'
-        buttonFocusBgColor: '${p.pink}'
-        labelFgColor: '${p.rosewater}'
-        fieldFgColor: '${p.text}'
-  '';
+  home.file."${k9sConfigDir}/skins/${k9sSkin}.yaml".text = mkSkin false;
 }

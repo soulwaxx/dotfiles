@@ -1,6 +1,6 @@
 # Neovim (LazyVim) cheatsheet
 
-Leader is `<Space>`. File finding and live grep use **fff.nvim**; other sources and the explorer use **snacks.picker**. Project search-and-replace is **grug-far**.
+Leader is `<Space>`. File finding and live grep use **fff.nvim**; other picker sources use **snacks.picker**. The sidebar uses **Neo-tree in native splits**, with Open Editors above Files. Project search-and-replace is **grug-far**.
 Meta-tip: press `<Space>` and pause. which-key lists every binding under it. `<leader>sk` searches all keymaps. This sheet is the high-value subset, not the full set.
 
 ## The three you asked for
@@ -33,12 +33,12 @@ Use `<leader>cr` over text replace when renaming a variable or function: it foll
 
 | Keys | Action |
 | --- | --- |
-| `<leader>/` / `<leader>sg` | Live grep with fff.nvim (Snacks Explorer root when open, otherwise cwd; ignores the hovered folder) |
+| `<leader>/` / `<leader>sg` | Live grep with fff.nvim (Files panel root when open, otherwise cwd; ignores the hovered folder) |
 | `<leader><space>` / `<leader>ff` | Find files with fff.nvim |
 | `<leader>sG` | Snacks live grep in the current working directory |
 | `<leader>sw` | Snacks grep for the word under the cursor (works in visual mode too) |
 
-fff honors `.gitignore` and picker-only `.ignore` files. Snacks shows hidden and gitignored files, excluding only the explicit ignored globs (`.pytest_cache`, `.terraform`, `.venv`, `__pycache__`, and `venv`); its `<a-h>` and `<a-i>` keys toggle hidden/ignored files.
+fff honors `.gitignore` and picker-only `.ignore` files. The Files panel and Snacks pickers show hidden and gitignored files, excluding `.pytest_cache`, `.terraform`, `.venv`, `__pycache__`, and `venv`. In Files, `H` toggles filtered files; Snacks pickers use `<a-h>` / `<a-i>` for hidden/ignored files.
 
 To scope a grep to one subfolder: hover it in the explorer and press `.` to make it the explorer root before searching, or use grug-far (`<leader>sr`) and set its Files field to the folder path or a glob.
 
@@ -46,15 +46,30 @@ To scope a grep to one subfolder: hover it in the explorer and press `.` to make
 
 | Keys | Action |
 | --- | --- |
-| `<leader>e` | Snacks explorer (project root), `<leader>E` for cwd |
+| `<leader>e` | Toggle stacked sidebar (project root), `<leader>E` for cwd |
+| `<leader>be` | Open sidebar and focus Open Editors |
+| `<leader>ba` | Close all file editors (prompts for unsaved changes; leaves terminals/tools alone) |
 | `<S-l>` / `<S-h>` | Next / previous buffer |
 | `<leader>,` | Switch buffer via picker |
 | `<leader>bd` | Delete the current buffer |
 | `<C-s>` | Save file |
 
-### File operations (Snacks explorer)
+### Mouse-friendly sidebar (trial 2: stacked panels)
 
-In the explorer, use `<Tab>` or visual mode to select multiple files. Navigate to the destination and press `m` to move or `c` to copy the selection. Use `r` to rename, `d` to delete, and `a` to create a file or directory (end the name with `/` for a directory). Deletes use the system trash when available.
+Start with `nvim .` (or the `v` shell alias), or press `<leader>e` inside Neovim.
+
+- **Open Editors** sits above **Files**; it includes buffers from outside the current project, grouped by folder.
+- **Single-click** selects an entry. **Double-click** opens a file, expands/collapses a folder, or switches to an Open Editors buffer.
+- Click **Close All** in the Open Editors header, or press `<leader>ba`. Unsaved files prompt to save, discard, or cancel; Cancel stops the operation. Files on disk are not deleted.
+- In **Open Editors**, `x` or `d` closes the selected buffer. The top buffer tabs also have clickable close buttons.
+- **Drag the sidebar's right edge** with the mouse to resize both panels. You can also drag the separator between the two panels to adjust their heights. `Q` closes the sidebar.
+- **`Ctrl-v`** on a file in either panel opens it in a vertical editor split. Headers are static (not collapsible).
+
+### File operations (Neo-tree Files panel)
+
+Use `a` to create a file/directory (end the name with `/` for a directory), `r` to rename, `m` to move, or `c` to copy with a destination prompt. For clipboard-style operations, `x` cuts, `y` copies, and `p` pastes into the selected directory. `<Tab>` selects multiple entries. `d` **deletes a file from disk**; `T` sends it to the system trash. These are filesystem operations, unlike `x`/`d` in Open Editors, which only close buffers.
+
+`<leader>er` re-roots Files at the current file's Git repository. `<leader>gw` picks a workspace repository with uncommitted/unpushed work and opens Files there.
 
 ## Entering insert mode
 

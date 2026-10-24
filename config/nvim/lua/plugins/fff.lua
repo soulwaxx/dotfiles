@@ -1,6 +1,6 @@
--- fff.nvim owns file-finding and live-grep; snacks.picker keeps every other
--- source (explorer, LSP, git, buffers, diagnostics). The two pickers coexist
--- deliberately: fff only implements files + grep, so a full swap would trade
+-- fff.nvim owns file-finding and live-grep; snacks.picker keeps the other
+-- picker sources (LSP, git, buffers, diagnostics); Neo-tree owns the sidebar.
+-- The two pickers coexist deliberately: fff only implements files + grep, so a full swap would trade
 -- 30 snacks sources for 2. Their filters intentionally differ: fff honors
 -- .gitignore and picker-only .ignore files; Snacks includes ignored files and
 -- applies the explicit ignored_globs list configured in core.lua.
@@ -18,6 +18,14 @@ local function workspace_grep()
     opts.select = {
       select_window = function() return main end,
     }
+  end
+  local tree = require("sidebar").state()
+  if tree then
+    opts.cwd = tree.path
+    if vim.bo.filetype == "neo-tree" then
+      local main = require("neo-tree.utils").get_appropriate_window(tree)
+      opts.select = { select_window = function() return main end }
+    end
   end
   require("fff").live_grep(opts)
 end

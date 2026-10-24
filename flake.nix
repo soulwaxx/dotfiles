@@ -323,6 +323,36 @@
               ${fixtures} ${./config/pi/subagents.json} ${./config/shared/agents}
             touch $out
           '';
+        pi-statusline =
+          let
+            hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
+              darwinHosts // linuxHosts
+            );
+            fixtures = pkgs.writeText "pi-statusline-fixtures.json" (
+              builtins.toJSON (
+                lib.mapAttrs (
+                  hostname: host:
+                  let
+                    home =
+                      if lib.hasSuffix "darwin" host.system then
+                        self.darwinConfigurations.${hostname}.config.home-manager.users.${host.username}
+                      else
+                        self.homeConfigurations.${hostname}.config;
+                  in
+                  {
+                    settings = home.home.file.".pi/agent/settings.json".source;
+                    extension = home.home.file.".pi/agent/extensions/dotfiles-statusline".source;
+                  }
+                ) hosts
+              )
+            );
+          in
+          pkgs.runCommand "check-pi-statusline" { nativeBuildInputs = [ pkgs.git ]; } ''
+            export PI_STATUSLINE_FIXTURES=${fixtures}
+            ${pkgs.nodejs_24}/bin/node --experimental-vm-modules --disable-warning=ExperimentalWarning \
+              ${./tests/pi-statusline.mjs} ${./config/pi/statusline/index.js}
+            touch $out
+          '';
         skills = pkgs.runCommand "check-skills" { } ''
           ${pkgs.python3}/bin/python3 ${./tests/skills.py} ${./config/shared/skills} \
             ${./config/shared/AGENTS.md}

@@ -5,9 +5,9 @@ argument-hint: "What will the next session be used for?"
 disable-model-invocation: true
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS - not the current workspace.
+Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS (`$TMPDIR`, else `/tmp`; `%TEMP%` on Windows) - not the current workspace.
 
-If a dispatch table exists in the conversation, embed it as the first section — same table format — so the next agent can resume execution from where this session left off.
+If an execution table exists in the conversation, embed the most recent `## Execution table` as the first section — same heading and table format — so the next agent can resume execution from where this session left off.
 
 Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
 

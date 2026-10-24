@@ -19,7 +19,7 @@ in
 
     settings = {
       theme = config.dotfiles.theme.current.ghostty;
-      background = config.dotfiles.theme.current.palette.base;
+      background = config.dotfiles.theme.current.palette.crust;
       background-opacity = 1.0;
 
       command =

@@ -6,6 +6,7 @@ vim.schedule(function()
     vim.api.nvim_exec_autocmds("User", { pattern = "VeryLazy" })
     vim.fn.mkdir(dir, "p")
     dir = assert(vim.uv.fs_realpath(dir))
+    vim.fn.mkdir(dir .. "/unrelated", "p")
     local path = dir .. "/sample.txt"
     local lines = {}
     for i = 1, 120 do
@@ -24,10 +25,16 @@ vim.schedule(function()
       { name = "vertical split from explorer", dashboard = true, explorer = true, key = "<leader>/", action = "vsplit" },
       { name = "tab from explorer", dashboard = true, explorer = true, key = "<leader>/", action = "tab" },
       { name = "cancel from explorer", dashboard = true, explorer = true, key = "<leader>/", cancel = true },
+      { name = "dashboard and sidebar", dashboard = true, sidebar = true, key = "<leader>/" },
+      { name = "editor and sidebar", sidebar = true, key = "<leader>sg" },
+      { name = "split from sidebar", sidebar = true, key = "<leader>/", action = "split" },
+      { name = "vertical split from sidebar", sidebar = true, key = "<leader>/", action = "vsplit" },
+      { name = "cancel from sidebar", sidebar = true, key = "<leader>/", cancel = true },
     }) do
       vim.cmd("tabonly!")
       vim.cmd("only!")
       vim.cmd("enew!")
+      vim.cmd.cd(dir)
       local main = vim.api.nvim_get_current_win()
       if case.dashboard then
         Snacks.dashboard.open({ buf = 0, win = main })
@@ -39,6 +46,11 @@ vim.schedule(function()
         explorer:focus("list")
       end
 
+      if case.sidebar then
+        vim.cmd.cd(dir .. "/unrelated")
+        require("sidebar").open(dir)
+        vim.wait(300, function() return false end)
+      end
       local origin = vim.api.nvim_get_current_win()
       local origin_buf = vim.api.nvim_get_current_buf()
       for _, key in ipairs(specs[2].keys) do
@@ -48,6 +60,9 @@ vim.schedule(function()
         end
       end
       assert(ui.state.active, "grep did not open")
+      if case.sidebar then
+        assert(ui.state.config.cwd == dir, "grep did not follow the Files root")
+      end
       ui.state.query = "needle"
       ui.update_results_sync()
       assert(vim.wait(2000, function() return #ui.state.filtered_items > 0 end), "no grep result")
@@ -64,12 +79,15 @@ vim.schedule(function()
         assert(vim.api.nvim_get_current_buf() == origin_buf, "cancel changed buffer")
       else
         if not case.action then
-          assert(vim.api.nvim_get_current_win() == main, case.name .. ": focus stayed in Snacks")
+          assert(vim.api.nvim_get_current_win() == main, case.name .. ": focus stayed in the sidebar")
         end
         assert(vim.api.nvim_buf_get_name(0) == path, case.name .. ": wrong buffer")
         assert(vim.deep_equal(vim.api.nvim_win_get_cursor(0), { 80, 7 }), case.name .. ": wrong cursor")
       end
-      print("PASS: " .. case.name)
+      io.stdout:write("PASS: " .. case.name .. "\n")
+      if case.sidebar then
+        require("sidebar").close()
+      end
       if explorer then
         explorer:close()
       end
