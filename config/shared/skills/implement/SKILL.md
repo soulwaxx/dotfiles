@@ -12,6 +12,8 @@ Execute the work described by the most recent execution table in the conversatio
 
 Find the last `## Execution table` in the conversation.
 
+If the user also supplies a ticket reference, fetch it from the issue tracker and state its title before starting. If the reference is ambiguous, ask. The ticket supplements the execution table; it does not replace it.
+
 ### 2. Execute row by row
 
 Complete each row in order before starting the next one. Honor its `Owner` assignment; `inline` means do not delegate that row. For `scout`, `worker`, or `reviewer`, launch the named subagent with that row's bounded task, relevant repository context, authority boundary, success criteria, verification, and expected report. Wait for and inspect its result before running the row's verification in the current session. Keep decisions and final acceptance with the parent; do not let subagents delegate further. Stop and report a launch or execution failure rather than silently switching to inline work.

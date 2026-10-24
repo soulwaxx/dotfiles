@@ -34,7 +34,7 @@ If no specification exists, skip the Spec axis and report `no spec available`.
 
 ### 3. Identify the standards sources
 
-Read repository files that define coding rules, such as `AGENTS.md`, `CONTRIBUTING.md`, or `CODING_STANDARDS.md`.
+Search the repository for every file that defines coding rules, including applicable `AGENTS.md` files. When `CONTRIBUTING.md` or `CODING_STANDARDS.md` exists, include it in the standards sources. Read the discovered standards before reviewing the diff.
 
 Apply the smell baseline below in addition to repository rules. Repository rules override the baseline. Treat every smell as a judgement call, not a hard violation. Skip checks already enforced by tooling.
 

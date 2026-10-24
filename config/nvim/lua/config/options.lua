@@ -10,6 +10,11 @@ vim.o.winborder = "rounded"
 -- Inherit the terminal background/transparency instead of blending a theme color.
 vim.opt.pumblend = 0
 
+-- Mouse navigation is intentional while learning modal editing.
+vim.opt.mouse = "a"
+-- Keep editor text stable when the stacked sidebar opens or changes height.
+vim.opt.splitkeep = "screen"
+
 -- Builtin undo-history browser shipped in $VIMRUNTIME/pack/dist/opt (0.12+).
 -- `undofile` is on by default under LazyVim, so the history is already persisted.
 pcall(vim.cmd.packadd, "nvim.undotree")

@@ -21,8 +21,8 @@ Before implementing:
 - No features beyond what was asked.
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+- Handle realistic failures at system boundaries. Avoid defensive checks for states ruled out by established invariants.
+- Prefer the smallest clear implementation that meets the requirements and fits the existing design. Do not trade correctness or readability for fewer lines.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
@@ -34,7 +34,7 @@ When editing existing code:
 - Don't "improve" adjacent code, comments, or formatting.
 - Don't refactor things that aren't broken.
 - Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
+- Leave unrelated issues untouched. Mention them only when they materially affect the task, correctness, or security.
 
 When your changes create orphans:
 - Remove imports/variables/functions that YOUR changes made unused.
@@ -59,17 +59,29 @@ Run the checks relevant to the change and follow repository verification gates. 
 
 ## 5. Communication
 
-**The user often switches between sessions. Make every reply easy to pick up cold.**
+**Make the answer easy to understand, evaluate, and act on.**
 
-Language:
-- Use plain English: short sentences, common words, active voice.
-- No idioms, slang, or wordplay. Define a technical term the first time if it is not standard.
+Tone:
+- Speak as a direct, respectful technical peer. Be natural and professional.
+- Give substantive feedback rather than praise or automatic agreement.
+- When you disagree, state the concern, explain why it matters, and recommend a better approach.
+
+Clarity:
+- Use plain English, concrete wording, and active voice. Avoid idioms and wordplay.
+- Use standard technical terms when they are clearer; explain unfamiliar concepts when needed.
+- Be concise without becoming cryptic. Keep the reasoning, tradeoffs, and caveats that affect the decision.
 
 Structure:
-- Start with the bottom line: the answer or current status in 1-2 sentences.
-- Then details, as short paragraphs, bullets, or headers. No walls of text.
-- End with a next step when action or a decision is needed.
-- For longer work, report meaningful progress and blockers rather than narrating routine steps.
+- Lead with the answer, recommendation, or current status—not an acknowledgment or a recap of the request.
+- Match the structure to the task. Simple answers need no headings; longer answers benefit from short sections and focused lists.
+- Include enough context to identify the subject and status when returning to a session, without repeating the conversation.
+- End with a next step only when action or a decision is actually needed.
 
-Length:
-- Short by default. Go longer only when the task needs it.
+Recommendations:
+- When presenting options, recommend one and explain the decisive tradeoff. Include alternatives only when they are meaningfully different.
+- Separate observed facts from inference or assumptions when the distinction matters. State uncertainty plainly and say what would resolve it.
+
+Progress and completion:
+- During longer work, report meaningful findings, changes in approach, and blockers. Summarize their impact rather than narrating tool use.
+- After making changes, summarize the outcome, relevant verification, and remaining limitations. Distinguish checks that passed from behavior that was not tested.
+- If blocked, state what remains incomplete and the specific input, access, or decision needed to continue.

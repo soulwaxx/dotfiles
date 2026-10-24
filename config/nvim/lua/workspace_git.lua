@@ -1,8 +1,6 @@
--- Workspace git overview. Snacks' git status is single-root (see the
--- <leader>er re-root keymap), so a workspace holding many sibling repos shows
--- no status for any of them. This scans the immediate subdirectories of the
--- cwd and lists the repos that have uncommitted OR unpushed work, so open work
--- is easy to recall. Selecting a repo re-roots the snacks explorer there.
+-- Workspace git overview. Scan the immediate subdirectories of the cwd for
+-- repos with uncommitted OR unpushed work. Selecting one re-roots the Files
+-- panel there; <leader>er instead re-roots at the current file's repository.
 local M = {}
 local uv = vim.uv or vim.loop
 
@@ -67,13 +65,7 @@ local function find_repos()
 end
 
 local function reroot_explorer(dir)
-	local explorer = Snacks.picker.get({ source = "explorer" })[1]
-	if explorer and not explorer.closed then
-		explorer:set_cwd(dir)
-		explorer:find()
-	else
-		Snacks.explorer({ cwd = dir })
-	end
+	require("sidebar").open(dir)
 end
 
 function M.pick()
