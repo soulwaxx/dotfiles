@@ -15,6 +15,5 @@
     ];
     home.homeDirectory = "/Users/${username}";
     dotfiles.pi.vaultAgentModel = "openai/gpt-6-luna";
-    dotfiles.herdr.heeler.enable = true;
   };
 }

@@ -24,9 +24,9 @@ in
 
       command =
         if pkgs.stdenv.hostPlatform.isDarwin then
-          "direct:/opt/homebrew/bin/herdr"
+          "direct:/opt/homebrew/bin/tmux new-session -A -s main"
         else
-          "direct:${pkgs.herdr}/bin/herdr";
+          "direct:${pkgs.tmux}/bin/tmux new-session -A -s main";
 
       font-family = config.dotfiles.theme.current.font.mono;
       # font-size is in points. Ghostty's point->pixel baseline is 72 DPI on

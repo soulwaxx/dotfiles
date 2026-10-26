@@ -301,11 +301,15 @@ in
         fi
         unset _fzf_functions
 
-        # Copy a whole file to the local machine's clipboard. OSC 52 travels over
-        # the terminal connection, so this also works through SSH.
+        # tmux's external-only clipboard mode blocks pane OSC 52; ask tmux to
+        # forward the copy explicitly. Outside tmux, send OSC 52 directly.
         clip() {
           [[ $# -eq 1 && -f $1 && -r $1 ]] || { echo "usage: clip <file>" >&2; return 1; }
-          printf '\e]52;c;%s\a' "$(base64 < "$1" | tr -d '\n')"
+          if [[ -n $TMUX ]]; then
+            command tmux load-buffer -w "$1"
+          else
+            printf '\e]52;c;%s\a' "$(base64 < "$1" | tr -d '\n')"
+          fi
         }
 
         # Load secrets (untracked). Guarded so a syntax error in the file reports

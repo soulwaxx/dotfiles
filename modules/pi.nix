@@ -250,12 +250,12 @@ let
     # Render mermaid diagrams once complete instead of streaming partial frames.
     markdown.mermaid = "final";
     tuiMode = "fullscreen"; # alternatives: "fullscreen" (default since 1.0.0), "regular"
-    # Force capabilities pi may under-detect behind a multiplexer.
-    # Kitty images work in Ghostty through Herdr graphics passthrough.
+    # tmux advertises OSC 8 for compatible clients. Let pi detect the complete
+    # terminal path: it deliberately falls back to text for images under tmux.
     terminal = {
-      hyperlinks = true;
+      hyperlinks = "auto";
       trueColor = true;
-      images = "kitty";
+      images = "auto";
     };
     defaultProjectTrust = "ask";
     quietStartup = true;

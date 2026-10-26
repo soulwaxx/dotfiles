@@ -142,47 +142,78 @@ Useful shell aliases:
 | `linux-realign`         | Linux only: check/switch, then clean Nix store                                  |
 | `linux-upgrade`         | Linux only: update flake inputs, switch, then clean Nix store                   |
 
-## Herd updates
+## tmux workspaces
 
-Herd itself follows the standard `cfg-upgrade` workflow: Homebrew updates it on macOS, and the updated nixpkgs input supplies it on Linux. These are the latest versions available from each package manager, which can lag upstream releases. A plain `nix-switch` does not update Homebrew or `flake.lock`; do not use `herdr update` for these package-manager-owned installs.
+`modules/tmux.nix` supplies the shared configuration on all five hosts. Homebrew owns tmux and Sesh on macOS; Nix owns their Linux packages. Home Manager owns configuration, a pinned TPM source, and the naming plugin's Python/libtmux environment—no user pip installation is needed.
 
-On every switch, `modules/herdr.nix` checks GitHub's latest stable release for Navigator and, where enabled, Heeler. It installs the release tag only when that source/tag is not already enabled. Plugin manifest versions can differ from repository release tags, so activation compares the source tag rather than a hard-coded plugin version. Plugins no longer follow fixed pins or development branches. Release checks require network access; lookup or installation failures fail activation rather than silently keeping an outdated plugin. The `herdr` flake check tests this behavior with mocked upstream responses.
+Ghostty runs `tmux new-session -A -s main`: projects normally occupy windows in one persistent `main` session. Closing or disconnecting Ghostty leaves processes running; reopening reconnects. This does **not** restore sessions after a reboot or tmux server exit, and does not launch editors or agents automatically. Ordinary shells and SSH do not auto-attach. In an interactive shell, bare `tmux` replaces the shell with a create-or-attach client for `main`; `tmux` with arguments passes them through unchanged.
 
-Package updates leave compatible running Herd servers in place. Reopen Herd to use the updated client; restart a session only when you are ready to pick up server-side changes.
+Ghostty's native tab/window shortcuts remain unchanged. Tabs attached to the same tmux session share its selected window; they are not independent project views. Use tmux windows to switch projects.
 
-## Herd phone access (Heeler + NetBird)
+### Keys and appearance
 
-[Heeler](https://github.com/ZingerLittleBee/Heeler) is an iOS 18+ companion for Herd. It controls existing agents over SSH; no extra agent server or public port forwarding is needed. `personal-mac` enables `dotfiles.herdr.heeler.enable`; other hosts leave it off. Activation also binds the managed plugin manifest's runtime scripts to an absolute Node executable: Ghostty starts Herd directly without the interactive shell's Homebrew PATH. This is a local manifest adjustment, not a change to upstream JavaScript or credentials.
+The prefix is **Ctrl+a**. Standard tmux bindings remain available except where overridden below.
 
-### One-time setup
+| Binding | Action |
+| --- | --- |
+| prefix → Ctrl+a | Send literal Ctrl+a to the application |
+| prefix → t | Pick windows in the current session |
+| prefix → o | Sesh's built-in interactive picker with icons and configured directory previews |
+| prefix → c | New window in the active pane's directory |
+| prefix → % / `\|` | Side-by-side split in that directory |
+| prefix → " / - | Stacked split in that directory |
+| prefix → h / j / k / l | Select the pane left / down / up / right |
+| prefix → H / J / K / L | Resize in that direction by 5 cells; repeatable |
+| prefix → < / > | Swap with the previous / next window; repeatable |
+| prefix → a | Switch to the last window |
+| prefix → Ctrl+p / Ctrl+n | Previous / next window |
+| prefix → X | Confirm and kill the current window |
+| prefix → r | Reload the generated tmux configuration |
+| prefix → Space | Command menu for pane, window, and session actions; no snapshot actions |
+| prefix → p / P | Floax floating scratch terminal / Floax menu |
+| prefix → F | tmux-fzf action picker |
+| prefix → u | Fuzzy URL picker over the last 2,000 scrollback lines |
+| prefix → d | Detach without terminating processes |
+| prefix → [ | Enter vi copy mode; v selects and y copies |
+| prefix → , | Set a manual window name |
 
-1. Install [Heeler from the App Store](https://apps.apple.com/us/app/heeler-for-herdr/id6797263135) and NetBird on the iPhone. Connect the phone and personal Mac to your existing NetBird network.
-2. In macOS **System Settings > General > Sharing > Remote Login**, enable SSH and allow only your login user. The dotfiles do not enable this service automatically. Keep OpenSSH's `AllowStreamLocalForwarding` enabled (the default); Heeler forwards to Herd's Unix socket.
-3. Use **ordinary macOS OpenSSH over NetBird**, not NetBird's built-in SSH server/JWT authentication. Heeler pairs against the OpenSSH host key and enrolls its device key in `~/.ssh/authorized_keys`; NetBird's embedded SSH server is not a substitute. If NetBird SSH is enabled on this peer, resolve its port-22 interception before pairing.
-4. In NetBird, allow the phone peer/group to reach the personal Mac peer/group with a **TCP port 22** access policy. Policies are additive: a narrower policy does not override the permissive Default policy or other broad rules. Review existing policies before restricting them so other access is not broken. NetBird policies govern overlay traffic only; Remote Login can also listen on LAN interfaces, so use host firewall/listener restrictions if you require VPN-only SSH.
-5. Keep Herd running, then open the pairing popup:
+Sesh creates secondary sessions on demand with a plain shell; it has no managed project inventory or startup commands. Its native picker handles cancellation and displays icons; `sesh/sesh.toml` restores the tmux/config/zoxide source order, prompt, and eza directory preview command. Floax supplies a persistent `scratch` session while the tmux server runs, not reboot recovery.
 
-   ```bash
-   herdr plugin list --plugin heeler
-   herdr plugin action invoke heeler.pair
-   ```
+Mouse dragging stays within the selected pane and copies on release. In copy mode the wheel scrolls five lines at a time; normal full-screen applications retain mouse reporting. Clipboard mode is **external-only**: tmux's own copies can reach the terminal clipboard, but direct application OSC 52 copies are blocked. This intentionally prevents Pi's direct remote clipboard path from working inside tmux. The `clip <file>` shell helper uses `tmux load-buffer -w` inside tmux and direct OSC 52 outside it. Clipboard delivery still depends on the outer terminal's permissions. Window/pane numbers start at 1; window numbers close gaps when one is removed. History retains 100,000 lines per pane.
 
-   Find the Mac's NetBird address in `netbird status`. In the popup, select that address (it may not be the preselected LAN address), deselect addresses you do not want advertised, and scan the QR in Heeler. The QR contains a short-lived bootstrap credential: do not share or commit it.
-6. Open an agent in Heeler and test reading its terminal and sending a harmless prompt. For a named Herd session, run `herdr --session <name> plugin action invoke heeler.pair` and select that session in the app's Host settings; the plugin installation is shared across sessions.
+Catppuccin Mocha uses rounded numbered window labels on a single top bar, with separate rounded session and short-hostname modules on the right. An empty top pane-border row separates the bar from terminal content; no extra status row is added. `tmux-window-name` supplies shortest unique directory paths and program icons; command arguments are hidden. Known directory-oriented programs include Neovim, Git, pi/Claude, Node/Python, SSH, btop, and k9s; other commands use the plugin's program-name fallback. Shell labels receive their icon from the theme. Manually named windows stay fixed; run `tmux rename-window ""` to return the current window to automatic naming. Shell directory/command changes and pane/window selection refresh labels without a polling daemon. The separate Nerd Font naming plugin is deliberately omitted to avoid competing renamers.
 
-Pairing grants the phone SSH access as your macOS user, not an agent-only sandbox. The phone's private key stays in its Keychain; authorized public keys and Heeler pairing/notification state remain machine-local. Do not declare the plugin's writable config directory as a Nix-managed file or commit its contents. Removing a Host from the app or disabling the Nix option does not revoke its SSH key: remove the corresponding device public-key entry from `~/.ssh/authorized_keys` to revoke access, and remove its notification registration if needed.
+Existing Claude desktop-notification hooks and pi permission bells remain enabled. Native tmux window flags show bells; no agent-state dashboard or phone push-notification replacement is installed.
 
-### Notifications and troubleshooting
+### Plugin installation and updates
 
-In Heeler, enable Agent Notifications, grant iOS notification permission, then enable Notifications for the Host. Live Activities are optional. The default relay is `https://heeler-apns.bybee.dev`: notification contents are end-to-end encrypted, but the relay/APNs still see delivery metadata. Leave notifications disabled if you do not want this external service involved; interactive SSH control does not need it.
+Switch activation installs missing plugins through TPM under `~/.config/tmux/plugins`, then reconciles those writable Git checkouts synchronously:
 
-```bash
-herdr plugin list --plugin heeler --json
-herdr plugin log list --plugin heeler --limit 20
-herdr plugin config-dir heeler
-```
+- `catppuccin/tmux` stays on **v2.3.2**. Edit the declared tag in `config/tmux/tmux.conf` to upgrade it.
+- `ofirgall/tmux-window-name`, `omerxx/tmux-floax`, `wfxr/tmux-fzf-url`, and `sainnhe/tmux-fzf` follow their upstream default branches using fast-forward-only updates.
+- Activation links Nix's `xre` into the URL plugin's ignored `bin` directory, preventing its first-use download installer.
+- Network, install, update, dirty-checkout, and unexpected-origin failures fail activation. Local tracked modifications are never reset or stashed automatically.
+- TPM itself is pinned through Nix in `modules/tmux.nix`. No mutable TPM self-update is performed.
 
-If pairing fails, check NetBird connectivity/policies, Remote Login, the selected address, and OpenSSH forwarding. The invoke command returns JSON; the popup appears in Herd, not the invoking terminal. Invocation is asynchronous, so a JSON result is not proof the popup started: inspect the plugin logs. If a `node` command fails with `No such file or directory`, reapply the personal Mac configuration to restore the absolute-Node manifest adjustment (reinstalling the plugin manually resets it). Exporting PATH in a pane does not change the already-running server's environment. If the host has no SSH host public keys, generate them with `sudo ssh-keygen -A`. The Mac must stay awake and reachable for interactive control.
+Activation uses a temporary, sessionless tmux server; it does not restart sessions or reload a live user server. After switching, load the configuration into an existing server explicitly with `tmux source-file ~/.config/tmux/tmux.conf`, or open tmux normally if no server is running. Never use `tmux kill-server` to reload configuration with unsaved work.
+
+TPM's prefix → I remains available for installation. Prefer a dotfiles switch for updates: TPM's upstream bulk updater does not reliably propagate individual background failures and cannot pull a detached release tag. Plugin checkout updates are **outside Nix-generation rollback**; rolling back a generation does not roll those directories back. There is no automated tmux behavior suite; use the manual checks below after configuration or plugin updates.
+
+### Terminal compatibility and migration
+
+The configuration advertises truecolor, underline styles/colors, extended keys, and OSC 8 hyperlinks for Ghostty, and uses CSI-u extended-key forwarding. Ghostty's existing macOS Cmd+w encoding is unchanged. **Known accepted limitation:** tmux 3.8 converts its Super+w CSI-u sequence to Alt+w, so Neovim's <D-w> mapping does not work through tmux as configured. No private-sequence translation or shortcut remapping is installed. Pi uses automatic hyperlink/image detection and keeps truecolor enabled. Its current renderer intentionally falls back to text for images under tmux; no Kitty mode is forced. Passthrough is enabled separately for Neovim's Snacks image/Mermaid/math rendering. Image input to models is unaffected.
+
+After an approved switch, manually verify:
+
+1. Ghostty reopens the same `main` session, with readable labels and the expected Mocha bar.
+2. The window, Sesh, URL, and action pickers, command menu, and Floax scratch terminal behave correctly; pane selection, directory changes, and manual names still work.
+3. Copy-mode selections and `clip <file>` reach the clipboard where supported; direct application OSC 52 copies remain blocked as selected.
+4. Pi Shift+Enter, Enter, and Alt+Enter remain distinct. Account for the accepted Cmd+w → Alt+w limitation in Neovim.
+5. Links open correctly, Neovim image previews render through passthrough, Claude notifications still arrive, and pi bells mark inactive windows.
+
+Herd and Heeler are no longer declared. Before applying this migration, save work in existing Herd sessions: Homebrew's normal cleanup may uninstall the undeclared Herd package. The migration does not stop Herd servers, delete session/plugin/pairing data, disable local integration entries, revoke phone SSH keys, or change SSH/NetBird policy.
+
+**Local integration cleanup is manual and report-only.** The inspected Mac still has `~/.pi/agent/extensions/herdr-agent-state.ts` (pi v9) and `~/.claude/hooks/herdr-agent-state.sh` (Claude v11). Both guard their behavior with Herd environment variables, but remain obsolete artifacts after migration. Review the generated entries and their install markers before disabling/removing anything; do not delete unrelated hooks or settings. The existing Claude settings-copy activation retains its normal behavior of reconciling the live settings file to repository settings when they drift; this migration adds no integration-cleanup action. Heeler phone authorization remains valid until explicitly revoked separately.
 
 ## Pi maintenance
 

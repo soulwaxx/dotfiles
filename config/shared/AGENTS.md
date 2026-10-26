@@ -21,6 +21,7 @@ Before implementing:
 - No features beyond what was asked.
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
+- Before writing a new implementation, check in this order: existing repository code and patterns, standard-library or platform features, then installed dependencies. Reuse the first option that meets the requirements and project conventions. If none fits, implement the missing behavior or explain why a new dependency is needed.
 - Handle realistic failures at system boundaries. Avoid defensive checks for states ruled out by established invariants.
 - Prefer the smallest clear implementation that meets the requirements and fits the existing design. Do not trade correctness or readability for fewer lines.
 
@@ -31,6 +32,8 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 **Touch only what you must. Clean up only your own mess.**
 
 When editing existing code:
+- Before changing behavior or an interface, inspect affected callers, tests, fixtures, configuration, and exports. Update each one that the change requires. A small diff is not a reason to leave affected code broken; this is not permission to change unrelated code.
+- When moving or consolidating code, preserve its required validation, error handling, security, and accessibility behavior. Do not drop these safeguards to shorten the code.
 - Don't "improve" adjacent code, comments, or formatting.
 - Don't refactor things that aren't broken.
 - Match existing style, even if you'd do it differently.
@@ -52,6 +55,8 @@ Transform tasks into verifiable goals:
 - "Add validation" → "Write tests for invalid inputs, then make them pass"
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
+
+When a solution deliberately accepts a known limitation, document what is unsupported and the observable condition that should trigger revisiting it, such as exceeding a stated input size. Put this in a nearby code comment or existing project documentation. Do not silently drop requirements; get user approval before reducing agreed scope.
 
 Show a brief plan when it helps coordination or makes complex work easier to follow. Keep routine task planning internal.
 
