@@ -144,11 +144,11 @@ Useful shell aliases:
 
 ## tmux workspaces
 
-`modules/tmux.nix` supplies the shared configuration on all five hosts. Homebrew owns tmux and Sesh on macOS; Nix owns their Linux packages. Home Manager owns configuration, a pinned TPM source, and the naming plugin's Python/libtmux environment—no user pip installation is needed.
+`modules/tmux.nix` supplies the shared configuration on all five hosts. Homebrew owns tmux and Sesh on macOS; Nix owns their Linux packages. Home Manager links `~/.config/tmux/tmux.conf` directly to `config/tmux/tmux.conf`, generates a small `environment.conf` for machine-specific paths and the default shell, and owns TPM bootstrap. There is no generated tmux wrapper or `dotfiles.conf`.
 
-Ghostty runs `tmux new-session -A -s main`: projects normally occupy windows in one persistent `main` session. Closing or disconnecting Ghostty leaves processes running; reopening reconnects. This does **not** restore sessions after a reboot or tmux server exit, and does not launch editors or agents automatically. Ordinary shells and SSH do not auto-attach. In an interactive shell, bare `tmux` replaces the shell with a create-or-attach client for `main`; `tmux` with arguments passes them through unchanged.
+Ghostty runs `tmux new-session`: each new tab or window creates an independent session. Closing or disconnecting Ghostty leaves processes running, but reopening creates another session rather than reconnecting automatically. Use Sesh or `tmux attach -t <session>` to reconnect. This does **not automatically** restore sessions after a reboot or tmux server exit, and does not launch editors or agents automatically. Manual Resurrect snapshots are available through the command menu. Ordinary shells and SSH do not auto-attach. In an interactive shell, bare `tmux` replaces the shell with a create-or-attach client for `home`; `tmux` with arguments passes them through unchanged.
 
-Ghostty's native tab/window shortcuts remain unchanged. Tabs attached to the same tmux session share its selected window; they are not independent project views. Use tmux windows to switch projects.
+Ghostty's native tab/window shortcuts remain unchanged. New tabs/windows have independent tmux window selection unless you explicitly attach them to the same session. Destroying the attached session detaches its client (`detach-on-destroy on`), even if another session exists.
 
 ### Keys and appearance
 
@@ -160,7 +160,7 @@ The prefix is **Ctrl+a**. Standard tmux bindings remain available except where o
 | prefix → t | Pick windows in the current session |
 | prefix → o | Sesh's built-in interactive picker with icons and configured directory previews |
 | prefix → c | New window in the active pane's directory |
-| prefix → % / `\|` | Side-by-side split in that directory |
+| prefix → v / % | Side-by-side split in that directory |
 | prefix → " / - | Stacked split in that directory |
 | prefix → h / j / k / l | Select the pane left / down / up / right |
 | prefix → H / J / K / L | Resize in that direction by 5 cells; repeatable |
@@ -168,8 +168,8 @@ The prefix is **Ctrl+a**. Standard tmux bindings remain available except where o
 | prefix → a | Switch to the last window |
 | prefix → Ctrl+p / Ctrl+n | Previous / next window |
 | prefix → X | Confirm and kill the current window |
-| prefix → r | Reload the generated tmux configuration |
-| prefix → Space | Command menu for pane, window, and session actions; no snapshot actions |
+| prefix → r | Reload tmux.conf and its generated environment |
+| prefix → Space | Command menu for pane, window, and session actions, including manual snapshot save and confirmed restore |
 | prefix → p / P | Floax floating scratch terminal / Floax menu |
 | prefix → F | tmux-fzf action picker |
 | prefix → u | Fuzzy URL picker over the last 2,000 scrollback lines |
@@ -177,27 +177,37 @@ The prefix is **Ctrl+a**. Standard tmux bindings remain available except where o
 | prefix → [ | Enter vi copy mode; v selects and y copies |
 | prefix → , | Set a manual window name |
 
-Sesh creates secondary sessions on demand with a plain shell; it has no managed project inventory or startup commands. Its native picker handles cancellation and displays icons; `sesh/sesh.toml` restores the tmux/config/zoxide source order, prompt, and eza directory preview command. Floax supplies a persistent `scratch` session while the tmux server runs, not reboot recovery.
+Sesh creates sessions on demand with a plain shell; it has no managed project inventory or startup commands. Its native picker handles cancellation and displays icons; `sesh/sesh.toml` restores the tmux/config/zoxide source order, prompt, and eza directory preview command. Floax supplies a persistent `scratch` session while the tmux server runs, not reboot recovery.
 
 Mouse dragging stays within the selected pane and copies on release. In copy mode the wheel scrolls five lines at a time; normal full-screen applications retain mouse reporting. Clipboard mode is **external-only**: tmux's own copies can reach the terminal clipboard, but direct application OSC 52 copies are blocked. This intentionally prevents Pi's direct remote clipboard path from working inside tmux. The `clip <file>` shell helper uses `tmux load-buffer -w` inside tmux and direct OSC 52 outside it. Clipboard delivery still depends on the outer terminal's permissions. Window/pane numbers start at 1; window numbers close gaps when one is removed. History retains 100,000 lines per pane.
 
-Catppuccin Mocha uses rounded numbered window labels on a single top bar, with separate rounded session and short-hostname modules on the right. An empty top pane-border row separates the bar from terminal content; no extra status row is added. `tmux-window-name` supplies shortest unique directory paths and program icons; command arguments are hidden. Known directory-oriented programs include Neovim, Git, pi/Claude, Node/Python, SSH, btop, and k9s; other commands use the plugin's program-name fallback. Shell labels receive their icon from the theme. Manually named windows stay fixed; run `tmux rename-window ""` to return the current window to automatic naming. Shell directory/command changes and pane/window selection refresh labels without a polling daemon. The separate Nerd Font naming plugin is deliberately omitted to avoid competing renamers.
+Catppuccin Mocha v2.3.2 uses the historical minimal overrides: rounded window labels and padded window names (` #W`). Number placement, label/pane colors, and status-module separators use the release defaults; the custom peach/sky styling and window-state icons are removed. Reloading clears the retired overrides before TPM initializes the theme. Popup borders are rounded. A single top bar shows the session on the left and current directory on the right. An empty top pane-border row separates the bar from terminal content; no extra status row is added. All appearance settings live in `config/tmux/tmux.conf`. Automatic renaming and application-driven renaming are disabled. Use prefix → , to name windows manually. No naming plugin or Python/libtmux support is installed. Reloading removes the retired naming hooks from an existing server; open fresh shells after switching to discard its old zsh hooks.
 
-Existing Claude desktop-notification hooks and pi permission bells remain enabled. Native tmux window flags show bells; no agent-state dashboard or phone push-notification replacement is installed.
+The command prompt uses Emacs editing independently of vi copy mode. Copy mode retains tmux's current defaults: H/L move to the top/bottom of the visible screen, Escape clears selection, Ctrl+v toggles rectangular selection, and Y is unbound. Prefix +, Y, Enter, and | remain unbound; prefix m marks a pane rather than toggling mouse.
+
+Existing Claude desktop-notification hooks and pi permission bells remain enabled. tmux uses `bell-action other` and no visual bell; Catppuccin's default bell styling remains available without window-state icons. No agent-state dashboard or phone push-notification replacement is installed.
+
+### Manual snapshots
+
+Use prefix → Space → Ctrl+s to save a Resurrect snapshot, or prefix → Space → Ctrl+r to restore the last snapshot after confirmation. Direct prefix → Ctrl+s/Ctrl+r bindings are disabled so restore cannot bypass that confirmation. There is no Continuum, periodic save, or automatic restore. Pane-content capture is disabled; Neovim uses Resurrect's `session` strategy and needs its session file for editor-state recovery. Snapshots do not guarantee recovery of arbitrary running processes.
+
+Terminal titles use `#S ● #I #{pane_current_command}`. Messages remain visible for three seconds and pane numbers for 1.2 seconds.
 
 ### Plugin installation and updates
 
-Switch activation installs missing plugins through TPM under `~/.config/tmux/plugins`, then reconciles those writable Git checkouts synchronously:
+Switch activation shallow-clones an unpinned, writable TPM checkout into `~/.config/tmux/plugins/tpm` if missing, then uses TPM to install missing plugins and clean undeclared plugin checkouts. Cleanup deletes undeclared checkouts, including any local changes in them. Currently declared plugins, including `tmux-fzf`, remain installed.
 
-- `catppuccin/tmux` stays on **v2.3.2**. Edit the declared tag in `config/tmux/tmux.conf` to upgrade it.
-- `ofirgall/tmux-window-name`, `omerxx/tmux-floax`, `wfxr/tmux-fzf-url`, and `sainnhe/tmux-fzf` follow their upstream default branches using fast-forward-only updates.
+- Switches do **not** update existing TPM or plugin checkouts. Clone, installation, cleanup, and server-start failures warn and allow activation to continue.
+- Catppuccin is declared at **v2.3.2**. TPM installs that tag on a fresh checkout; changing the declaration does not move an existing checkout. TPM's bulk updater cannot pull a detached release tag, so update Catppuccin explicitly when changing versions.
+- Other plugins are installed from their upstream defaults. TPM's standard prefix → I (install), U (update), and Alt+u (cleanup) bindings remain available; bulk updates may not reliably report individual background failures.
 - Activation links Nix's `xre` into the URL plugin's ignored `bin` directory, preventing its first-use download installer.
-- Network, install, update, dirty-checkout, and unexpected-origin failures fail activation. Local tracked modifications are never reset or stashed automatically.
-- TPM itself is pinned through Nix in `modules/tmux.nix`. No mutable TPM self-update is performed.
+- Plugin and TPM checkouts are **outside Nix-generation rollback**; rolling back a generation does not roll those directories back. There are no activation-time origin, dirty-worktree, or fast-forward checks.
 
-Activation uses a temporary, sessionless tmux server; it does not restart sessions or reload a live user server. After switching, load the configuration into an existing server explicitly with `tmux source-file ~/.config/tmux/tmux.conf`, or open tmux normally if no server is running. Never use `tmux kill-server` to reload configuration with unsaved work.
+The generated environment replaces PATH on every reload, so repeated reloads do not accumulate entries. Declared Nix plugin helpers take precedence, followed by Homebrew on macOS, the platform Nix profile, declared user binaries, and standard system directories. Undeclared directories inherited from the launching application are not retained. Linux retains the former Home Manager secure-socket behavior through `TMUX_TMPDIR`, using `$XDG_RUNTIME_DIR` or `/run/user/$(id -u)` instead of `/tmp`.
 
-TPM's prefix → I remains available for installation. Prefer a dotfiles switch for updates: TPM's upstream bulk updater does not reliably propagate individual background failures and cannot pull a detached release tag. Plugin checkout updates are **outside Nix-generation rollback**; rolling back a generation does not roll those directories back. There is no automated tmux behavior suite; use the manual checks below after configuration or plugin updates.
+Activation uses the default tmux server, not a private socket. Starting a server can load the user's configuration; an already running server is not explicitly reloaded or restarted. After switching, load the configuration into an existing server with `tmux source-file ~/.config/tmux/tmux.conf`, or open tmux normally if no server is running. Never use `tmux kill-server` to reload configuration with unsaved work.
+
+Bootstrap behavior and generated configuration have automated tests. Configuration tests use private sockets and a fake TPM, covering package ownership, launch commands, bindings/options, stale theme-override cleanup, and reload-stable PATH and terminal features without touching live plugins or snapshots. Interactive tmux behavior still needs the manual checks below.
 
 ### Terminal compatibility and migration
 
@@ -205,15 +215,24 @@ The configuration advertises truecolor, underline styles/colors, extended keys, 
 
 After an approved switch, manually verify:
 
-1. Ghostty reopens the same `main` session, with readable labels and the expected Mocha bar.
-2. The window, Sesh, URL, and action pickers, command menu, and Floax scratch terminal behave correctly; pane selection, directory changes, and manual names still work.
+1. New Ghostty tabs/windows create independent sessions with readable labels and the expected Mocha bar. Closing and reopening does not reconnect automatically; confirm Sesh can reconnect and bare `tmux` attaches to `home`.
+2. The window, Sesh, URL, and action pickers, command menu, and Floax scratch terminal behave correctly; pane selection, directory changes, and manual names still work. In a disposable session, save and restore a manual snapshot, checking that restore asks for confirmation.
 3. Copy-mode selections and `clip <file>` reach the clipboard where supported; direct application OSC 52 copies remain blocked as selected.
 4. Pi Shift+Enter, Enter, and Alt+Enter remain distinct. Account for the accepted Cmd+w → Alt+w limitation in Neovim.
 5. Links open correctly, Neovim image previews render through passthrough, Claude notifications still arrive, and pi bells mark inactive windows.
 
 Herd and Heeler are no longer declared. Before applying this migration, save work in existing Herd sessions: Homebrew's normal cleanup may uninstall the undeclared Herd package. The migration does not stop Herd servers, delete session/plugin/pairing data, disable local integration entries, revoke phone SSH keys, or change SSH/NetBird policy.
 
-**Local integration cleanup is manual and report-only.** The inspected Mac still has `~/.pi/agent/extensions/herdr-agent-state.ts` (pi v9) and `~/.claude/hooks/herdr-agent-state.sh` (Claude v11). Both guard their behavior with Herd environment variables, but remain obsolete artifacts after migration. Review the generated entries and their install markers before disabling/removing anything; do not delete unrelated hooks or settings. The existing Claude settings-copy activation retains its normal behavior of reconciling the live settings file to repository settings when they drift; this migration adds no integration-cleanup action. Heeler phone authorization remains valid until explicitly revoked separately.
+**Local integration cleanup is explicit and permanent.** Run the standalone Python 3 script as the normal user on each host:
+
+```bash
+python3 cleanup-herdr.py          # preview only
+python3 cleanup-herdr.py --apply  # permanently delete, with no backups
+```
+
+The script removes marked `~/.pi/agent/extensions/herdr-agent-state.ts` and `~/.claude/hooks/herdr-agent-state.sh` files, their standalone commands from Claude's user-level settings hooks, and all of `~/.config/herdr` and `~/.local/state/herdr` (including old sessions, plugins, and Heeler state). It preserves unrelated hooks, settings, and packages; it does not scan other projects or edit package internals. Ambiguous hook commands, unmarked integration files, invalid settings, and linked settings that need rewriting fail before deletion. Apply mode refuses to proceed while Herd or Heeler is running. Quit Claude before applying to avoid concurrent settings writes, then restart pi and Claude to unload any already loaded integration. Repeated runs are safe.
+
+The script can also be streamed to a verified SSH target without installing it there: `ssh <user>@<host> 'python3 - --apply' < cleanup-herdr.py`. Use each host's inventory user and normal SSH host-key verification. There is no automatic cleanup during activation and no package uninstallation, process termination, or SSH/NetBird policy change. Heeler phone authorization remains valid until explicitly revoked separately.
 
 ## Pi maintenance
 

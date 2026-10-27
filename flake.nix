@@ -315,6 +315,59 @@
               ${./tests/pi-statusline.mjs} ${./config/pi/statusline/index.js}
             touch $out
           '';
+        tmux-bootstrap =
+          pkgs.runCommand "check-tmux-bootstrap" { nativeBuildInputs = [ pkgs.coreutils ]; }
+            ''
+              ${pkgs.python3}/bin/python3 ${./tests/tmux-bootstrap.py} \
+                ${./config/tmux/bootstrap-plugins.sh} ${pkgs.bash}/bin/bash
+              touch $out
+            '';
+        tmux-config =
+          let
+            hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
+              darwinHosts // linuxHosts
+            );
+            fixtures = pkgs.writeText "tmux-config-fixtures.json" (
+              builtins.toJSON (
+                lib.mapAttrs (
+                  hostname: host:
+                  let
+                    darwin = lib.hasSuffix "darwin" host.system;
+                    home =
+                      if darwin then
+                        self.darwinConfigurations.${hostname}.config.home-manager.users.${host.username}
+                      else
+                        self.homeConfigurations.${hostname}.config;
+                  in
+                  {
+                    inherit darwin;
+                    environment = home.xdg.configFile."tmux/environment.conf".source;
+                    source = home.xdg.configFile."tmux/tmux.conf".source;
+                    expectedSource = "${home.dotfiles.path}/config/tmux/tmux.conf";
+                    configHome = home.xdg.configHome;
+                    homeDirectory = home.home.homeDirectory;
+                    shell = "${pkgs.zsh}/bin/zsh";
+                    shellInit = home.programs.zsh.initContent;
+                    ghosttyCommand = home.programs.ghostty.settings.command;
+                    tmuxInstalled = lib.any (package: lib.getName package == "tmux") home.home.packages;
+                    generatedWrapper = home.programs.tmux.enable;
+                    socketDirectory = home.home.sessionVariables.TMUX_TMPDIR or null;
+                    hasDotfilesConf = builtins.hasAttr "tmux/dotfiles.conf" home.xdg.configFile;
+                  }
+                ) hosts
+              )
+            );
+          in
+          pkgs.runCommand "check-tmux-config" { } ''
+            ${pkgs.python3}/bin/python3 ${./tests/tmux-config.py} \
+              ${fixtures} ${./config/tmux/tmux.conf} ${pkgs.tmux}/bin/tmux \
+              ${pkgs.zsh}/bin/zsh ${pkgs.bash}/bin/bash
+            touch $out
+          '';
+        cleanup-herdr = pkgs.runCommand "check-cleanup-herdr" { } ''
+          ${pkgs.python3}/bin/python3 ${./tests/cleanup-herdr.py} ${./cleanup-herdr.py}
+          touch $out
+        '';
         skills = pkgs.runCommand "check-skills" { } ''
           ${pkgs.python3}/bin/python3 ${./tests/skills.py} ${./config/shared/skills} \
             ${./config/shared/AGENTS.md}
