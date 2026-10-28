@@ -37,6 +37,7 @@ let
     pkgs.fd
     pkgs.glow
     pkgs.graphviz
+    pkgs.herdr # config lives in modules/herdr.nix
     pkgs.ghostscript
     pkgs.imagemagick
     pkgs.jq
@@ -46,7 +47,6 @@ let
     pkgs.statix # nvim-lint nix source
     pkgs.p7zip
     pkgs.ripgrep
-    pkgs.sesh # tmux session picker; config lives in modules/tmux.nix
     pkgs.shellcheck
     pkgs.tree-sitter
     pkgs.unar
@@ -73,7 +73,7 @@ in
     basePackages
     ++ cloudPackages
     ++ cliPackages
-    # Clipboard support for terminal applications on Wayland desktops.
+    # Herd copies selections through wl-copy on Wayland desktops.
     ++ lib.optionals config.dotfiles.linux.enableDesktop [ pkgs.wl-clipboard ]
     ++ lib.optionals config.dotfiles.kubernetes.enable kubernetesPackages
     ++ devToolchainPackages;

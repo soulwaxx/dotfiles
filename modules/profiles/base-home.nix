@@ -38,7 +38,7 @@ in
     ../fzf.nix
     ../starship.nix
     ../neovim.nix
-    ../tmux.nix
+    ../herdr.nix
     ../k9s.nix
     ../terraform.nix
     ../theme

@@ -39,15 +39,14 @@ let
     "fd"
     "glow"
     "graphviz"
+    "herdr" # config lives in modules/herdr.nix
     "jq"
     "make" # GNU make (installs as gmake)
     "nixfmt" # nvim conform + treefmt parity; Mason has no darwin-arm64 nixfmt
     "p7zip"
     "ripgrep"
-    "sesh" # tmux session picker; config lives in modules/tmux.nix
     "shellcheck"
     "statix" # nvim-lint nix source; Mason only builds it slowly from cargo
-    "tmux" # config lives in modules/tmux.nix
     "tree-sitter-cli" # nvim-treesitter parser compilation (the plain `tree-sitter` formula ships only the library)
     "unar"
     "yq" # Mike Farah's Go yq (== nixpkgs yq-go)
