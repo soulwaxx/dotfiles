@@ -263,9 +263,8 @@
                   in
                   {
                     # Test the generated shell with mocked external commands,
-                    # without building Herd or the plugin build toolchains.
+                    # without building Herd.
                     script = builtins.unsafeDiscardStringContext home.home.activation.herdrIntegrations.data;
-                    heeler = home.dotfiles.herdr.heeler.enable;
                   }
                 ) hosts
               )
@@ -273,11 +272,7 @@
           in
           pkgs.runCommand "check-herdr"
             {
-              nativeBuildInputs = [
-                pkgs.coreutils
-                pkgs.jq
-                pkgs.gnused
-              ];
+              nativeBuildInputs = [ pkgs.coreutils ];
             }
             ''
               ${pkgs.python3}/bin/python3 ${./tests/herdr.py} ${fixtures} ${pkgs.bash}/bin/bash

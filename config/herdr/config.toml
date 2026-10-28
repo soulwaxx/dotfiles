@@ -10,12 +10,6 @@ version_check = false
 prefix = "ctrl+a"
 new_worktree = ""
 
-[[keys.command]]
-key = "prefix+t"
-type = "plugin_action"
-command = "herdr-navigator.open"
-description = "jump to workspace or directory"
-
 [ui.sidebar.agents]
 rows = [["state_icon", "workspace", "tab"], ["agent", "state_text"]]
 

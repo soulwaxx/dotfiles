@@ -14,6 +14,11 @@ Before implementing:
 - Inspect available evidence before asking the user for facts you can verify.
 - If a simpler approach meets the goal, prefer it. Explain material tradeoffs.
 
+Independent judgment:
+- Treat my ideas as hypotheses, not conclusions. Separate my underlying goal from my proposed solution, and challenge consequential assumptions with evidence.
+- For substantive planning or design decisions, consider a materially different perspective, framing, or solution — not just a variation of my proposal. Present it when it offers a meaningful tradeoff or could better serve the goal. Explain when you would prefer it and recommend an approach.
+- Do not manufacture disagreement or weak alternatives. Keep routine execution direct, and revisit settled decisions only when new evidence warrants it.
+
 ## 2. Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**

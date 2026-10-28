@@ -146,43 +146,9 @@ Useful shell aliases:
 
 Herd itself follows the standard `cfg-upgrade` workflow: Homebrew updates it on macOS, and the updated nixpkgs input supplies it on Linux. These are the latest versions available from each package manager, which can lag upstream releases. A plain `nix-switch` does not update Homebrew or `flake.lock`; do not use `herdr update` for these package-manager-owned installs.
 
-On every switch, `modules/herdr.nix` checks GitHub's latest stable release for Navigator and, where enabled, Heeler. It installs the release tag only when that source/tag is not already enabled. Plugin manifest versions can differ from repository release tags, so activation compares the source tag rather than a hard-coded plugin version. Plugins no longer follow fixed pins or development branches. Release checks require network access; lookup or installation failures fail activation rather than silently keeping an outdated plugin. The `herdr` flake check tests this behavior with mocked upstream responses.
+No Herd plugins are declared. On every switch, `modules/herdr.nix` only installs Herd's pi and Claude integrations; the `herdr` flake check tests this with a mocked `herdr`. Plugins installed earlier stay on disk until removed manually.
 
 Package updates leave compatible running Herd servers in place. Reopen Herd to use the updated client; restart a session only when you are ready to pick up server-side changes.
-
-## Herd phone access (Heeler + NetBird)
-
-[Heeler](https://github.com/ZingerLittleBee/Heeler) is an iOS 18+ companion for Herd. It controls existing agents over SSH; no extra agent server or public port forwarding is needed. `personal-mac` enables `dotfiles.herdr.heeler.enable`; other hosts leave it off. Activation also binds the managed plugin manifest's runtime scripts to an absolute Node executable: Ghostty starts Herd directly without the interactive shell's Homebrew PATH. This is a local manifest adjustment, not a change to upstream JavaScript or credentials.
-
-### One-time setup
-
-1. Install [Heeler from the App Store](https://apps.apple.com/us/app/heeler-for-herdr/id6797263135) and NetBird on the iPhone. Connect the phone and personal Mac to your existing NetBird network.
-2. In macOS **System Settings > General > Sharing > Remote Login**, enable SSH and allow only your login user. The dotfiles do not enable this service automatically. Keep OpenSSH's `AllowStreamLocalForwarding` enabled (the default); Heeler forwards to Herd's Unix socket.
-3. Use **ordinary macOS OpenSSH over NetBird**, not NetBird's built-in SSH server/JWT authentication. Heeler pairs against the OpenSSH host key and enrolls its device key in `~/.ssh/authorized_keys`; NetBird's embedded SSH server is not a substitute. If NetBird SSH is enabled on this peer, resolve its port-22 interception before pairing.
-4. In NetBird, allow the phone peer/group to reach the personal Mac peer/group with a **TCP port 22** access policy. Policies are additive: a narrower policy does not override the permissive Default policy or other broad rules. Review existing policies before restricting them so other access is not broken. NetBird policies govern overlay traffic only; Remote Login can also listen on LAN interfaces, so use host firewall/listener restrictions if you require VPN-only SSH.
-5. Keep Herd running, then open the pairing popup:
-
-   ```bash
-   herdr plugin list --plugin heeler
-   herdr plugin action invoke heeler.pair
-   ```
-
-   Find the Mac's NetBird address in `netbird status`. In the popup, select that address (it may not be the preselected LAN address), deselect addresses you do not want advertised, and scan the QR in Heeler. The QR contains a short-lived bootstrap credential: do not share or commit it.
-6. Open an agent in Heeler and test reading its terminal and sending a harmless prompt. For a named Herd session, run `herdr --session <name> plugin action invoke heeler.pair` and select that session in the app's Host settings; the plugin installation is shared across sessions.
-
-Pairing grants the phone SSH access as your macOS user, not an agent-only sandbox. The phone's private key stays in its Keychain; authorized public keys and Heeler pairing/notification state remain machine-local. Do not declare the plugin's writable config directory as a Nix-managed file or commit its contents. Removing a Host from the app or disabling the Nix option does not revoke its SSH key: remove the corresponding device public-key entry from `~/.ssh/authorized_keys` to revoke access, and remove its notification registration if needed.
-
-### Notifications and troubleshooting
-
-In Heeler, enable Agent Notifications, grant iOS notification permission, then enable Notifications for the Host. Live Activities are optional. The default relay is `https://heeler-apns.bybee.dev`: notification contents are end-to-end encrypted, but the relay/APNs still see delivery metadata. Leave notifications disabled if you do not want this external service involved; interactive SSH control does not need it.
-
-```bash
-herdr plugin list --plugin heeler --json
-herdr plugin log list --plugin heeler --limit 20
-herdr plugin config-dir heeler
-```
-
-If pairing fails, check NetBird connectivity/policies, Remote Login, the selected address, and OpenSSH forwarding. The invoke command returns JSON; the popup appears in Herd, not the invoking terminal. Invocation is asynchronous, so a JSON result is not proof the popup started: inspect the plugin logs. If a `node` command fails with `No such file or directory`, reapply the personal Mac configuration to restore the absolute-Node manifest adjustment (reinstalling the plugin manually resets it). Exporting PATH in a pane does not change the already-running server's environment. If the host has no SSH host public keys, generate them with `sudo ssh-keygen -A`. The Mac must stay awake and reachable for interactive control.
 
 ## Pi maintenance
 
@@ -215,8 +181,10 @@ Other option layouts, including staging-only commands with Git global options, c
 
 Pi uses [`pi-subagents`](https://pi.dev/packages/pi-subagents). `modules/pi.nix` loads only its extension and its `pi-subagents` skill; the package prompt templates and `council-mode` skill are filtered out.
 
-- Agents: `subagents.disableBuiltins` hides every bundled agent. The only agents are `scout`, `reviewer`, and `worker`, generated from `config/shared/agents/` into `~/.pi/agent/agents/`, plus `obsidian-second-brain.wiki-vault` on macOS, which the obsidian-second-brain package ships. `dotfiles.pi.vaultAgentModel` sets that agent's model through `subagents.agentOverrides`.
-- Generated agents run in the background with fresh context, repository instructions, the shared global `AGENTS.md` (`inheritGlobalContext`; the vault agent gets it through `agentOverrides`), and strict tool allowlists. Background children load the parent's installed extensions, so the permission system and web access also apply inside children.
+- Agents: `subagents.disableBuiltins` hides every bundled agent. The repository declares `scout`, `researcher`, `reviewer`, `infra-reviewer`, and `worker`, generated from `config/shared/agents/` into `~/.pi/agent/agents/`, plus `obsidian-second-brain.wiki-vault` on macOS, which the obsidian-second-brain package ships. `dotfiles.pi.vaultAgentModel` sets that agent's model through `subagents.agentOverrides`.
+- Generated agents default to background execution with fresh context, repository instructions, the shared global `AGENTS.md` (`inheritGlobalContext`; the vault agent gets it through `agentOverrides`), and strict tool allowlists. Fresh context does not include the parent conversation, so each assignment needs a self-contained brief. Background children load the parent's installed extensions, including the permission system and web access.
+- Read-only agents (`scout`, `researcher`, `reviewer`, and `infra-reviewer`) retain `bash` for investigation and checks. Their instructions require read-only behavior, but neither those instructions nor `acceptanceRole: read-only` provides a sandbox or prevents shell mutations. The permission policy remains the authorization boundary.
+- Background execution is the supported mode for this configuration, not an enforced restriction: callers can override `async: true`. Foreground children do not load ambient extensions, so an `async: false` override can lose permission enforcement and web tools. Explicitly loading those extensions would restore policy checks and tools, but not human approval forwarding: [upstream documents foreground `ask` forwarding as unsupported](https://github.com/nicobailon/pi-subagents/blob/main/docs/watchdog.md#native-child-tool-permissions) for the current integration. Revisit foreground support when session-scoped approval forwarding is supported and validated.
 - `config/pi/subagents.json` is symlinked to `~/.pi/agent/extensions/subagent/config.json`. Direct launches and JavaScript workflow scripts are available; scripts use `runs.run` for sequential work and `runs.all` for parallel work instead of top-level `tasks` and `chain`. Lane-management controls are available for reviewed cleanup, with confirmation required for worktree discard and destructive cleanup. Other optional feature groups, including preflight hints, scheduled runs, and automatic missions, remain disabled.
 - `maxSubagentDepth: 1` prevents child delegation. Artifact saving and concurrency use package defaults, as does the 30-minute run deadline for each single-agent launch.
 - The reviewer supports fixed-point diff reviews and current-state audits. Only diff reviews require the `code-review` skill and a fixed point.

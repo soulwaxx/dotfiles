@@ -32,11 +32,12 @@ in
       # font-size is in points. Ghostty's point->pixel baseline is 72 DPI on
       # macOS but 96 DPI on Linux/GTK, so an identical point size renders ~33%
       # larger on Linux. Scale the Linux value by 72/96 to match macOS visually.
+      # Use Ghostty's default font size, weight, and spacing for now.
       font-size = if pkgs.stdenv.hostPlatform.isDarwin then 13.5 else 10.125;
       font-thicken = true;
       # Adds 6% to the font's natural cell height and vertically centers the
       # glyph, giving airier line spacing that reads as less visually noisy.
-      adjust-cell-height = "6%";
+      # adjust-cell-height = "6%";
 
       cursor-style = "bar";
       cursor-style-blink = true;
