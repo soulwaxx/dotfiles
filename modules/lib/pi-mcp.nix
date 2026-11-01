@@ -10,7 +10,7 @@ in
         name: server:
         server
         // {
-          exposure = "deferred";
+          exposure = "codemode";
           timeout = if name == "aws-mcp" then 300 else 60;
         }
       )

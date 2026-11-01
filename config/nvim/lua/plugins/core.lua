@@ -45,7 +45,6 @@ return {
         mason = true,
         mini = { enabled = true, indentscope_color = "overlay2" },
         native_lsp = { enabled = true },
-        neotree = true,
         noice = true,
         notifier = true,
         render_markdown = true,
@@ -101,14 +100,6 @@ return {
             hidden = true,
             ignored = true,
             exclude = ignored_globs,
-            git_status_open = true,
-            layout = {
-              layout = {
-                width = 28,
-                min_width = 20,
-              },
-            },
-            jump = { close = false },
             win = {
               list = {
                 keys = {

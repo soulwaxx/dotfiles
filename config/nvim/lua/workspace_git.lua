@@ -65,7 +65,11 @@ local function find_repos()
 end
 
 local function reroot_explorer(dir)
-	require("sidebar").open(dir)
+	local explorer = Snacks.picker.get({ source = "explorer" })[1]
+	if explorer then
+		explorer:close()
+	end
+	Snacks.explorer({ cwd = dir })
 end
 
 function M.pick()

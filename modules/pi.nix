@@ -232,14 +232,13 @@ let
       keepRecentTokens = 20000;
       modelOverrides = {
         # Confirmed 1M work window: compact above 300K context tokens.
-        "anthropic/claude-opus-5-5".reserveTokens = 1000000 - 300000;
+        "anthropic/claude-opus-5-5".reserveTokens = 1000000 - 500000;
         # Confirmed 272K personal window: compact above 220K context tokens.
         "openai/gpt-6.1-sol".reserveTokens = 272000 - 220000;
       };
     };
     theme = theme.name;
     defaultTools = [
-      "+tool_search"
       "+codemode"
     ];
     # Opt out of the anonymous install/update ping and provider attribution

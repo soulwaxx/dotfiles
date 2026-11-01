@@ -21,7 +21,11 @@ vim.keymap.set("n", "<leader>er", function()
 		vim.notify("No git repo for " .. file, vim.log.levels.WARN)
 		return
 	end
-	require("sidebar").open(root)
+	local explorer = Snacks.picker.get({ source = "explorer" })[1]
+	if explorer then
+		explorer:close()
+	end
+	Snacks.explorer({ cwd = root })
 end, { desc = "Explorer: re-root at file's git repo" })
 
 -- Workspace git overview: pick a sibling repo with uncommitted/unpushed work
