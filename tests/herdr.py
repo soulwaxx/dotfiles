@@ -42,16 +42,24 @@ def run_case(fixture):
         script = re.sub(r"/nix/store/[^ '\"$]+/bin/herdr", str(herdr), script)
         script = script.replace("/opt/homebrew/bin/herdr", str(herdr))
         script_file = root / "activation.sh"
-        script_file.write_text("set -euo pipefail\nrun() { \"$@\"; }\n" + script + "\n")
+        script_file.write_text('set -euo pipefail\nrun() { "$@"; }\n' + script + "\n")
 
         env = os.environ.copy()
-        env.update({
-            "HOME": str(home),
-            "PATH": str(bindir) + os.pathsep + env["PATH"],
-            "HERDR_LOG": str(log),
-        })
-        result = subprocess.run([BASH, str(script_file)], env=env, text=True, capture_output=True)
-        calls = [json.loads(line) for line in log.read_text().splitlines()] if log.exists() else []
+        env.update(
+            {
+                "HOME": str(home),
+                "PATH": str(bindir) + os.pathsep + env["PATH"],
+                "HERDR_LOG": str(log),
+            }
+        )
+        result = subprocess.run(
+            [BASH, str(script_file)], env=env, text=True, capture_output=True
+        )
+        calls = (
+            [json.loads(line) for line in log.read_text().splitlines()]
+            if log.exists()
+            else []
+        )
         backup = home / ".local/state/dotfiles/claude-settings.last.json"
         return result, calls, backup.read_text() if backup.exists() else None
 
@@ -66,10 +74,14 @@ def run_host(host, fixture):
     result, calls, backup = run_case(fixture)
     expect(result.returncode == 0, f"{host}: activation failed: {result.stderr}")
     expect(
-        calls == [["integration", "install", "pi"], ["integration", "install", "claude"]],
+        calls
+        == [["integration", "install", "pi"], ["integration", "install", "claude"]],
         f"{host}: unexpected herdr calls: {calls}",
     )
-    expect(backup == '{"integrations":{"keep":true}}\n', "settings backup missing or integrations were not preserved")
+    expect(
+        backup == '{"integrations":{"keep":true}}\n',
+        "settings backup missing or integrations were not preserved",
+    )
     print(f"herdr activation behavior passed ({host})")
 
 

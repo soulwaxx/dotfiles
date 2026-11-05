@@ -24,7 +24,7 @@
 ### Role vs ClusterRole
 
 | | Role | ClusterRole |
-|--|------|-------------|
+| -- | ------ | ------------- |
 | **Scope** | Single namespace | Cluster-wide |
 | **Use for** | Workload service accounts that only need access within their namespace | Node-scoped resources, CRDs, cluster-level reads, cross-namespace controllers |
 | **Bound by** | `RoleBinding` | `ClusterRoleBinding` (cluster-wide) or `RoleBinding` (namespace-scoped) |
@@ -63,6 +63,7 @@ roleRef:
 ```
 
 **Wildcard rules are never least-privilege:**
+
 ```yaml
 # ❌ Grants everything in the API group
 rules:
@@ -96,6 +97,7 @@ automountServiceAccountToken: false   # default opt-out for the ServiceAccount
 ```
 
 Override per-pod when a specific workload does need API access:
+
 ```yaml
 spec:
   automountServiceAccountToken: true   # pod-level override; wins over ServiceAccount default
@@ -113,7 +115,7 @@ PSP was removed in Kubernetes 1.25. PSA is the replacement, built into the API s
 **Three levels:**
 
 | Level | What it allows | Use for |
-|-------|---------------|---------|
+| ------- | --------------- | --------- |
 | `privileged` | Anything | System namespaces (`kube-system`), node agents, CSI drivers |
 | `baseline` | Blocks known privilege escalation; allows host networking/PID off by default | Legacy apps being migrated |
 | `restricted` | Enforces secure defaults: non-root, no privilege escalation, seccomp required | All new application workloads |
@@ -121,7 +123,7 @@ PSP was removed in Kubernetes 1.25. PSA is the replacement, built into the API s
 **Three modes:**
 
 | Mode | Effect |
-|------|--------|
+| ------ | -------- |
 | `enforce` | Rejects pods that violate the policy |
 | `audit` | Logs violations to audit log; pods still run |
 | `warn` | Returns a warning in API responses; pods still run |
@@ -141,6 +143,7 @@ metadata:
 ```
 
 **Migration strategy for existing workloads:**
+
 1. Start with `warn` + `audit` on `baseline`. Watch audit logs and warnings.
 2. Move to `enforce: baseline` once no violations remain.
 3. Upgrade to `warn` + `audit` on `restricted`, fix securityContext fields.
@@ -238,7 +241,7 @@ spec:
 Three patterns for secrets in Kubernetes, in order of operational maturity:
 
 | Approach | How it works | Trade-off |
-|----------|-------------|-----------|
+| ---------- | ------------- | ----------- |
 | **External Secrets Operator** | Pulls secrets from AWS Secrets Manager, SSM, Vault etc. into Kubernetes Secrets at runtime | Secret values never in Git; requires cluster connectivity to secret store; ESO manages rotation |
 | **SOPS + age/KMS** | Encrypts secret files in Git with age key or AWS KMS; decrypt at apply time | Secret-encrypted-in-Git is auditable; decryption key must be available at deploy time; Flux has native SOPS support |
 | **Sealed Secrets** | Controller generates public/private key; `kubeseal` encrypts secrets into `SealedSecret` CRs committed to Git; controller decrypts | Secrets in Git as sealed CRs; controller private key is a single point of failure; rotation requires re-sealing all secrets |
@@ -309,7 +312,7 @@ image: my-app:1.2.3@sha256:abc123...   # tag for readability, digest for immutab
 **`imagePullPolicy`:**
 
 | Value | When to use |
-|-------|-------------|
+| ------- | ------------- |
 | `IfNotPresent` | Default for most workloads; uses local cache |
 | `Always` | Use with `latest` tag or in environments where cache staleness is a concern |
 | `Never` | Air-gapped; image must already be on node |
@@ -345,7 +348,7 @@ spec:
 ## Admission Policy Engines
 
 | Engine | Model | Strength | When to choose |
-|--------|-------|----------|----------------|
+| -------- | ------- | ---------- | ---------------- |
 | **ValidatingAdmissionPolicy** (built-in, Kubernetes 1.26+ GA 1.30) | CEL expressions in-cluster | No controller install; low latency; native | Simple org-wide rules; no external dependency tolerance |
 | **Kyverno** | Kubernetes-native policies as CRDs | Rich policy library, mutation + generation + validation, `kyverno test` CLI | Teams that prefer YAML/Kubernetes-native; good for generation (auto-add labels) |
 | **OPA Gatekeeper** | Rego policy language + Constraint/ConstraintTemplate | Most flexible; Rego handles complex logic | Teams already using OPA/Rego; complex multi-resource policies |

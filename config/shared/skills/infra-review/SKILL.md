@@ -15,7 +15,7 @@ Relevant files include Terraform/OpenTofu, AWS CDK, Kubernetes manifests, Helm c
 
 ## Workflow
 
-1. Build context first. Check the diff, then read only the files needed to understand the changed resource, module, chart, or pipeline.
+1. Build context first. Check the diff, then read the reviewed files and relevant supplied or nearby local context (for example, `CONTEXT.md`) to establish workload needs, scope, and approval boundaries. Ask only for facts still missing; do not ask the user to repeat facts available in that context.
 2. Verify current docs before quoting exact AWS, Kubernetes, Terraform provider, Helm, or CLI fields and flags.
 3. Look for risks in this order: security, data loss, availability, rollback, state drift, blast radius, cost, operability, maintainability.
 4. Treat missing tests, missing validation, or missing rollout/rollback steps as findings only when they create a concrete operational risk.

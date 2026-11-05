@@ -67,7 +67,7 @@ in
       };
 
       kubernetes = {
-        description = "Inspect Kubernetes clusters, workloads, resources, and logs in read-only mode.";
+        description = "Inspect Kubernetes clusters, workloads, resources, and logs.";
         command = "npx";
         args = [
           "-y"

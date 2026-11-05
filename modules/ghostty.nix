@@ -32,15 +32,13 @@ in
       # font-size is in points. Ghostty's point->pixel baseline is 72 DPI on
       # macOS but 96 DPI on Linux/GTK, so an identical point size renders ~33%
       # larger on Linux. Scale the Linux value by 72/96 to match macOS visually.
-      # Use Ghostty's default font size, weight, and spacing for now.
-      font-size = if pkgs.stdenv.hostPlatform.isDarwin then 13.5 else 10.125;
+      font-size = if pkgs.stdenv.hostPlatform.isDarwin then 15 else 11.25;
       font-thicken = true;
-      # Adds 6% to the font's natural cell height and vertically centers the
-      # glyph, giving airier line spacing that reads as less visually noisy.
-      # adjust-cell-height = "6%";
+      # Add breathing room between lines without changing glyph proportions.
+      adjust-cell-height = "6%";
 
-      cursor-style = "bar";
-      cursor-style-blink = true;
+      cursor-style = "block";
+      cursor-style-blink = false;
       mouse-hide-while-typing = true;
 
       window-decoration = "auto";
@@ -52,7 +50,8 @@ in
       window-padding-balance = true;
 
       shell-integration = "detect";
-      shell-integration-features = "true";
+      # Keep the configured cursor instead of switching to a bar at the prompt.
+      shell-integration-features = "no-cursor";
 
       keybind =
         if pkgs.stdenv.hostPlatform.isDarwin then

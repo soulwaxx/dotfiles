@@ -72,7 +72,7 @@ kubeconform \
 ## Dry-Run — Client vs Server
 
 | Mode | What it does | What it catches |
-|------|-------------|-----------------|
+| ------ | ------------- | ----------------- |
 | `--dry-run=client` | Generates the object locally; no API call | Syntax errors, missing required fields per client-side schema |
 | `--dry-run=server` | Sends the object to the API server; not persisted | All of the above + admission webhooks + server-side validation + quota checks + CRD validation |
 
@@ -303,7 +303,7 @@ For teams using ArgoCD or Flux: add a step that calls `argocd app diff` or `flux
 ## Troubleshooting Table
 
 | Error message | Cause | Fix |
-|---------------|-------|-----|
+| --------------- | ------- | ----- |
 | `no matches for kind "X" in version "Y"` | Wrong `apiVersion` for the Kind; CRD not installed | Check [API-Version Guard Table](workloads.md#api-version-guard-table); install CRD first |
 | `unknown field "X"` | Field name typo or wrong API version | `-strict` kubeconform flags catches this; check API reference for the correct field name |
 | `admission webhook denied: <policy>` | Kyverno/OPA/PSA rejected the resource | Read the policy message; fix the failing field (usually securityContext, image registry, or labels) |

@@ -20,7 +20,7 @@ The skill has two branches:
 Read any earlier output on the topic first: the conversation, a grilling session, an existing analysis, `CONTEXT.md`, ADRs, notes the user points to. Pre-fill the fields from it and from the environment. Ask the user only for the gaps.
 
 | # | Field | Content |
-|---|---|---|
+| --- | --- | --- |
 | 1 | Question | The decision, in one sentence |
 | 2 | Branch | Selection or implementation |
 | 3 | Ticket or parent | Issue link, parent analysis, or none |

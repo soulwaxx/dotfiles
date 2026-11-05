@@ -14,22 +14,25 @@ fi
 export DOTFILES_DIR
 HOST="${1:-}"
 
-info()  { echo -e "${GREEN}[INFO]${NC} $*"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
-error() { echo -e "${RED}[ERROR]${NC} $*" >&2; exit 1; }
+info() { echo -e "${GREEN}[INFO]${NC} $*"; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+error() {
+  echo -e "${RED}[ERROR]${NC} $*" >&2
+  exit 1
+}
 
 repo_identity() {
   local repo="${1%/}"
   repo="${repo%.git}"
   case "$repo" in
-    git@*:* )
-      repo="${repo#git@}"
-      repo="${repo/:/\/}"
-      ;;
-    *://* )
-      repo="${repo#*://}"
-      repo="${repo#*@}"
-      ;;
+  git@*:*)
+    repo="${repo#git@}"
+    repo="${repo/:/\/}"
+    ;;
+  *://*)
+    repo="${repo#*://}"
+    repo="${repo#*@}"
+    ;;
   esac
   printf '%s\n' "$repo"
 }
@@ -88,22 +91,22 @@ fi
 
 configure_linux_nix_trust() {
   local trusted_users
-  trusted_users="$(nix --extra-experimental-features nix-command config show trusted-users 2>/dev/null)" \
-    || error "Could not read the effective trusted-users setting."
+  trusted_users="$(nix --extra-experimental-features nix-command config show trusted-users 2>/dev/null)" ||
+    error "Could not read the effective trusted-users setting."
 
   if printf '%s\n' "$trusted_users" | tr ' ' '\n' | grep -qxF "$CURRENT_USER"; then
     info "$CURRENT_USER is already a trusted Nix user"
   else
     trusted_users="${trusted_users:-root}"
     info "Adding $CURRENT_USER to trusted-users in /etc/nix/nix.conf..."
-    printf 'trusted-users = %s %s\n' "$trusted_users" "$CURRENT_USER" \
-      | sudo tee -a /etc/nix/nix.conf >/dev/null \
-      || error "Could not update trusted-users in /etc/nix/nix.conf."
+    printf 'trusted-users = %s %s\n' "$trusted_users" "$CURRENT_USER" |
+      sudo tee -a /etc/nix/nix.conf >/dev/null ||
+      error "Could not update trusted-users in /etc/nix/nix.conf."
   fi
 
   if command -v systemctl &>/dev/null; then
-    sudo systemctl restart nix-daemon \
-      || error "Could not restart nix-daemon after verifying trusted-users."
+    sudo systemctl restart nix-daemon ||
+      error "Could not restart nix-daemon after verifying trusted-users."
   else
     error "No systemctl found. Restart nix-daemon manually, then rerun bootstrap."
   fi
@@ -112,8 +115,7 @@ configure_linux_nix_trust() {
 homebrew_bin() {
   for candidate in \
     /opt/homebrew/bin/brew \
-    /usr/local/bin/brew
-  do
+    /usr/local/bin/brew; do
     if [[ -x "$candidate" ]]; then
       echo "$candidate"
       return 0
@@ -151,18 +153,18 @@ install_homebrew_if_needed() {
 
 # Step 3: Clone dotfiles
 if [[ -d "$DOTFILES_DIR" ]]; then
-  actual_repo="$(git -C "$DOTFILES_DIR" remote get-url origin 2>/dev/null)" \
-    || error "$DOTFILES_DIR exists but is not a Git checkout with an origin remote."
+  actual_repo="$(git -C "$DOTFILES_DIR" remote get-url origin 2>/dev/null)" ||
+    error "$DOTFILES_DIR exists but is not a Git checkout with an origin remote."
   if [[ "$(repo_identity "$actual_repo")" != "$(repo_identity "$DOTFILES_REPO")" ]]; then
     error "$DOTFILES_DIR uses origin '$actual_repo', expected '$DOTFILES_REPO'. Remove it or choose a different DOTFILES_DIR."
   fi
-  [[ -f "$DOTFILES_DIR/flake.nix" ]] \
-    || error "$DOTFILES_DIR is missing flake.nix; repair the checkout before rerunning bootstrap."
+  [[ -f "$DOTFILES_DIR/flake.nix" ]] ||
+    error "$DOTFILES_DIR is missing flake.nix; repair the checkout before rerunning bootstrap."
   info "Dotfiles repo already exists at $DOTFILES_DIR"
 else
   info "Cloning dotfiles to $DOTFILES_DIR..."
-  git clone "$DOTFILES_REPO" "$DOTFILES_DIR" \
-    || error "Failed to clone dotfiles repo. Check network connectivity and that $DOTFILES_REPO is reachable."
+  git clone "$DOTFILES_REPO" "$DOTFILES_DIR" ||
+    error "Failed to clone dotfiles repo. Check network connectivity and that $DOTFILES_REPO is reachable."
 fi
 
 # Step 4: Read host metadata from flake.nix. This keeps flake.nix as the single
@@ -173,22 +175,22 @@ if ! HOST_LINE="$(printf '%s\n' "$HOSTS_OUTPUT" | awk -v host="$HOST" 'NR > 1 &&
   error "Unknown host '$HOST'. Valid hosts: $valid_hosts"
 fi
 
-read -r _host_name HOST_SYSTEM HOST_USER SWITCH_APP HOST_ROLE <<< "$HOST_LINE"
+read -r _host_name HOST_SYSTEM HOST_USER SWITCH_APP HOST_ROLE <<<"$HOST_LINE"
 
 if [[ "$CURRENT_USER" != "$HOST_USER" ]]; then
   error "Host '$HOST' expects user '$HOST_USER', but bootstrap is running as '$CURRENT_USER'."
 fi
 
 case "$HOST_SYSTEM" in
-  *-darwin)
-    [[ "$OS" == "Darwin" ]] || error "Host '$HOST' targets $HOST_SYSTEM but this machine is Linux."
-    ;;
-  *-linux)
-    [[ "$OS" != "Darwin" ]] || error "Host '$HOST' targets $HOST_SYSTEM but this machine is macOS."
-    ;;
-  *)
-    error "Host '$HOST' has unsupported target system '$HOST_SYSTEM'."
-    ;;
+*-darwin)
+  [[ "$OS" == "Darwin" ]] || error "Host '$HOST' targets $HOST_SYSTEM but this machine is Linux."
+  ;;
+*-linux)
+  [[ "$OS" != "Darwin" ]] || error "Host '$HOST' targets $HOST_SYSTEM but this machine is macOS."
+  ;;
+*)
+  error "Host '$HOST' has unsupported target system '$HOST_SYSTEM'."
+  ;;
 esac
 
 # Ask for untracked host files before the first switch: activation reads the
@@ -212,8 +214,8 @@ if [[ "$OS" == "Darwin" ]]; then
 
   if ! sudo launchctl list 2>/dev/null | grep -q org.nixos.nix-daemon; then
     warn "nix-daemon is not loaded; attempting to load it..."
-    sudo launchctl bootstrap system /Library/LaunchDaemons/org.nixos.nix-daemon.plist \
-      || error "Could not load nix-daemon; check /Library/LaunchDaemons/org.nixos.nix-daemon.plist"
+    sudo launchctl bootstrap system /Library/LaunchDaemons/org.nixos.nix-daemon.plist ||
+      error "Could not load nix-daemon; check /Library/LaunchDaemons/org.nixos.nix-daemon.plist"
     info "nix-daemon loaded"
   fi
 fi

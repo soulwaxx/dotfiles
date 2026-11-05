@@ -225,13 +225,13 @@ let
     defaultProvider = config.dotfiles.pi.defaultProvider;
     defaultModel = config.dotfiles.pi.defaultModel;
     defaultThinkingLevel = "high";
+    showCacheMissNotices = true;
     # Keep ordinary reserves for unlisted models, including smaller subagents.
     compaction = {
       enabled = true;
       reserveTokens = 16384;
       keepRecentTokens = 20000;
       modelOverrides = {
-        # Confirmed 1M work window: compact above 300K context tokens.
         "anthropic/claude-opus-5-5".reserveTokens = 1000000 - 500000;
         # Confirmed 272K personal window: compact above 220K context tokens.
         "openai/gpt-6.1-sol".reserveTokens = 272000 - 220000;
@@ -296,7 +296,7 @@ let
     frecencyDbPath = "${config.home.homeDirectory}/.pi/agent/fff/frecency";
     historyDbPath = "${config.home.homeDirectory}/.pi/agent/fff/history";
     enableFsRootScanning = false;
-    enableHomeDirScanning = false;
+    enableHomeDirScanning = true;
     followSymlinks = true;
   };
 

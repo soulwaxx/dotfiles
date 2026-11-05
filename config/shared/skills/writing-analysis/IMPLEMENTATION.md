@@ -18,6 +18,10 @@ Numbered rules the design must keep, `INV-1` onward. Each one is checkable: a re
 
 ## Decision areas
 
+An approved option settles only the stated decision, not unspecified behavior. Resolve material contract choices from supplied requirements and code; keep unresolved choices in Open items with an owner and a closure condition before implementation. Do not silently choose a policy or exclude it as unrelated scope when the design depends on it.
+
+For example, approval of a bounded retry loop or attempt limit does not establish which failures are retryable or whether repeated execution is safe.
+
 One subsection per decision. Its heading names the decision, for example "Where credentials live". Under it:
 
 - One option block per option, chosen first, in the verdict-first paragraph format in SKILL.md.
