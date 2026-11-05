@@ -15,16 +15,16 @@ tty=${BOOTSTRAP_TTY:-/dev/tty}
 warn() { printf '\033[1;33m[WARN]\033[0m %s\n' "$*" >&2; }
 
 case "$role" in
-  work | personal) ;;
-  *)
-    printf 'local-files: unknown host role %s\n' "'$role'" >&2
-    exit 1
-    ;;
+work | personal) ;;
+*)
+  printf 'local-files: unknown host role %s\n' "'$role'" >&2
+  exit 1
+  ;;
 esac
 
 interactive=0
-if [[ "$mode" == --prompt ]] && (: < "$tty") 2>/dev/null; then
-  exec 3< "$tty"
+if [[ "$mode" == --prompt ]] && (: <"$tty") 2>/dev/null; then
+  exec 3<"$tty"
   interactive=1
 fi
 

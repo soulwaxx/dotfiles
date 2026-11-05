@@ -9,8 +9,8 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 write_stub() {
-  printf '#!%s\n' "$BASH" > "$1"
-  cat >> "$1"
+  printf '#!%s\n' "$BASH" >"$1"
+  cat >>"$1"
 }
 
 make_stubs() {
@@ -124,7 +124,7 @@ run_case() {
     STORE_STATUS=0 \
     DOTFILES_DIR="$checkout" \
     "$@" \
-    bash "$bootstrap" test-host > "$log/output" 2>&1
+    bash "$bootstrap" test-host >"$log/output" 2>&1
   local status=$?
   set -e
 
@@ -185,7 +185,7 @@ grep -qF '.gitconfig.personal lacks user.name user.email user.username' "$tmp/no
 grep -qF '.secrets is missing' "$tmp/no-tty/log/output"
 if grep -qF '.gitconfig.local' "$tmp/no-tty/log/output"; then exit 1; fi
 
-printf 'Personal Name\npersonal@example.com\npersonal-gh\n' > "$tmp/personal-answers"
+printf 'Personal Name\npersonal@example.com\npersonal-gh\n' >"$tmp/personal-answers"
 run_case personal-prompt 0 BOOTSTRAP_TTY="$tmp/personal-answers"
 p="$tmp/personal-prompt/home/.gitconfig.personal"
 [[ "$(identity "$p" user.name)" == 'Personal Name' ]]
@@ -195,7 +195,7 @@ p="$tmp/personal-prompt/home/.gitconfig.personal"
 [[ ! -e "$tmp/personal-prompt/home/.gitconfig.local" ]]
 if grep -qF 'lacks' "$tmp/personal-prompt/log/output"; then exit 1; fi
 
-printf 'P\np@example.com\np-gh\nW\nw@example.com\nw-gh\n' > "$tmp/work-answers"
+printf 'P\np@example.com\np-gh\nW\nw@example.com\nw-gh\n' >"$tmp/work-answers"
 run_case work-prompt 0 HOST_ROLE=work BOOTSTRAP_TTY="$tmp/work-answers"
 [[ "$(identity "$tmp/work-prompt/home/.gitconfig.personal" user.email)" == p@example.com ]]
 w="$tmp/work-prompt/home/.gitconfig.local"
@@ -210,7 +210,7 @@ setup_partial_identity() {
   git config --file "$1/.gitconfig.personal" user.email kept@example.com
   chmod 644 "$1/.gitconfig.personal"
 }
-printf 'added-gh\n' > "$tmp/partial-answers"
+printf 'added-gh\n' >"$tmp/partial-answers"
 run_case partial-identity 0 BOOTSTRAP_TTY="$tmp/partial-answers"
 p="$tmp/partial-identity/home/.gitconfig.personal"
 [[ "$(identity "$p" user.name)" == 'Kept Name' ]]

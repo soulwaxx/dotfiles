@@ -14,7 +14,6 @@ let
   mkCurlInstaller = import ../lib/mk-curl-installer.nix { inherit lib pkgs; };
   symlinkedPaths = {
     ".claude/statusline-command.sh" = "statusline.sh";
-    ".claude/commands" = "commands";
     ".claude/hooks/notify-attention.sh" = "hooks/notify-attention.sh";
   };
   # Harness-agnostic prose lives in config/shared and is symlinked into both
@@ -22,6 +21,8 @@ let
   sharedPaths = {
     ".claude/CLAUDE.md" = "AGENTS.md";
     ".claude/skills" = "skills";
+    ".claude/commands/adversarial.md" = "prompts/adversarial.md";
+    ".claude/commands/lesson.md" = "prompts/lesson.md";
   };
 
   mkClaudeAgent =
@@ -134,6 +135,14 @@ in
     };
 
     activation = {
+      # Replace only the old dotfiles directory link before placing per-file links.
+      migrateClaudeCommands = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
+        if [[ -L "$HOME/.claude/commands" && "$(readlink -f "$HOME/.claude/commands")" == "${dotfiles}/config/claude/commands" ]]; then
+          run rm "$HOME/.claude/commands"
+          run mkdir -p "$HOME/.claude/commands"
+        fi
+      '';
+
       migrateClaudeHooks = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
         if [[ -L "$HOME/.claude/hooks" && "$(readlink -f "$HOME/.claude/hooks")" == "${dotfiles}/config/claude/hooks" ]]; then
           run rm "$HOME/.claude/hooks"

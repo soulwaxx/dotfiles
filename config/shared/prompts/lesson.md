@@ -4,7 +4,9 @@ argument-hint: "[topic to focus on]"
 ---
 Review this session and propose at most one lesson worth keeping.
 
-Focus for this run: ${@:-none}
+Focus for this run: $ARGUMENTS
+
+If no focus is supplied, review the whole session.
 
 ## Steps
 

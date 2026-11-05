@@ -27,7 +27,7 @@ Replace each with a concrete verb or noun.
 ## Say this instead
 
 | Instead of | Write |
-|---|---|
+| --- | --- |
 | utilize, leverage, harness | use |
 | an em-dash aside | `, aside,` or `(aside)` or two sentences |
 | a testament to | what it proves |

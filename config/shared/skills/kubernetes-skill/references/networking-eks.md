@@ -22,7 +22,7 @@
 ## Service Types
 
 | Type | What it does | When to use |
-|------|-------------|-------------|
+| ------ | ------------- | ------------- |
 | `ClusterIP` | Stable virtual IP inside the cluster | Default; service-to-service within cluster |
 | `headless` (`clusterIP: None`) | DNS returns Pod IPs directly, no virtual IP | StatefulSet peer discovery; client-side load balancing |
 | `NodePort` | Exposes a port on every node's IP | Development only; not for production direct exposure |
@@ -150,7 +150,7 @@ The AWS Load Balancer Controller provisions ALBs (for Ingress/HTTPRoute) and NLB
 ### NLB vs ALB
 
 | | ALB | NLB |
-|--|-----|-----|
+| -- | ----- | ----- |
 | **OSI layer** | L7 (HTTP/HTTPS) | L4 (TCP/UDP/TLS) |
 | **Use for** | HTTP routing, path/host-based rules, JWT auth, WAF | Any TCP/UDP, gRPC without HTTP inspection, static IP |
 | **Kubernetes trigger** | `Ingress` or `HTTPRoute` | `Service type: LoadBalancer` |
@@ -212,6 +212,7 @@ aws eks create-pod-identity-association \
 ```
 
 IAM role trust policy:
+
 ```json
 {
   "Effect": "Allow",
@@ -241,6 +242,7 @@ metadata:
 ```
 
 IAM role trust policy (IRSA):
+
 ```json
 {
   "Effect": "Allow",
@@ -261,7 +263,7 @@ IRSA requires the EKS OIDC provider to be enabled and a trust policy that refere
 ### Side-by-side comparison
 
 | | Pod Identity | IRSA |
-|--|-------------|------|
+| -- | ------------- | ------ |
 | **Cluster setup** | Enable Pod Identity Agent add-on | Enable OIDC provider on cluster |
 | **IAM trust policy** | `pods.eks.amazonaws.com` service principal | OIDC Federated principal + condition |
 | **SA annotation** | Not required | `eks.amazonaws.com/role-arn` required |
@@ -325,11 +327,13 @@ EFS volumes are not AZ-constrained — they work across zones. Use EFS for `Read
 Karpenter discovers subnets and security groups by tag, not by explicit configuration in the NodePool. This is the most common provisioning failure point.
 
 **Required subnet tag:**
+
 ```
 karpenter.sh/discovery: <cluster-name>
 ```
 
 **Required security group tag:**
+
 ```
 karpenter.sh/discovery: <cluster-name>
 ```

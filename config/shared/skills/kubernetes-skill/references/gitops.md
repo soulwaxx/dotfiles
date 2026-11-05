@@ -67,7 +67,7 @@ spec:
 ## ArgoCD — Automated Sync and Self-Heal
 
 | Setting | Effect | When to enable |
-|---------|--------|----------------|
+| --------- | -------- | ---------------- |
 | `automated.prune: true` | ArgoCD deletes resources removed from Git | Always in production; without it, removed manifests accumulate as orphans |
 | `automated.selfHeal: true` | ArgoCD overwrites manual `kubectl` changes back to Git state | Production; prevents silent drift from ad-hoc fixes |
 | `syncPolicy: {}` (no automated) | Sync requires manual trigger or CI call | When you want human approval before each apply |
@@ -139,7 +139,7 @@ metadata:
 Common wave assignments:
 
 | Wave | What goes here |
-|------|----------------|
+| ------ | ---------------- |
 | `-5` or `-10` | CRD installation (must exist before CRD-backed resources) |
 | `-1` | Namespace, RBAC, ServiceAccount, ConfigMap, ExternalSecret |
 | `0` | Deployments, StatefulSets (default wave) |
@@ -233,7 +233,7 @@ argocd app get <app-name> --hard-refresh
 ```
 
 | ArgoCD status | Meaning | First action |
-|---------------|---------|-------------|
+| --------------- | --------- | ------------- |
 | `OutOfSync` | Git state differs from cluster state | Check diff: `argocd app diff <name>` |
 | `Degraded` | A managed resource's health check failed | `argocd app resources <name>`; check Pod events |
 | `Missing` | Resource in Git not found in cluster | Check if namespace exists; check RBAC |
@@ -408,6 +408,7 @@ spec:
 ```
 
 In the manifest, mark the image field with a policy comment:
+
 ```yaml
 image: my-app:v1.0.0 # {"$imagepolicy": "flux-system:my-app"}
 ```
@@ -454,7 +455,7 @@ A sync failure is a diagnosis problem, not a retry target. Never force-sync with
 Both are production-grade. The choice is usually driven by existing tooling, not technical superiority.
 
 | | ArgoCD | Flux |
-|--|--------|------|
+| -- | -------- | ------ |
 | **UI** | Rich web UI, RBAC per team | CLI-first; web UI via Weave GitOps |
 | **Multi-tenancy** | AppProject RBAC | Separate namespaces + RBAC |
 | **Ordering within sync** | Sync waves + hooks | `dependsOn` between objects |

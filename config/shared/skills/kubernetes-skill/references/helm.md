@@ -40,6 +40,7 @@ my-chart/
 ```
 
 **`Chart.yaml` minimum:**
+
 ```yaml
 apiVersion: v2           # always v2 for Helm 3
 name: my-chart
@@ -96,6 +97,7 @@ affinity: {}
 ```
 
 **Type stability rules:**
+
 - Maps must default to `{}`, not `null` or absent. A template doing `range .Values.podAnnotations` over a null value panics.
 - Lists must default to `[]`, not absent.
 - Booleans must be `true`/`false` not `"true"`/`"false"` — Helm renders string `"false"` as truthy in `if`.
@@ -201,7 +203,7 @@ metadata:
 **Hook phases:**
 
 | Hook | When | Typical use |
-|------|------|-------------|
+| ------ | ------ | ------------- |
 | `pre-install` | Before any resources installed | Cert provisioning, pre-flight checks |
 | `post-install` | After all resources installed and ready | Seed data, smoke test |
 | `pre-upgrade` | Before upgrade starts | DB migration, backup |
@@ -213,7 +215,7 @@ metadata:
 **Hook delete policies:**
 
 | Policy | When it deletes the hook resource |
-|--------|-----------------------------------|
+| -------- | ----------------------------------- |
 | `before-hook-creation` | Before creating the hook (replaces the previous run) |
 | `hook-succeeded` | After the hook completes successfully |
 | `hook-failed` | After the hook fails (useful for preserving logs) |
@@ -338,6 +340,7 @@ kustomize build .
 ```
 
 Kustomize overlay adds a patch:
+
 ```yaml
 # /tmp/kustomize-overlay/kustomization.yaml
 resources:

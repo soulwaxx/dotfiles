@@ -249,12 +249,9 @@ in
         bindkey '^A' beginning-of-line
         bindkey '^E' end-of-line
         bindkey '^?' backward-delete-char
-        # Cursor shape: block in normal mode, beam in insert mode
+        # Keep a steady block cursor in both vi modes (DECSCUSR 2).
         _vi_mode_cursor() {
-          case ''${KEYMAP} in
-            vicmd)      print -n '\e[1 q' ;;
-            viins|main) print -n '\e[5 q' ;;
-          esac
+          print -n '\e[2 q'
           # Repaint the prompt so starship's character module can swap in its
           # vicmd_symbol (N >>>) when entering normal mode.
           zle reset-prompt
@@ -264,10 +261,10 @@ in
         # plugin's hook (or have its own dropped).
         autoload -Uz add-zle-hook-widget
         add-zle-hook-widget zle-keymap-select _vi_mode_cursor
-        _vi_mode_line_init() { print -n '\e[5 q'; }
+        _vi_mode_line_init() { print -n '\e[2 q'; }
         add-zle-hook-widget zle-line-init _vi_mode_line_init
-        # Reset cursor to beam after each command (TUIs can leave a block cursor)
-        _dotfiles_reset_cursor_preexec() { print -n '\e[5 q'; }
+        # Start commands with a steady block; TUIs may override it while running.
+        _dotfiles_reset_cursor_preexec() { print -n '\e[2 q'; }
         autoload -Uz add-zsh-hook
         add-zsh-hook preexec _dotfiles_reset_cursor_preexec
 

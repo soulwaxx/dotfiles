@@ -278,46 +278,6 @@
               ${pkgs.python3}/bin/python3 ${./tests/herdr.py} ${fixtures} ${pkgs.bash}/bin/bash
               touch $out
             '';
-        pi-subagents =
-          let
-            hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
-              darwinHosts // linuxHosts
-            );
-            fixtures = pkgs.writeText "pi-subagent-fixtures.json" (
-              builtins.toJSON (
-                lib.mapAttrs (
-                  hostname: host:
-                  let
-                    home =
-                      if lib.hasSuffix "darwin" host.system then
-                        self.darwinConfigurations.${hostname}.config.home-manager.users.${host.username}
-                      else
-                        self.homeConfigurations.${hostname}.config;
-                    files = home.home.file;
-                  in
-                  {
-                    settings = files.".pi/agent/settings.json".source;
-                    agents = lib.mapAttrs (_: file: file.source) (
-                      lib.filterAttrs (name: _: lib.hasPrefix ".pi/agent/agents/" name) files
-                    );
-                    claudeAgents = lib.mapAttrs (_: file: file.source) (
-                      lib.filterAttrs (name: _: lib.hasPrefix ".claude/agents/" name) files
-                    );
-                    models = home.dotfiles.pi.subagentModels;
-                    vaultModel = home.dotfiles.pi.vaultAgentModel;
-                    darwin = lib.hasSuffix "darwin" host.system;
-                    runtimeTarget = files.".pi/agent/extensions/subagent/config.json".source;
-                    hasAppendSystem = builtins.hasAttr ".pi/agent/APPEND_SYSTEM.md" files;
-                  }
-                ) hosts
-              )
-            );
-          in
-          pkgs.runCommand "check-pi-subagents" { } ''
-            ${pkgs.python3}/bin/python3 ${./tests/pi-subagents.py} \
-              ${fixtures} ${./config/pi/subagents.json} ${./config/shared/agents}
-            touch $out
-          '';
         pi-statusline =
           let
             hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
@@ -348,6 +308,41 @@
               ${./tests/pi-statusline.mjs} ${./config/pi/statusline/index.js}
             touch $out
           '';
+        prompts =
+          let
+            hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
+              darwinHosts // linuxHosts
+            );
+            fixtures = pkgs.writeText "prompt-fixtures.json" (
+              builtins.toJSON (
+                lib.mapAttrs (
+                  hostname: host:
+                  let
+                    home =
+                      if lib.hasSuffix "darwin" host.system then
+                        self.darwinConfigurations.${hostname}.config.home-manager.users.${host.username}
+                      else
+                        self.homeConfigurations.${hostname}.config;
+                  in
+                  {
+                    dotfiles = home.dotfiles.path;
+                    sources = lib.mapAttrs (_: file: file.source) (
+                      lib.filterAttrs (
+                        name: _: lib.hasPrefix ".pi/agent/prompts" name || lib.hasPrefix ".claude/commands" name
+                      ) home.home.file
+                    );
+                    piMigration = builtins.unsafeDiscardStringContext home.home.activation.migratePiPrompts.data;
+                    claudeMigration = builtins.unsafeDiscardStringContext home.home.activation.migrateClaudeCommands.data;
+                  }
+                ) hosts
+              )
+            );
+          in
+          pkgs.runCommand "check-prompts" { nativeBuildInputs = [ pkgs.coreutils ]; } ''
+            ${pkgs.python3}/bin/python3 ${./tests/prompts.py} ${fixtures} \
+              ${./config/shared/prompts} ${./config/pi/prompts} ${pkgs.bash}/bin/bash
+            touch $out
+          '';
         skills = pkgs.runCommand "check-skills" { } ''
           ${pkgs.python3}/bin/python3 ${./tests/skills.py} ${./config/shared/skills} \
             ${./config/shared/AGENTS.md}
@@ -373,12 +368,13 @@
               ${pkgs.bash}/bin/bash ${./tests/bootstrap.sh} ${./bootstrap.sh} ${./local-files.sh}
               touch $out
             '';
-        # Behavioural test for the MCP reconcile filter. Only the filter and
-        # the script are copied in, so the whole repo does not enter the store.
+        # Behavioural tests for MCP reconciliation and runtime plugin options.
+        # Copy only the filters and script, not the whole repo.
         claude-state-jq = pkgs.runCommand "check-claude-state-jq" { nativeBuildInputs = [ pkgs.jq ]; } ''
           mkdir -p tests modules/claude/jq
           cp ${./tests/claude-state-jq.sh} tests/claude-state-jq.sh
           cp ${./modules/claude/jq/reconcile-mcp.jq} modules/claude/jq/reconcile-mcp.jq
+          cp ${./modules/claude/jq/preserve-plugin-configs.jq} modules/claude/jq/preserve-plugin-configs.jq
           ${pkgs.bash}/bin/bash tests/claude-state-jq.sh
           touch $out
         '';

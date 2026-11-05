@@ -225,13 +225,13 @@ let
     defaultProvider = config.dotfiles.pi.defaultProvider;
     defaultModel = config.dotfiles.pi.defaultModel;
     defaultThinkingLevel = "high";
+    showCacheMissNotices = true;
     # Keep ordinary reserves for unlisted models, including smaller subagents.
     compaction = {
       enabled = true;
       reserveTokens = 16384;
       keepRecentTokens = 20000;
       modelOverrides = {
-        # Confirmed 1M work window: compact above 300K context tokens.
         "anthropic/claude-opus-5-5".reserveTokens = 1000000 - 500000;
         # Confirmed 272K personal window: compact above 220K context tokens.
         "openai/gpt-6.1-sol".reserveTokens = 272000 - 220000;
@@ -296,7 +296,7 @@ let
     frecencyDbPath = "${config.home.homeDirectory}/.pi/agent/fff/frecency";
     historyDbPath = "${config.home.homeDirectory}/.pi/agent/fff/history";
     enableFsRootScanning = false;
-    enableHomeDirScanning = false;
+    enableHomeDirScanning = true;
     followSymlinks = true;
   };
 
@@ -310,6 +310,14 @@ in
     sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux { PI_CLIPBOARD_OSC52 = "1"; };
 
     activation = {
+      # Replace only the old dotfiles directory link before placing per-file links.
+      migratePiPrompts = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
+        if [[ -L "$HOME/.pi/agent/prompts" && "$(readlink -f "$HOME/.pi/agent/prompts")" == "${dotfiles}/config/pi/prompts" ]]; then
+          run rm "$HOME/.pi/agent/prompts"
+          run mkdir -p "$HOME/.pi/agent/prompts"
+        fi
+      '';
+
       installPi = mkCurlInstaller {
         name = "pi";
         displayName = "Pi";
@@ -410,8 +418,13 @@ in
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/AGENTS.md";
       ".pi/agent/skills".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/skills";
 
-      # Prompt templates.
-      ".pi/agent/prompts".source = config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/prompts";
+      # Per-file links combine shared prompts with the pi-only init command.
+      ".pi/agent/prompts/adversarial.md".source =
+        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/prompts/adversarial.md";
+      ".pi/agent/prompts/lesson.md".source =
+        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/shared/prompts/lesson.md";
+      ".pi/agent/prompts/init.md".source =
+        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/prompts/init.md";
     }
     // piAgentFiles;
   };

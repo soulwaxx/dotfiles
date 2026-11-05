@@ -111,7 +111,7 @@ VPA (`VerticalPodAutoscaler`) adjusts a pod's CPU/memory requests based on obser
 **Conflict with HPA on CPU:** HPA on CPU utilization reads the current `requests.cpu` as its denominator. VPA changing `requests.cpu` shifts that denominator, causing HPA to oscillate. Do not run both against the same resource metric on the same workload.
 
 | VPA mode | What it does | Safe to pair with HPA? |
-|----------|-------------|----------------------|
+| ---------- | ------------- | ---------------------- |
 | `Off` | Computes recommendations, applies nothing | Yes — read-only |
 | `Initial` | Sets requests at pod creation only | Yes — no live mutation |
 | `Auto` | Evicts pods to apply recommendations | Only if HPA uses custom/external metrics, not CPU |
@@ -147,6 +147,7 @@ Use `minAvailable` when you know the floor (e.g., 2 of 3 replicas must serve). U
 - A Deployment's `maxUnavailable` in its rolling-update strategy is separate from the PDB. The PDB governs voluntary eviction; the rolling-update `maxUnavailable` governs how the Deployment controller replaces pods.
 
 **Verify a drain respects your PDB:**
+
 ```bash
 kubectl drain <node> --dry-run --ignore-daemonsets --delete-emptydir-data
 # Look for "cannot evict pod as it would violate the pod's disruption budget" lines
@@ -177,6 +178,7 @@ spec:
 ```
 
 **`whenUnsatisfiable` tradeoff:**
+
 - `DoNotSchedule` — pods stay `Pending` if the constraint cannot be satisfied. Use for HA workloads in prod where zone-spread is non-negotiable.
 - `ScheduleAnyway` — constraint is advisory; pods schedule even if skew is exceeded. Use for host-spread (less critical) or when zone counts may temporarily drop below `minDomains`.
 
@@ -283,7 +285,7 @@ aws ec2 describe-subnets \
 ## Cluster Autoscaler vs Karpenter
 
 | | Cluster Autoscaler | Karpenter |
-|--|---------------------|-----------|
+| -- | --------------------- | ----------- |
 | **Provisioning model** | Pre-defined node groups; picks the group that fits the pending pod | Directly provisions EC2 instances matching the pod's requirements |
 | **Speed** | Minutes (ASG warm-up) | ~30–60 s (bypasses ASG) |
 | **Bin-packing** | Group-level; limited cross-group optimization | Per-pod; selects optimal instance type |

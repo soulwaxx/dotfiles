@@ -20,7 +20,7 @@
 ## Controller Selection
 
 | Controller | Use when | Key invariant |
-|------------|----------|---------------|
+| ------------ | ---------- | --------------- |
 | `Deployment` | stateless services, multiple identical replicas, horizontal scale | pods are fungible; any replica can serve any request |
 | `StatefulSet` | databases, message brokers, anything needing stable network identity or ordered startup | each pod gets a stable DNS name `<name>-<ordinal>.<svc>` and a dedicated PVC |
 | `DaemonSet` | per-node agents — log collectors, CSI plugins, network CNI, Karpenter node-problem-detector | runs exactly one pod per node (or per matching node); not for user workloads |
@@ -63,7 +63,7 @@ spec:
 Three probes, three distinct purposes. Omitting one has a specific failure mode.
 
 | Probe | Purpose | Failure mode if omitted | Typical action |
-|-------|---------|-------------------------|----------------|
+| ------- | --------- | ------------------------- | ---------------- |
 | `startupProbe` | Lets a slow-starting container finish initialising before other probes fire | `livenessProbe` kills the pod during a legitimate slow start, causing a restart loop | `httpGet` or `exec`; fires only until success |
 | `readinessProbe` | Gates traffic; pod removed from Service endpoints when failing | Traffic reaches a pod that is not ready; broken pod still counts as available in rollout progress | `httpGet /ready`; fires continuously |
 | `livenessProbe` | Restarts a wedged/deadlocked process | Stuck pod never restarts; workload silently dead | `httpGet /healthz`; fires continuously |
@@ -114,7 +114,7 @@ livenessProbe:
 Kubernetes assigns QoS at scheduling time based on requests/limits. The class determines eviction priority under node memory pressure.
 
 | QoS class | Condition | Eviction order (first evicted) |
-|-----------|-----------|-------------------------------|
+| ----------- | ----------- | ------------------------------- |
 | **BestEffort** | No `requests` or `limits` set at all | Evicted first |
 | **Burstable** | `requests` set; `limits` either unset or `limits > requests` | Evicted second |
 | **Guaranteed** | `requests == limits` for **every** resource on **every** container | Evicted last; also pinned to CPUs on nodes with static CPU policy |
@@ -263,7 +263,7 @@ spec:
 Check these before emitting a manifest. Wrong `apiVersion` causes `no matches for kind` at apply time or silent schema validation failure.
 
 | Kind | Correct apiVersion | Removed / deprecated | Notes |
-|------|--------------------|----------------------|-------|
+| ------ | -------------------- | ---------------------- | ------- |
 | `Deployment` | `apps/v1` | `extensions/v1beta1` removed 1.16 | |
 | `StatefulSet` | `apps/v1` | `apps/v1beta1` removed 1.16 | |
 | `DaemonSet` | `apps/v1` | `extensions/v1beta1` removed 1.16 | |

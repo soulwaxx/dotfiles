@@ -5,7 +5,7 @@ verbatim copy — the upstream `claude/SKILL.md` is one monolithic file; here it
 condensed and split into progressive-disclosure `references/`. Keep that shape when
 porting upstream changes: essentials in `SKILL.md`, depth in `references/`.
 
-- **Upstream:** https://github.com/vidanov/aws-architecture-diagram-skill (MIT)
+- **Upstream:** <https://github.com/vidanov/aws-architecture-diagram-skill> (MIT)
 - **Canonical upstream files:** `claude/SKILL.md` + `references/*.md`
 - **Last reconciled:** 2026-10-23 (checked against upstream `main` at `d0f8550`)
 

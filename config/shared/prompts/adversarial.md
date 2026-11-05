@@ -4,7 +4,9 @@ argument-hint: "[idea or proposal to evaluate]"
 ---
 Evaluate this independently before helping me execute it.
 
-Proposal to evaluate: ${@:-the proposal currently under discussion}
+Proposal to evaluate: $ARGUMENTS
+
+If no proposal is supplied, evaluate the proposal currently under discussion.
 
 1. Separate my underlying goal from my proposed solution. If no proposal is identifiable, ask what to evaluate before proceeding.
 2. Identify consequential unsupported assumptions or possible biases in how I framed the problem. Distinguish evidence from inference.

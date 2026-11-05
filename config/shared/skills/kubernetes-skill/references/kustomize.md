@@ -125,6 +125,7 @@ spec:
 ```
 
 Reference in `kustomization.yaml`:
+
 ```yaml
 patches:
   - path: replicas-patch.yaml
@@ -151,6 +152,7 @@ More precise: explicitly states the operation (add/replace/remove) and the exact
 Note: `/` in a JSON Pointer key is escaped as `~1`. `~` is escaped as `~0`.
 
 Reference in `kustomization.yaml` with a `target` selector:
+
 ```yaml
 patches:
   - path: remove-debug.yaml
@@ -165,7 +167,7 @@ patches:
 **When to use each:**
 
 | | Strategic Merge | JSON6902 |
-|--|-----------------|---------|
+| -- | ----------------- | --------- |
 | Override existing field | ✅ simple | ✅ precise |
 | Remove a field | ❌ cannot | ✅ `op: remove` |
 | Add to an array positionally | Merges by name | ✅ `op: add /path/-` appends |
@@ -248,6 +250,7 @@ patches:
 ```
 
 An overlay opts in:
+
 ```yaml
 # overlays/prod/kustomization.yaml
 resources:
@@ -316,6 +319,7 @@ kubectl apply -k overlays/prod --dry-run=server
 Kustomize excels at structural deltas (replicas, images, resources). It does not express conditional logic.
 
 Use Helm instead when:
+
 - A resource should be conditionally included or excluded based on a flag (`if .Values.hpa.enabled`).
 - You need to loop over a variable-length list to generate resources (`range .Values.ingresses`).
 - The chart is distributed to others who need a documented, typed values interface.

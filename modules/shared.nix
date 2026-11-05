@@ -33,10 +33,13 @@ in
 
     home.packages = [
       # Sole python3 provider on Linux (not in linux/packages.nix) and preferred
-      # over Homebrew's transitive python on darwin. The wiki skill's okf_mw
-      # validator and index sync import PyYAML; use the same interpreter for the wiki hooks
-      # and middleware that the Obsidian lifecycle check uses.
-      (pkgs.python3.withPackages (pythonPackages: [ pythonPackages.pyyaml ]))
+      # over Homebrew's transitive python on darwin. Obsidian requires Python
+      # 3.14+, PyYAML for middleware, and markdown-it-py for read/outline and
+      # evidence reports. Use the same interpreter for both agent clients.
+      (pkgs.python314.withPackages (pythonPackages: [
+        pythonPackages.pyyaml
+        pythonPackages.markdown-it-py
+      ]))
     ]
     ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
       pkgs.coreutils

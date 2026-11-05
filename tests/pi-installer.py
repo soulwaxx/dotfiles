@@ -72,9 +72,7 @@ exit "${INSTALLER_STATUS:-0}"
     )
     assert result.returncode == 1 and result.stderr, result
 
-    result = subprocess.run(
-        [node, runner, bash, "-c", "kill -TERM $$"], check=False
-    )
+    result = subprocess.run([node, runner, bash, "-c", "kill -TERM $$"], check=False)
     assert result.returncode == 1, result
 
 print("pi-installer: ok")
