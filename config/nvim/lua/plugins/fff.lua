@@ -16,7 +16,9 @@ local function workspace_grep()
     -- Capture the explorer's main window before opening the fff floats.
     local main = explorer.main
     opts.select = {
-      select_window = function() return main end,
+      select_window = function()
+        return main
+      end,
     }
   end
   require("fff").live_grep(opts)

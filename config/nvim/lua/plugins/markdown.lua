@@ -8,21 +8,21 @@
 local markdownlint_config = vim.fn.stdpath("config") .. "/markdownlint-cli2.jsonc"
 
 return {
-	{ "iamcco/markdown-preview.nvim", enabled = false },
-	{
-		"mfussenegger/nvim-lint",
-		opts = {
-			linters = {
-				["markdownlint-cli2"] = { prepend_args = { "--config", markdownlint_config } },
-			},
-		},
-	},
-	{
-		"stevearc/conform.nvim",
-		opts = {
-			formatters = {
-				["markdownlint-cli2"] = { prepend_args = { "--config", markdownlint_config } },
-			},
-		},
-	},
+  { "iamcco/markdown-preview.nvim", enabled = false },
+  {
+    "mfussenegger/nvim-lint",
+    opts = {
+      linters = {
+        ["markdownlint-cli2"] = { prepend_args = { "--config", markdownlint_config } },
+      },
+    },
+  },
+  {
+    "stevearc/conform.nvim",
+    opts = {
+      formatters = {
+        ["markdownlint-cli2"] = { prepend_args = { "--config", markdownlint_config } },
+      },
+    },
+  },
 }

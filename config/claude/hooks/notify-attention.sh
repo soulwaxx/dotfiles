@@ -10,20 +10,20 @@ input=$(cat)
 event=$(printf '%s' "$input" | jq -r '.hook_event_name // empty' 2>/dev/null) || exit 0
 
 case "$event" in
-  Notification)
-    notification_type=$(printf '%s' "$input" | jq -r '.notification_type // "notification"' 2>/dev/null)
-    title=$(printf '%s' "$input" | jq -r '.title // "Claude Code"' 2>/dev/null)
-    message=$(printf '%s' "$input" | jq -r '.message // "Claude Code needs attention"' 2>/dev/null)
-    title="${title} (${notification_type})"
-    ;;
-  StopFailure)
-    error=$(printf '%s' "$input" | jq -r '.error // "unknown"' 2>/dev/null)
-    message=$(printf '%s' "$input" | jq -r '.error_details // .last_assistant_message // "Claude Code turn failed"' 2>/dev/null)
-    title="Claude Code failed: ${error}"
-    ;;
-  *)
-    exit 0
-    ;;
+Notification)
+  notification_type=$(printf '%s' "$input" | jq -r '.notification_type // "notification"' 2>/dev/null)
+  title=$(printf '%s' "$input" | jq -r '.title // "Claude Code"' 2>/dev/null)
+  message=$(printf '%s' "$input" | jq -r '.message // "Claude Code needs attention"' 2>/dev/null)
+  title="${title} (${notification_type})"
+  ;;
+StopFailure)
+  error=$(printf '%s' "$input" | jq -r '.error // "unknown"' 2>/dev/null)
+  message=$(printf '%s' "$input" | jq -r '.error_details // .last_assistant_message // "Claude Code turn failed"' 2>/dev/null)
+  title="Claude Code failed: ${error}"
+  ;;
+*)
+  exit 0
+  ;;
 esac
 
 message=$(printf '%s' "$message" | tr '\n' ' ' | cut -c 1-240)

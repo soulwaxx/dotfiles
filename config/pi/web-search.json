@@ -1,9 +1,9 @@
 {
-    "workflow": "none",
-    "toolExposure": "deferred",
-    "tools": {
-        "sourceCheck": {
-            "enabled": false
-        }
+  "workflow": "none",
+  "toolExposure": "deferred",
+  "tools": {
+    "sourceCheck": {
+      "enabled": false
     }
+  }
 }

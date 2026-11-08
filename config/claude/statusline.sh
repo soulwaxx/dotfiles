@@ -64,8 +64,8 @@ else
   BAR_COLOR="${RED}"
 fi
 bar="${BAR_COLOR}["
-for ((i=0; i<filled; i++)); do bar+="█"; done
-for ((i=0; i<empty; i++)); do bar+="░"; done
+for ((i = 0; i < filled; i++)); do bar+="█"; done
+for ((i = 0; i < empty; i++)); do bar+="░"; done
 bar+="] ${pct}%${RESET}"
 
 cost=$(json_get '.cost.total_cost_usd // 0' "0")
@@ -73,10 +73,10 @@ cost_fmt=$(printf '%s\n' "$cost" | LC_ALL=C awk '{printf "%.2f", $1+0}')
 
 vim_mode=$(json_get '.vim.mode // ""' "")
 case "$vim_mode" in
-  NORMAL) vim_info="${GREEN}N${RESET}" ;;
-  INSERT) vim_info="${YELLOW}I${RESET}" ;;
-  VISUAL) vim_info="${MAGENTA}V${RESET}" ;;
-  *)      vim_info="" ;;
+NORMAL) vim_info="${GREEN}N${RESET}" ;;
+INSERT) vim_info="${YELLOW}I${RESET}" ;;
+VISUAL) vim_info="${MAGENTA}V${RESET}" ;;
+*) vim_info="" ;;
 esac
 
 SEP="${DIM}|${RESET}"

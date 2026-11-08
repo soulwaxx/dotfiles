@@ -13,6 +13,16 @@ return {
 		"neovim/nvim-lspconfig",
 		opts = {
 			servers = {
+				-- Use two spaces when no project Ruff config supplies the style.
+				-- Editing overrides belong in the project's .editorconfig.
+				ruff = {
+					init_options = {
+						settings = {
+							configuration = { ["indent-width"] = 2 },
+							configurationPreference = "filesystemFirst",
+						},
+					},
+				},
 				-- nil_ls (the lang.nix extra's default Nix LSP) evaluates flake
 				-- inputs on open and blocks with an interactive "fetch inputs?"
 				-- prompt when they are not archived. autoEvalInputs=false stops the

@@ -130,9 +130,7 @@ in
   ];
 
   home = {
-    sessionVariables = lib.mkIf config.dotfiles.claude.enableWorkIntegrations {
-      CLAUDE_CODE_SUBAGENT_MODEL = "haiku";
-    };
+    sessionVariables.CLAUDE_CODE_SUBAGENT_MODEL = "haiku";
 
     activation = {
       # Replace only the old dotfiles directory link before placing per-file links.

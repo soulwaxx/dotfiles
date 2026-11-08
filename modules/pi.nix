@@ -206,6 +206,7 @@ let
     "npm:@gotgenes/pi-permission-system"
     "npm:@gotgenes/pi-anthropic-auth"
     "npm:pi-web-access"
+    "npm:pi-powerline-footer"
     "npm:@ff-labs/pi-fff"
     {
       source = "npm:pi-subagents";
@@ -262,6 +263,13 @@ let
     autocompleteMaxVisible = 8;
     enableSkillCommands = true;
     packages = piPackages;
+    powerline = {
+      preset = "default";
+      welcome = false;
+      # Keep /compact <text> as native compaction instructions, not a queued prompt.
+      queue.compactPromptMode = "native";
+    };
+    workingVibe = "off";
     # pi-subagents settings-level keys; runtime limits live in config/pi/subagents.json.
     # Only the agents declared in this module (plus the macOS vault package agent) are used.
     subagents = {
@@ -397,10 +405,6 @@ in
       # at the same source so `workflow: none` is honored on every host.
       ".pi/agent/web-search.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/web-search.json";
-
-      # Display-only footer, auto-discovered by pi on every host.
-      ".pi/agent/extensions/dotfiles-statusline".source =
-        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/statusline";
 
       # Extension configs — static JSON, symlinked.
       ".pi/agent/extensions/pi-permission-system/config.json".source =

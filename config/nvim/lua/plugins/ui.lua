@@ -3,7 +3,7 @@
 -- 0.12's builtin ui2 stays off: it can only draw the cmdline at the bottom.
 
 return {
-	-- LazyVim's default colorscheme, unused here (core.lua pins catppuccin) and
-	-- only ever reached through LazyVim's default `colorscheme` option.
-	{ "folke/tokyonight.nvim", enabled = false },
+  -- LazyVim's default colorscheme, unused here (core.lua pins catppuccin) and
+  -- only ever reached through LazyVim's default `colorscheme` option.
+  { "folke/tokyonight.nvim", enabled = false },
 }

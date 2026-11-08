@@ -228,6 +228,15 @@ Three-way merge (`:h diff-mode`): `:diffget //2` takes the left/ours side, `:dif
 
 LazyVim already sets `diffopt` to `indent-heuristic,inline:char,linematch:40`, so lines that only changed slightly are aligned and highlighted character-by-character instead of showing as whole-block replacements. Nothing to configure.
 
+## Git change previews (Gitsigns)
+
+Left-click a Git marker in the gutter to preview that change inline, including old/deleted text. Moving the cursor or entering Insert mode closes the preview. Other gutter clicks keep their normal behavior.
+
+| Keys | Action |
+| --- | --- |
+| `<leader>ghp` | Preview the change under the cursor inline |
+| `]h` / `[h` | Next / previous change |
+
 ## Diffing with git (Diffview)
 
 Use this when the other side is a git ref — a branch, a commit, the index — rather than a file on disk.

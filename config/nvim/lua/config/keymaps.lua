@@ -12,25 +12,25 @@ vim.keymap.set("n", "<leader>uu", "<cmd>Undotree<cr>", { desc = "Undo tree" })
 -- Re-root the Files panel at the current file's git repo, useful in a
 -- workspace holding many sibling repositories.
 vim.keymap.set("n", "<leader>er", function()
-	local file = vim.api.nvim_buf_get_name(0)
-	if file == "" then
-		return
-	end
-	local root = Snacks.git.get_root(file)
-	if not root then
-		vim.notify("No git repo for " .. file, vim.log.levels.WARN)
-		return
-	end
-	local explorer = Snacks.picker.get({ source = "explorer" })[1]
-	if explorer then
-		explorer:close()
-	end
-	Snacks.explorer({ cwd = root })
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == "" then
+    return
+  end
+  local root = Snacks.git.get_root(file)
+  if not root then
+    vim.notify("No git repo for " .. file, vim.log.levels.WARN)
+    return
+  end
+  local explorer = Snacks.picker.get({ source = "explorer" })[1]
+  if explorer then
+    explorer:close()
+  end
+  Snacks.explorer({ cwd = root })
 end, { desc = "Explorer: re-root at file's git repo" })
 
 -- Workspace git overview: pick a sibling repo with uncommitted/unpushed work
 -- and re-root the explorer there. Complements <leader>er (which re-roots at the
 -- current file's repo) for when no relevant file is open yet.
 vim.keymap.set("n", "<leader>gw", function()
-	require("workspace_git").pick()
+  require("workspace_git").pick()
 end, { desc = "Git: workspace repos with changes" })
