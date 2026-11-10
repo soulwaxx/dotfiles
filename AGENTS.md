@@ -45,6 +45,9 @@ Claude Code and pi.
 - Preserve secret-access, catastrophic-operation, and external/destructive
   effect confirmation protections in `config/pi/permission-system.json`
   and `config/claude/settings.json`.
+- When changing bash or MCP rules in `config/pi/permission-system.json`,
+  mirror them in `config/omp/config.yml` (`bash.patterns`,
+  `tools.approval`); no test checks they match.
 
 ## Verification and activation
 

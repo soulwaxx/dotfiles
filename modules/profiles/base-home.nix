@@ -44,5 +44,6 @@ in
     ../theme
     ../claude
     ../pi.nix
+    ../omp.nix
   ];
 }
