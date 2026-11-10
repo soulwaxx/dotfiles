@@ -189,23 +189,9 @@ Pi uses [`pi-subagents`](https://pi.dev/packages/pi-subagents). `modules/pi.nix`
 - `config/pi/subagents.json` is symlinked to `~/.pi/agent/extensions/subagent/config.json`. Direct launches and JavaScript workflow scripts are available; scripts use `runs.run` for sequential work and `runs.all` for parallel work instead of top-level `tasks` and `chain`. Lane-management controls are available for reviewed cleanup, with confirmation required for worktree discard and destructive cleanup. Other optional feature groups, including preflight hints, scheduled runs, and automatic missions, remain disabled.
 - `maxSubagentDepth: 1` prevents child delegation. Artifact saving and concurrency use package defaults, as does the 30-minute run deadline for each single-agent launch.
 - The reviewer supports fixed-point diff reviews and current-state audits. Only diff reviews require the `code-review` skill and a fixed point.
-- No global `APPEND_SYSTEM.md` is managed, and no standing delegation authorization is supplied. Package guidance requires authorization before delegation and one writer per checkout/worktree.
 - The package keeps its default `toolActivation: "auto"`, so new sessions may first call `subagents_enable`.
 
 Start a new Pi session after changing `config/pi/subagents.json`; resumed sessions retain previously declared tool definitions. Use `/subagents-doctor` to check the setup.
-
-## omp trial
-
-[oh-my-pi](https://github.com/can1357/oh-my-pi) (`omp`) runs alongside pi on every host through `modules/omp.nix`. It keeps all state under `~/.omp`; it reads `~/.pi` only through the linked Obsidian package.
-
-- Install: activation runs `https://omp.sh/install --binary` (a SHA-256-verified prebuilt binary) only when `~/.local/bin/omp` is missing. Upgrade explicitly with `omp update`; `update.auto` is off.
-- Settings: `config/omp/config.yml` is hand-maintained and linked to `~/.omp/agent/config.yml`. Edits apply live, and `/settings` or `omp config set` writes land in the repository, so review them in `git diff`. Model names are written directly and do not follow `dotfiles.pi.*`.
-- Generated: `~/.omp/agent/mcp.json` renders `modules/mcp-servers.nix` (work servers on work hosts; read-only, so change servers here rather than through `/mcp add`), and `~/.omp/agent/agents/` renders the repository agents from `config/shared/agents/`. The bundled `task`, `sonic`, and `security-reviewer` agents are disabled, so every `task` call names an agent.
-- Shared: `config/shared/AGENTS.md` is linked as `~/.omp/agent/RULES.md` so subagents receive it too; skills and the `/adversarial` and `/lesson` commands are linked from `config/shared/`. omp uses its built-in `/init`.
-- Obsidian (macOS): activation runs `omp plugin link` on pi's installed `@soulwaxx/obsidian-second-brain`, so it follows `pi update`. The packaged `wiki-vault` subagent is not discovered by omp.
-- Credentials: run `omp login anthropic` once per host. omp stores credentials in `~/.omp/agent/agent.db`.
-- Safety: `tools.approvalMode: yolo` with pi's bash rules copied into `bash.patterns`, exact-name prompts for destructive MCP tools, and `tools.restrictedFolders` for home-directory secrets. Accepted gaps: no automated check keeps `bash.patterns` in sync with `config/pi/permission-system.json`; `eval` can spawn shells that bypass `bash.patterns`; in-repository `.env`, `*.pem`, `*.key`, and `secret(s)` paths are readable; new upstream MCP tools are not covered until named.
-- Remove: drop `../omp.nix` from `modules/profiles/base-home.nix`, switch, then run `rm -rf ~/.omp ~/.local/bin/omp`.
 
 ## Nix distribution choice
 

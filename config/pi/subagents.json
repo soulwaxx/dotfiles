@@ -1,4 +1,5 @@
 {
+  "toolActivation": "auto",
   "disabledFeatures": [
     "agent-management",
     "watchdog",

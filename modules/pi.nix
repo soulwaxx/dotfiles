@@ -227,17 +227,6 @@ let
     defaultModel = config.dotfiles.pi.defaultModel;
     defaultThinkingLevel = "high";
     showCacheMissNotices = true;
-    # Keep ordinary reserves for unlisted models, including smaller subagents.
-    compaction = {
-      enabled = true;
-      reserveTokens = 16384;
-      keepRecentTokens = 20000;
-      modelOverrides = {
-        "anthropic/claude-opus-5-5".reserveTokens = 1000000 - 500000;
-        # Confirmed 272K personal window: compact above 220K context tokens.
-        "openai/gpt-6.1-sol".reserveTokens = 272000 - 220000;
-      };
-    };
     theme = theme.name;
     defaultTools = [
       "+codemode"
@@ -268,6 +257,14 @@ let
       welcome = false;
       # Keep /compact <text> as native compaction instructions, not a queued prompt.
       queue.compactPromptMode = "native";
+      placement = "below";
+      workingIndicatorPlacement = "above-powerline";
+      secondaryOverflow = "wrap";
+      # Subscription: show Pi-reported API-equivalent cost too, e.g. "$1.23 (sub)".
+      cost.subscriptionDisplay = "both";
+      # Session and latest-request cache hit rates, e.g. "cache 84% · last 97%".
+      cache_read.format = "session-request";
+      git.hostIcon = true;
     };
     workingVibe = "off";
     # pi-subagents settings-level keys; runtime limits live in config/pi/subagents.json.
