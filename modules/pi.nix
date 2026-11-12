@@ -88,36 +88,49 @@ let
     };
   };
 
+  # @tintinweb/pi-subagents agent definitions. `prompt_mode: replace` gives each
+  # child a fresh prompt without AGENTS.md, so the body starts by reading them.
   mkPiAgent =
     name: prompt: frontmatter:
     pkgs.writeText "pi-agent-${name}.md" ''
       ---
       name: ${name}
-      ${frontmatter}
+      ${lib.trim frontmatter}
+      prompt_mode: replace
+      skills: false
       ---
+      First read ${config.home.homeDirectory}/.pi/agent/AGENTS.md and every AGENTS.md that applies to your working directory.
+
       ${prompt}
     '';
 
-  # pi-subagents agent definitions. Builtin agents are disabled in settings;
-  # on macOS the obsidian-second-brain package also ships its own vault agent.
+  # `tools:` narrows built-ins only; any `ext:` entry turns extension tools into
+  # an allowlist, keeping codemode/MCP, todo, and question tools out of children.
+  # pi-fff overrides the built-in grep and find; they must stay listed as
+  # built-ins too, because unlisted built-in names are excluded from the child.
+  # Web tools are deferred (config/pi/web-search.json), so children need the
+  # direct web_enable loader to activate them. pi-web-access re-adds that loader
+  # in before_agent_start, after pi-subagents narrows the active set, so agents
+  # without web tools would see it (uncallable) on turn 1. `disallowed_tools`
+  # removes it from the child's registry, where the loader cannot re-add it.
+  readOnlyTools = "read, bash, grep, find, ls, ext:pi-fff/grep, ext:pi-fff/find";
+  webTools = "ext:pi-web-access/web_enable, ext:pi-web-access/web_search, ext:pi-web-access/fetch_content, ext:pi-web-access/get_search_content";
+
+  # Default agents are disabled in config/pi/subagents.json.
   piAgentFiles = {
     ".pi/agent/agents/scout.md" = {
       source = mkPiAgent "scout" (builtins.readFile ../config/shared/agents/scout.md) ''
         description: Use for read-only codebase investigation that traces behavior, locates relevant files, callers, and tests, and returns cited evidence.
-        advertise: true
-        tools: read, bash, grep, find, ls
+        tools: ${readOnlyTools}
+        disallowed_tools: web_enable
         model: ${subagentModels.scout}
         thinking: low
-        async: true
-        inheritProjectContext: true
-        inheritGlobalContext: true
-        acceptanceRole: read-only
       '';
       force = true;
     };
     ".pi/agent/agents/reviewer.md" = {
-      # pi-subagents never injects skills marked disable-model-invocation
-      # (code-review is explicit-only), so point the reviewer at the file.
+      # Agents preload no skills (`skills: false`), so point the reviewer at
+      # the code-review skill file.
       source =
         mkPiAgent "reviewer"
           (
@@ -129,14 +142,10 @@ let
           )
           ''
             description: Use for read-only diff reviews against an explicit fixed point, or current-state audits of named files, configuration, or behavior against supplied criteria.
-            advertise: true
-            tools: read, bash, grep, find, ls
+            tools: ${readOnlyTools}
+            disallowed_tools: web_enable
             model: ${subagentModels.reviewer}
             thinking: high
-            async: true
-            inheritProjectContext: true
-            inheritGlobalContext: true
-            acceptanceRole: read-only
           '';
       force = true;
     };
@@ -152,14 +161,9 @@ let
           )
           ''
             description: Use for read-only local and web research on a bounded question; return inspected primary-source citations, findings, and unknowns without editing or publishing.
-            advertise: true
-            tools: read, bash, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
+            tools: ${readOnlyTools}, ${webTools}
             model: ${subagentModels.worker}
             thinking: high
-            async: true
-            inheritProjectContext: true
-            inheritGlobalContext: true
-            acceptanceRole: read-only
           '';
       force = true;
     };
@@ -175,28 +179,18 @@ let
           )
           ''
             description: Use for read-only operational-risk review of Terraform/OpenTofu, Kubernetes/GitOps, and infrastructure security; verify official docs and report evidence-backed findings without applying changes.
-            advertise: true
-            tools: read, bash, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
+            tools: ${readOnlyTools}, ${webTools}
             model: ${subagentModels.reviewer}
             thinking: high
-            async: true
-            inheritProjectContext: true
-            inheritGlobalContext: true
-            acceptanceRole: read-only
           '';
       force = true;
     };
     ".pi/agent/agents/worker.md" = {
       source = mkPiAgent "worker" (builtins.readFile ../config/shared/agents/worker.md) ''
         description: Use for an already well-scoped implementation task with clear success criteria; make minimal edits and run focused verification.
-        advertise: true
-        tools: read, bash, edit, write, grep, find, ls, web_enable, web_search, fetch_content, get_search_content
+        tools: ${readOnlyTools}, edit, write, ${webTools}
         model: ${subagentModels.worker}
         thinking: high
-        async: true
-        inheritProjectContext: true
-        inheritGlobalContext: true
-        acceptanceRole: writer
       '';
       force = true;
     };
@@ -208,12 +202,7 @@ let
     "npm:pi-web-access"
     "npm:pi-powerline-footer"
     "npm:@ff-labs/pi-fff"
-    {
-      source = "npm:pi-subagents";
-      extensions = [ "index.js" ];
-      skills = [ "skills/pi-subagents/SKILL.md" ];
-      prompts = [ ];
-    }
+    "npm:@tintinweb/pi-subagents"
     "npm:@juicesharp/rpiv-todo"
     "npm:@juicesharp/rpiv-ask-user-question"
     "npm:@soulwaxx/pi-skill-autocomplete"
@@ -267,29 +256,12 @@ let
       git.hostIcon = true;
     };
     workingVibe = "off";
-    # pi-subagents settings-level keys; runtime limits live in config/pi/subagents.json.
-    # Only the agents declared in this module (plus the macOS vault package agent) are used.
-    subagents = {
-      disableBuiltins = true;
-    }
-    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
-      # The package agent already inherits project context; add the global AGENTS.md.
-      agentOverrides."obsidian-second-brain.wiki-vault" = {
-        inheritGlobalContext = true;
-      }
-      // lib.optionalAttrs (config.dotfiles.pi.vaultAgentModel != null) {
-        model = config.dotfiles.pi.vaultAgentModel;
-      };
-    };
   };
 
   mkPiMcp = import ./lib/pi-mcp.nix { inherit lib pkgs; };
   piMcp = mkPiMcp { inherit isWork awsMcp; };
 
-  piPackageSource = package: if builtins.isString package then package else package.source;
-  piPackageNames = map (package: lib.removePrefix "npm:" (piPackageSource package)) (
-    builtins.filter (package: lib.hasPrefix "npm:" (piPackageSource package)) piPackages
-  );
+  piPackageNames = map (lib.removePrefix "npm:") (builtins.filter (lib.hasPrefix "npm:") piPackages);
   piAllowedPackagesFile = jsonFormat.generate "pi-allowed-packages.json" piPackageNames;
 
   # Use explicit per-host paths: pi-fff does not expand ~ in database paths,
@@ -406,7 +378,8 @@ in
       # Extension configs — static JSON, symlinked.
       ".pi/agent/extensions/pi-permission-system/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
-      ".pi/agent/extensions/subagent/config.json".source =
+      # @tintinweb/pi-subagents reads global settings from ~/.pi/agent/subagents.json.
+      ".pi/agent/subagents.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/subagents.json";
 
       # Shared global instructions and skills — harness-agnostic prose owned by

@@ -73,12 +73,6 @@ in
         description = "Pi model selected at startup.";
       };
 
-      vaultAgentModel = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        description = "Pi model for the Obsidian vault specialist on this host.";
-      };
-
       subagentModels = {
         scout = lib.mkOption {
           type = lib.types.str;
