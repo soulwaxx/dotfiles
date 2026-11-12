@@ -10,12 +10,7 @@ let
   # Pin nh's flake refs to this host so bare `nh <platform> switch` resolves the
   # right config even when the machine hostname differs from the flake output.
   nhFlakeRef = "${config.dotfiles.path}#${hostname}";
-  verifyNixStore = pkgs.writeShellScript "verify-nix-store" ''
-    if ! ${pkgs.nix}/bin/nix-store --verify --check-contents; then
-      echo "Nix store content verification failed; repair the reported paths before cleanup." >&2
-      exit 1
-    fi
-  '';
+  verifyNixStore = import ./lib/verify-nix-store.nix { inherit pkgs; };
 in
 {
   config = {

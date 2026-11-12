@@ -6,6 +6,15 @@
 -- name, same commands, same options — only the source changes, so `name` is
 -- pinned so lazy.nvim keeps the original plugin directory and identity.
 return {
+  -- The LazyVim snacks_picker extra binds the same keys; lazy.nvim resolves
+  -- same-lhs keys across specs nondeterministically, so disable those.
+  {
+    "folke/snacks.nvim",
+    keys = {
+      { "<leader>gd", false },
+      { "<leader>gD", false },
+    },
+  },
   {
     "dlyongemallo/diffview.nvim",
     name = "diffview.nvim",

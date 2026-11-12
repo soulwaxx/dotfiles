@@ -67,27 +67,32 @@ in
       };
     };
 
-    # SSH config — managed declaratively so fresh bootstraps get the right keys
+    # SSH config — managed declaratively so fresh bootstraps get the right keys.
+    # A pre-existing hand-written ~/.ssh/config is moved to config.hm-backup on
+    # the first switch. UseKeychain needs Apple's /usr/bin/ssh (no Nix openssh).
     ssh = {
-      matchBlocks = {
+      enable = true;
+      # The old implicit defaults only restated OpenSSH defaults.
+      enableDefaultConfig = false;
+      settings = {
         # Work GitHub (default identity)
         "github.com" = lib.hm.dag.entryBefore [ "i-* mi-*" ] {
-          user = "git";
-          identitiesOnly = true;
-          addKeysToAgent = "yes";
-          identityFile = "~/.ssh/git";
-          extraOptions.UseKeychain = "yes";
+          User = "git";
+          IdentitiesOnly = true;
+          AddKeysToAgent = "yes";
+          IdentityFile = "~/.ssh/git";
+          UseKeychain = "yes";
         };
 
         # Personal GitHub — use a remote alias:
         #   git clone git@github.com-personal:user/repo.git
         "github.com-personal" = lib.hm.dag.entryBefore [ "i-* mi-*" ] {
-          hostname = "github.com";
-          user = "git";
-          identitiesOnly = true;
-          addKeysToAgent = "yes";
-          identityFile = "~/.ssh/git_personal";
-          extraOptions.UseKeychain = "yes";
+          HostName = "github.com";
+          User = "git";
+          IdentitiesOnly = true;
+          AddKeysToAgent = "yes";
+          IdentityFile = "~/.ssh/git_personal";
+          UseKeychain = "yes";
         };
 
         # SSH over AWS SSM Session Manager.
@@ -96,14 +101,12 @@ in
         # agent), so the SSH host key offers no additional trust. Skipping the
         # known_hosts dance also avoids churn from instance-ID-based hostnames.
         "i-* mi-*" = {
-          user = "ec2-user";
-          identitiesOnly = true;
-          identityFile = "~/.ssh/git";
-          proxyCommand = "sh -c \"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'\"";
-          extraOptions = {
-            StrictHostKeyChecking = "no";
-            UserKnownHostsFile = "/dev/null";
-          };
+          User = "ec2-user";
+          IdentitiesOnly = true;
+          IdentityFile = "~/.ssh/git";
+          ProxyCommand = "sh -c \"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'\"";
+          StrictHostKeyChecking = "no";
+          UserKnownHostsFile = "/dev/null";
         };
       };
     };

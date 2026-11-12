@@ -5,5 +5,4 @@ debug
 .repro
 foo.*
 *.log
-lazy-lock.json
 data

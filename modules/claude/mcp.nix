@@ -10,8 +10,6 @@
 
 let
   jsonFormat = pkgs.formats.json { };
-  isWork = config.dotfiles.claude.enableWorkIntegrations;
-  awsMcp = config.dotfiles.aws.mcp;
   reconcileMcpFilter = "${config.dotfiles.path}/modules/claude/jq/reconcile-mcp.jq";
 
   # Definitions shared with modules/pi.nix. Claude's schema requires an
@@ -22,10 +20,7 @@ let
     entry:
     (lib.removeAttrs entry [ "description" ]) // { type = if entry ? url then "http" else "stdio"; };
 
-  mcpServers = lib.mapAttrs (_: addType) (
-    mcpServersLib.commonServers
-    // lib.optionalAttrs isWork (mcpServersLib.mkWorkServers { inherit awsMcp; })
-  );
+  mcpServers = lib.mapAttrs (_: addType) (mcpServersLib.mkServers config);
   mcpServersFile = jsonFormat.generate "claude-mcp-servers.json" mcpServers;
 in
 {
@@ -37,9 +32,15 @@ in
          ${pkgs.diffutils}/bin/cmp -s - <(${pkgs.jq}/bin/jq -S '.' ${mcpServersFile}); then
         verboseEcho "claude: MCP servers unchanged, skipping"
       else
+        # set -e does not fire inside an && list, so fail explicitly.
         ${pkgs.jq}/bin/jq --slurpfile mcp ${mcpServersFile} \
           --from-file ${lib.escapeShellArg reconcileMcpFilter} \
-          "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+          "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" || {
+          rm -f "$CLAUDE_JSON.tmp"
+          echo "claude: failed to reconcile MCP servers in $CLAUDE_JSON" >&2
+          false
+        }
+        mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
       fi
     else
       ${pkgs.jq}/bin/jq -n --slurpfile mcp ${mcpServersFile} \

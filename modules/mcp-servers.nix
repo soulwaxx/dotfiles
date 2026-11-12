@@ -1,5 +1,5 @@
 # Shared MCP server definitions for both harnesses.
-# modules/pi.nix consumes these as-is; modules/claude/mcp.nix maps over them
+# modules/pi.nix adds pi-only fields; modules/claude/mcp.nix maps over them
 # to add the `type = "http"/"stdio"` field Claude's schema requires (inferred
 # here from whether an entry has `url` or `command`).
 { lib, pkgs }:
@@ -23,8 +23,6 @@ let
     fi
     exec uvx mcp-proxy-for-aws-cli@latest "$@"
   '';
-in
-{
   commonServers = {
     github = {
       description = "Search and manage GitHub repositories, code, issues, and pull requests.";
@@ -35,7 +33,7 @@ in
 
   # Work-only servers. awsMcp is config.dotfiles.aws.mcp.
   mkWorkServers =
-    { awsMcp }:
+    { awsMcp, enableKubernetes }:
     let
       awsMcpEndpoint = awsMcpEndpoints.${awsMcp.endpointRegion};
     in
@@ -66,16 +64,6 @@ in
         url = "https://knowledge-mcp.global.api.aws";
       };
 
-      kubernetes = {
-        description = "Inspect Kubernetes clusters, workloads, resources, and logs.";
-        command = "npx";
-        args = [
-          "-y"
-          "kubernetes-mcp-server@latest"
-        ];
-        env = { };
-      };
-
       notion = {
         description = "Search, read, and manage Notion pages and databases.";
         url = "https://mcp.notion.com/mcp";
@@ -91,5 +79,27 @@ in
         description = "Query and manage incident.io incidents, alerts, on-call schedules, and escalations.";
         url = "https://mcp.incident.io/mcp";
       };
+    }
+    # Kubernetes tools follow dotfiles.kubernetes.enable (AGENTS.md).
+    // lib.optionalAttrs enableKubernetes {
+      kubernetes = {
+        description = "Inspect Kubernetes clusters, workloads, resources, and logs.";
+        command = "npx";
+        args = [
+          "-y"
+          "kubernetes-mcp-server@latest"
+        ];
+        env = { };
+      };
     };
+in
+{
+  # The one composition both harnesses consume. config is the Home Manager config.
+  mkServers =
+    config:
+    commonServers
+    // lib.optionalAttrs config.dotfiles.claude.enableWorkIntegrations (mkWorkServers {
+      awsMcp = config.dotfiles.aws.mcp;
+      enableKubernetes = config.dotfiles.kubernetes.enable;
+    });
 }

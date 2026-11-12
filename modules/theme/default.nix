@@ -46,7 +46,6 @@ in
   config.dotfiles.theme.current = {
     inherit palette;
     name = "catppuccin-mocha";
-    variant = "dark";
     # Built into bat and delta. Consumed by modules/shared.nix (bat) and
     # modules/git.nix (delta syntax-theme).
     bat = "Catppuccin Mocha";
@@ -75,9 +74,6 @@ in
         "border:${palette.overlay0}"
         "label:${palette.text}"
       ];
-    font = {
-      regular = "JetBrainsMono Nerd Font";
-      mono = "JetBrainsMono Nerd Font Mono";
-    };
+    font.mono = "JetBrainsMono Nerd Font Mono";
   };
 }

@@ -23,8 +23,8 @@ Claude Code and pi.
   other live settings reset.
 - Declare MCP servers in `modules/mcp-servers.nix`; consumers own
   harness-specific schemas.
-- Shared skills: `config/shared/skills/<name>/SKILL.md`. Invoke explicitly,
-  except `grilling` and `infra-review`, which may auto-select by description.
+- Shared skills: `config/shared/skills/<name>/SKILL.md`. All are
+  explicit-only (`disable-model-invocation: true`); agents read them by path.
 - `tests/` is executable verification, not agent instructions. Obsidian and
   skill-completion tests belong to their standalone package repositories.
 

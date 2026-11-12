@@ -7,10 +7,6 @@
 
 let
   dotfiles = config.dotfiles.path;
-  # Version floor enforced at switch time. requiredMinimumVersion in settings.json
-  # is managed-settings-only (ignored in user scope), and Home Manager cannot own
-  # the system-level managed-settings path on Linux hosts, so the installer re-runs
-  # instead when the binary is older. Bump when the config relies on newer behavior.
   mkCurlInstaller = import ../lib/mk-curl-installer.nix { inherit lib pkgs; };
   symlinkedPaths = {
     ".claude/statusline-command.sh" = "statusline.sh";
@@ -59,7 +55,7 @@ let
             + builtins.readFile ../../config/shared/agents/reviewer.md
           )
           ''
-            description: Use for read-only review of an explicit fixed-point-to-HEAD diff against repository standards and the originating specification.
+            description: Use for read-only diff reviews against an explicit fixed point, or current-state audits of named files, configuration, or behavior against supplied criteria.
             tools: Read, Grep, Glob, Bash
             model: sonnet
             permissionMode: plan
@@ -93,7 +89,7 @@ let
         mkClaudeAgent "infra-reviewer"
           (
             ''
-              For Kubernetes, Helm, Kustomize, or GitOps reviews, also read ${config.home.homeDirectory}/.claude/skills/kubernetes-skill/SKILL.md and its relevant references.
+              Read ${config.home.homeDirectory}/.claude/skills/infra-review/SKILL.md and follow it as the review contract. For Kubernetes, Helm, Kustomize, or GitOps reviews, also read ${config.home.homeDirectory}/.claude/skills/kubernetes-skill/SKILL.md and its relevant references.
 
             ''
             + builtins.readFile ../../config/shared/agents/infra-reviewer.md
@@ -105,8 +101,6 @@ let
             permissionMode: plan
             effort: high
             background: true
-            skills:
-              - infra-review
           '';
       force = true;
     };
@@ -133,21 +127,6 @@ in
     sessionVariables.CLAUDE_CODE_SUBAGENT_MODEL = "haiku";
 
     activation = {
-      # Replace only the old dotfiles directory link before placing per-file links.
-      migrateClaudeCommands = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
-        if [[ -L "$HOME/.claude/commands" && "$(readlink -f "$HOME/.claude/commands")" == "${dotfiles}/config/claude/commands" ]]; then
-          run rm "$HOME/.claude/commands"
-          run mkdir -p "$HOME/.claude/commands"
-        fi
-      '';
-
-      migrateClaudeHooks = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
-        if [[ -L "$HOME/.claude/hooks" && "$(readlink -f "$HOME/.claude/hooks")" == "${dotfiles}/config/claude/hooks" ]]; then
-          run rm "$HOME/.claude/hooks"
-          run mkdir -p "$HOME/.claude/hooks"
-        fi
-      '';
-
       installClaudeCode = mkCurlInstaller {
         name = "claude";
         displayName = "Claude Code";

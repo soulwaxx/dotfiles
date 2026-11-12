@@ -10,34 +10,25 @@
 # HELPER FUNCTIONS
 # ============================================================================
 
-# Color helpers (TTY only)
-_git_color_init() {
-    if [[ -t 1 ]] && command -v tput &>/dev/null; then
-        _git_c_reset="$(tput sgr0)"
-        _git_c_bold="$(tput bold)"
-        _git_c_red="$(tput setaf 1)"
-        _git_c_green="$(tput setaf 2)"
-        _git_c_yellow="$(tput setaf 3)"
-        _git_c_blue="$(tput setaf 4)"
-        _git_c_cyan="$(tput setaf 6)"
+# Color helpers. The terminal check runs per call, so redirected output stays
+# plain; zsh prompt escapes avoid forking tput at shell startup.
+# _git_styled <fd> <prompt-style> <line-ending> <text...>
+_git_styled() {
+    local fd=$1 style=$2 ending=$3
+    shift 3
+    if [[ -t $fd ]]; then
+        printf "%s%s%s$ending" "${(%)style}" "$*" "${(%):-%f%b}" >&$fd
     else
-        _git_c_reset=""
-        _git_c_bold=""
-        _git_c_red=""
-        _git_c_green=""
-        _git_c_yellow=""
-        _git_c_blue=""
-        _git_c_cyan=""
+        printf "%s$ending" "$*" >&$fd
     fi
 }
-_git_color_init
 
-_git_header() { printf "%s%s%s%s\n" "$_git_c_bold" "$_git_c_cyan" "$*" "$_git_c_reset"; }
-_git_info() { printf "%s%s%s\n" "$_git_c_blue" "$*" "$_git_c_reset"; }
-_git_success() { printf "%s%s%s\n" "$_git_c_green" "$*" "$_git_c_reset"; }
-_git_warn() { printf "%s%s%s\n" "$_git_c_yellow" "$*" "$_git_c_reset"; }
-_git_error() { printf "%s%s%s\n" "$_git_c_red" "$*" "$_git_c_reset" >&2; }
-_git_prompt() { printf "%s%s%s" "$_git_c_bold" "$*" "$_git_c_reset"; }
+_git_header() { _git_styled 1 '%B%F{6}' '\n' "$*"; }
+_git_info() { _git_styled 1 '%F{4}' '\n' "$*"; }
+_git_success() { _git_styled 1 '%F{2}' '\n' "$*"; }
+_git_warn() { _git_styled 1 '%F{3}' '\n' "$*"; }
+_git_error() { _git_styled 2 '%F{1}' '\n' "$*"; }
+_git_prompt() { _git_styled 1 '%B' '' "$*"; }
 
 # Require fzf for interactive helpers
 _git_require_fzf() {
@@ -851,7 +842,8 @@ git-cherry-pick-interactive() {
     echo "$commits"
     printf "\n"
     if _git_confirm "Continue? (y/N): "; then
-        echo "$commits" | xargs git cherry-pick
+        # git log lists newest first; apply oldest first so children follow parents.
+        git cherry-pick ${(Oaf)commits}
     else
         _git_warn "Cancelled."
     fi

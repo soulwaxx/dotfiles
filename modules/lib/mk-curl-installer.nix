@@ -9,8 +9,6 @@
   installerArgs ? [ ],
   installerCommand ? [ "${pkgs.bash}/bin/bash" ],
   extraPath ? [ ],
-  versionFloor ? null,
-  versionCommand ? null,
   postInstall ? "",
 }:
 
@@ -23,11 +21,6 @@ let
     "${pkgs.gzip}/bin"
   ];
   path = lib.concatStringsSep ":" (basePath ++ extraPath) + ":$PATH";
-  versionCmd =
-    if versionCommand != null then
-      versionCommand
-    else
-      ''"$BIN_PATH" --version 2>/dev/null | ${pkgs.coreutils}/bin/cut -d' ' -f1'';
 in
 
 lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -63,20 +56,9 @@ lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     verboseEcho "${name}: installing ${displayName} into ${installDir}"
     _install_${name} || {
       echo "${name}: ${displayName} install failed (curl or installer returned non-zero)" >&2
-      exit 1
+      false
     }
   fi
-
-  ${lib.optionalString (versionFloor != null) ''
-    if [[ -x "$BIN_PATH" ]]; then
-      INSTALLED_VERSION="$(${versionCmd})"
-      if [[ -n "$INSTALLED_VERSION" ]] \
-        && [[ "$(printf '%s\n' "${versionFloor}" "$INSTALLED_VERSION" | ${pkgs.coreutils}/bin/sort -V | ${pkgs.coreutils}/bin/head -n1)" != "${versionFloor}" ]]; then
-        echo "${name}: installed version $INSTALLED_VERSION is below the ${versionFloor} floor; re-running installer" >&2
-        _install_${name} || echo "${name}: WARN: update failed; keeping $INSTALLED_VERSION" >&2
-      fi
-    fi
-  ''}
 
   ${lib.optionalString (postInstall != "") ''
     if [[ -x "$BIN_PATH" ]]; then

@@ -3,7 +3,7 @@
 -- Add any additional options here
 
 -- One option borders every float Neovim opens (LSP hover, signature help,
--- diagnostics, vim.ui.input). Neovim 0.12+; the pcall keeps older builds quiet.
+-- diagnostics, vim.ui.input). Requires Neovim 0.11+.
 vim.o.winborder = "rounded"
 
 -- Catppuccin only leaves completion backgrounds unset when pumblend is zero.

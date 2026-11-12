@@ -41,8 +41,8 @@ aws-ssm() {
 #
 # ecss / ecs-status  — fzf: cluster → service → show task sets, health, events
 # ecsl / ecs-logs    — fzf: cluster → service → container → docker logs
-# ecse / ecs-exec <service> <container> <cmd>  — docker exec via SSM
-# ecsc / ecs-curl <service> <url>              — HTTP GET from inside task namespace
+# ecse / ecs-exec <cluster> <service> <container> <cmd> [task_id]  — docker exec via SSM
+# ecsc / ecs-curl <cluster> <service> <url> [task_id]              — HTTP GET from inside task namespace
 # ============================================================================
 
 ECS_REGION="${ECS_REGION:-eu-west-1}"
@@ -336,7 +336,9 @@ ecs-logs() {
     echo "Task: $task_id  EC2: $ec2_id  Container: $short"
     echo ""
     local short_q="${(q)short}"
-    _ecs_ssm_run "$ec2_id" "docker logs $short_q 2>&1"
+    # SSM StandardOutputContent keeps only the first 24,000 characters, so
+    # bound the output to the recent tail instead of the oldest lines.
+    _ecs_ssm_run "$ec2_id" "docker logs --tail 500 $short_q 2>&1"
     local ssm_status=$?
     echo ""
     echo "# Rerun: ecsl $container $cluster $service $task_id"

@@ -85,9 +85,6 @@ in
     # One-time: create a multi-platform buildx builder (amd64 via Rosetta + arm64).
     buildx-init = "docker buildx inspect multiarch >/dev/null 2>&1 || docker buildx create --name multiarch --driver docker-container --bootstrap --use";
 
-    # Kubernetes
-    k = "kubectl";
-
     # Dotfiles desired state
     cfg-check = "(cd \"${dotfilesPathExpr}\" && nix run .#check)";
     cfg-fmt = "(cd \"${dotfilesPathExpr}\" && nix run .#fmt)";

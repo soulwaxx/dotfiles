@@ -19,7 +19,7 @@ in
       ''
         if [[ ! -x "${herdrBin}" ]]; then
           echo "herdr: binary not found at ${herdrBin}" >&2
-          exit 1
+          false
         fi
 
         run ${herdrBin} integration install pi

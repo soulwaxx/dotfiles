@@ -289,6 +289,10 @@ Rule of thumb: **two files → builtin `:vert diffsplit`. Two git refs → `:Dif
 |---|---|
 | `<C-a>` / `<C-x>` | Increment / decrement number, date, hex, ordinal under cursor |
 
+Inside herdr, `ctrl+a` is the herdr prefix (`config/herdr/config.toml`), so it
+never reaches Neovim or zsh directly. Press the prefix, then pick **send prefix**
+from herdr's keybind menu to pass `<C-a>` through.
+
 ## Sessions and layouts
 
 | Keys | Action |

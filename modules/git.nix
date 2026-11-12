@@ -73,9 +73,7 @@ in
       "__pycache__"
       ".secrets"
       ".claude"
-      "CLAUDE.md"
       "SPEC.md"
-      "AGENTS.md"
       "PLAN.md"
       ".pi"
     ];

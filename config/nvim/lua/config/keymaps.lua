@@ -5,6 +5,11 @@
 -- Quick escape from insert mode
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Escape insert mode" })
 
+-- Ghostty forwards cmd+w as CSI-u (modules/ghostty.nix) so it reaches Neovim.
+vim.keymap.set("n", "<D-w>", function()
+  Snacks.bufdelete()
+end, { desc = "Close buffer" })
+
 -- Builtin undo tree (packadd'ed in config/options.lua). Branches of the undo
 -- history are unreachable with plain u/<C-r>, which only walk one line of it.
 vim.keymap.set("n", "<leader>uu", "<cmd>Undotree<cr>", { desc = "Undo tree" })

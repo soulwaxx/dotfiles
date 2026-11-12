@@ -39,7 +39,8 @@ in
           if [[ -z "$_email" ]]; then
             verboseEcho "allowed_signers: no user.email in ${e.emailConfigFile}; skipping ${e.keyFile}"
           elif [[ -f "${e.keyFile}" ]]; then
-            read -r _ktype _kpub _ < "${e.keyFile}"
+            # read returns 1 at EOF when the key has no trailing newline.
+            read -r _ktype _kpub _ < "${e.keyFile}" || [[ -n "''${_kpub:-}" ]]
             echo "$_email $_ktype $_kpub" >> "$_signers_tmp"
           else
             verboseEcho "allowed_signers: ${e.keyFile} not found; skipping $_email"

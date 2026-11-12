@@ -6,7 +6,7 @@ description: "Apply Andrea's prose style to written deliverables: structure, wor
 
 # Writing style
 
-Applies to all prose I produce for Andrea: ADRs, technical analyses, PR descriptions, Slack drafts, commit messages, docs. Does **not** apply to code comments (which follow the no-comment default in CLAUDE.md) or to direct chat replies in this CLI.
+Applies to all prose I produce for Andrea: ADRs, technical analyses, PR descriptions, Slack drafts, commit messages, docs. Does **not** apply to code comments or to direct chat replies in this CLI.
 
 > **Provenance (honest split).** Two kinds of rule live in this file. **AWS/Amazon-sourced rules** come from documented Amazon writing practice and AWS documentation conventions: active voice, present tense, second person, imperative procedures, one term per concept, weasel-word elimination, numbers over adjectives, verdict-first structure. **Anti-AI-tell rules** are mine: the em-dash ban, negative-parallelism ban, tricolon-padding ban, and the specific banned-word list. Both earn their place, but only the first set can claim an external standard. `references/sources.md` traces each rule to its origin; `examples/before-after.md` shows the rules applied.
 

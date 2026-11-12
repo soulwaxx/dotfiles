@@ -51,7 +51,7 @@
   },
   "editor.cursorBlinking": "solid",
   "editor.detectIndentation": true,
-  "editor.fontFamily": "JetBrains Mono",
+  "editor.fontFamily": "JetBrainsMono Nerd Font Mono",
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": true,
   "editor.guides.highlightActiveIndentation": true,

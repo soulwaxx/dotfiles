@@ -173,6 +173,11 @@
       "github*dismiss*": "ask",
       "notion*move*": "ask",
       "notion*archive*": "ask",
+      "kubernetes*create_or_update*": "ask",
+      "kubernetes*exec*": "ask",
+      "kubernetes*install*": "ask",
+      "incident-io*create*": "ask",
+      "incident-io*escalat*": "ask",
       "mcp__*": "allow",
       "mcp__*delete*": "ask",
       "mcp__*merge*": "ask",
@@ -186,7 +191,12 @@
       "mcp__github*mark*": "ask",
       "mcp__github*dismiss*": "ask",
       "mcp__notion*move*": "ask",
-      "mcp__notion*archive*": "ask"
+      "mcp__notion*archive*": "ask",
+      "mcp__kubernetes*create_or_update*": "ask",
+      "mcp__kubernetes*exec*": "ask",
+      "mcp__kubernetes*install*": "ask",
+      "mcp__incident-io*create*": "ask",
+      "mcp__incident-io*escalat*": "ask"
     }
   }
 }

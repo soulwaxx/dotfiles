@@ -13,31 +13,13 @@
   pkgs,
   ...
 }:
-let
-  caches = import ./lib/nix-substituters.nix;
-in
 {
   nix = {
     enable = true;
     package = pkgs.nix;
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      inherit (caches) substituters;
-      trusted-public-keys = caches.trustedPublicKeys;
-      builders-use-substitutes = true;
-      keep-outputs = true;
-      keep-derivations = true;
-      warn-dirty = false;
-      fallback = true;
-      # `auto-optimise-store` is deliberately NOT set: inline optimisation races
-      # the daemon and can corrupt the store (NixOS/nix#7273). Home Manager has
-      # no `nix.optimise` timer equivalent, so store dedup on Linux is manual
-      # via `nix run .#clean`.
-      http-connections = 50;
-    };
+    # Home Manager has no nix.optimise timer equivalent, so store dedup on
+    # Linux is manual via `nix run .#clean`.
+    settings = import ./lib/nix-settings.nix;
     # Pin `nixpkgs#…` and <nixpkgs> to the flake's locked nixpkgs (see the
     # Darwin config for rationale).
     registry.nixpkgs.flake = nixpkgs;

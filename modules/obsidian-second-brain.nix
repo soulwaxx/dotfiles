@@ -106,6 +106,29 @@ in
       '';
     })
 
+    # Shadows the package's pi `wiki-vault` agent (global agents outrank
+    # package agents) only to pin its model and thinking; the package file
+    # sets neither, so it would inherit the parent session's model. The
+    # frontmatter and body are copied from the package's
+    # agents/pi/wiki-vault.md (3.8.1); resync them after package updates.
+    # `disallowed_tools: web_enable` is local: see readOnlyTools in pi.nix.
+    (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+      home.file.".pi/agent/agents/wiki-vault.md" = {
+        source = pkgs.writeText "pi-agent-wiki-vault.md" ''
+          ---
+          name: wiki-vault
+          description: Work in the configured Obsidian vault to find, explain, create, and maintain OKF wiki pages when asked.
+          tools: read, grep, find, bash, edit, write, ext:obsidian-second-brain
+          disallowed_tools: web_enable
+          model: ${config.dotfiles.pi.subagentModels.scout}
+          thinking: medium
+          ---
+
+          ${builtins.readFile ../config/pi/agents/wiki-vault.md}'';
+        force = true;
+      };
+    })
+
     (lib.mkIf (cfg.vaultPath != null) {
       # Optional vault shell; Claude and pi can use the configured wiki from
       # any cwd. Obsidian Git exclusively owns commits, pulls, and pushes.

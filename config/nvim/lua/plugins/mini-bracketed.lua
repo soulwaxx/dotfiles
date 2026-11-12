@@ -1,6 +1,7 @@
--- ]f/[f jump between functions, ]d/[d between diagnostics, etc. LazyVim ships
--- ]d/[d itself; mini.bracketed adds the rest (functions, treesitter nodes,
--- yanks, quickfix, windows) that stock LazyVim doesn't cover.
+-- Bracket motions LazyVim doesn't ship (buffers, conflicts, indent, jumps,
+-- oldfiles, undo, ...). Targets that LazyVim or builtins already own (comment,
+-- file, window, quickfix, yank) are disabled below; treesitter nodes move to
+-- ]n/[n.
 return {
   {
     "nvim-mini/mini.bracketed",

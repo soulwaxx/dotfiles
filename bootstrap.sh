@@ -96,17 +96,19 @@ configure_linux_nix_trust() {
 
   if printf '%s\n' "$trusted_users" | tr ' ' '\n' | grep -qxF "$CURRENT_USER"; then
     info "$CURRENT_USER is already a trusted Nix user"
-  else
-    trusted_users="${trusted_users:-root}"
-    info "Adding $CURRENT_USER to trusted-users in /etc/nix/nix.conf..."
-    printf 'trusted-users = %s %s\n' "$trusted_users" "$CURRENT_USER" |
-      sudo tee -a /etc/nix/nix.conf >/dev/null ||
-      error "Could not update trusted-users in /etc/nix/nix.conf."
+    return 0
   fi
 
+  trusted_users="${trusted_users:-root}"
+  info "Adding $CURRENT_USER to trusted-users in /etc/nix/nix.conf..."
+  printf 'trusted-users = %s %s\n' "$trusted_users" "$CURRENT_USER" |
+    sudo tee -a /etc/nix/nix.conf >/dev/null ||
+    error "Could not update trusted-users in /etc/nix/nix.conf."
+
+  # The daemon reads trusted-users only at startup.
   if command -v systemctl &>/dev/null; then
     sudo systemctl restart nix-daemon ||
-      error "Could not restart nix-daemon after verifying trusted-users."
+      error "Could not restart nix-daemon after updating trusted-users."
   else
     error "No systemctl found. Restart nix-daemon manually, then rerun bootstrap."
   fi
@@ -140,8 +142,10 @@ install_homebrew_if_needed() {
   fi
 
   info "Installing Homebrew..."
-  NONINTERACTIVE=1 /bin/bash -c \
-    "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  local installer
+  installer="$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" ||
+    error "Could not download the Homebrew installer. Check network connectivity."
+  NONINTERACTIVE=1 /bin/bash -c "$installer"
 
   add_homebrew_to_path
   brew_path="$(homebrew_bin)" || error "Homebrew installation finished, but brew was not found in the expected paths."
@@ -169,7 +173,9 @@ fi
 
 # Step 4: Read host metadata from flake.nix. This keeps flake.nix as the single
 # source of truth for host names, target systems, usernames, and switch apps.
-HOSTS_OUTPUT="$(nix --extra-experimental-features 'nix-command flakes' run "path:$DOTFILES_DIR#hosts")"
+# A plain directory ref uses Git semantics, so only tracked files reach the
+# store; a path: ref would also copy ignored files such as .secrets or .direnv.
+HOSTS_OUTPUT="$(nix --extra-experimental-features 'nix-command flakes' run "$DOTFILES_DIR#hosts")"
 if ! HOST_LINE="$(printf '%s\n' "$HOSTS_OUTPUT" | awk -v host="$HOST" 'NR > 1 && $1 == host { print; found=1 } END { exit found ? 0 : 1 }')"; then
   valid_hosts="$(printf '%s\n' "$HOSTS_OUTPUT" | awk 'NR > 1 { hosts = hosts sep $1; sep = ", " } END { print hosts }')"
   error "Unknown host '$HOST'. Valid hosts: $valid_hosts"
@@ -212,7 +218,8 @@ if [[ "$OS" == "Darwin" ]]; then
     error "Nix volume mount config incomplete (missing: ${missing[*]}). Repair the upstream Nix installation before rerunning bootstrap."
   fi
 
-  if ! sudo launchctl list 2>/dev/null | grep -q org.nixos.nix-daemon; then
+  # `launchctl list | grep -q` can SIGPIPE under pipefail and misreport.
+  if ! sudo launchctl print system/org.nixos.nix-daemon >/dev/null 2>&1; then
     warn "nix-daemon is not loaded; attempting to load it..."
     sudo launchctl bootstrap system /Library/LaunchDaemons/org.nixos.nix-daemon.plist ||
       error "Could not load nix-daemon; check /Library/LaunchDaemons/org.nixos.nix-daemon.plist"
@@ -237,13 +244,13 @@ info "Building configuration for host: $HOST"
 if [[ "$OS" == "Darwin" ]]; then
   info "Detected macOS — using the flake-locked nix-darwin bootstrap app"
   nix --extra-experimental-features 'nix-command flakes' \
-    run "path:$DOTFILES_DIR#bootstrap-$HOST"
+    run "$DOTFILES_DIR#bootstrap-$HOST"
 else
   info "Detected Linux — using Home Manager via flake app"
   # Runs the named switch app defined in flake.nix so home-manager is sourced
   # from the flake's own pinned input (flake.lock), not the Nix registry.
   nix --extra-experimental-features 'nix-command flakes' \
-    run "path:$DOTFILES_DIR#$SWITCH_APP"
+    run "$DOTFILES_DIR#$SWITCH_APP"
 fi
 
 echo ""

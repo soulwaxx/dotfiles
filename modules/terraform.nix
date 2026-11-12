@@ -102,5 +102,6 @@ in
 
   # Run in a stack that errors with "the cached package ... does not match any of
   # the checksums recorded in the dependency lock file", then re-run init.
-  programs.zsh.shellAliases.tflock = "terraform providers lock -enable-plugin-cache";
+  # Darwin only: Linux hosts install OpenTofu, not terraform.
+  programs.zsh.shellAliases.tflock = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin "terraform providers lock -enable-plugin-cache";
 }

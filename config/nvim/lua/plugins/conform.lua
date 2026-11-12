@@ -3,6 +3,10 @@ return {
   opts = {
     formatters_by_ft = {
       yaml = { "yamlfmt" }, -- K8s/Helm-friendly formatter over prettier
+      -- The LazyVim markdown extra also lists prettier, which no package set
+      -- installs; keep only the formatters it ensures through Mason.
+      markdown = { "markdownlint-cli2", "markdown-toc" },
+      ["markdown.mdx"] = { "markdownlint-cli2", "markdown-toc" },
     },
     formatters = {
       yamlfmt = {

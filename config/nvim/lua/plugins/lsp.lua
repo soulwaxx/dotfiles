@@ -1,6 +1,8 @@
--- Neovim LSP + tooling. Mason owns every server, formatter, and linter on both
--- macOS and Linux; the Homebrew (macOS) and Nix (Linux) package sets no longer
--- ship editor tooling on PATH. Only behavioral opt-outs remain here.
+-- Neovim LSP + tooling. Mason owns most servers, formatters, and linters on
+-- both macOS and Linux. Exceptions come from Homebrew (macOS) / Nix (Linux) on
+-- PATH because they double as CLI tools or Mason cannot ship them: nixfmt,
+-- statix, shellcheck, yamlfmt, and rust-analyzer. Only behavioral opt-outs
+-- remain here.
 --
 -- Nix LSP: nixd is deliberately NOT used. It is unavailable via both Homebrew
 -- and Mason (it links against Nix's C++ internals, so no prebuilt binary is
@@ -48,17 +50,13 @@ return {
 			},
 		},
 	},
-	-- yamlfmt (conform.lua) is not ensured by any LazyVim extra, so pin it here.
-	-- stylua / tflint / shellcheck / shfmt return via the LazyVim core / terraform
-	-- / dot extras, which already ensure them.
+	-- yamlfmt (conform.lua) comes from Homebrew / Nix, which also put it on PATH
+	-- for the shell; a Mason copy would be shadowed. stylua / tflint / shfmt
+	-- return via the LazyVim core / terraform / dot extras, which ensure them.
 	--
 	-- The lang.nix extra lints with statix and formats with nixfmt but assumes
 	-- both are on PATH. They are NOT pinned via Mason: Mason has no darwin-arm64
 	-- nixfmt binary ("platform unsupported") and builds statix slowly from source.
 	-- Instead they come from Homebrew (macOS) / Nix (Linux) like the rest of the
 	-- nix toolchain — see modules/homebrew-packages.nix + modules/linux/packages.nix.
-	{
-		"mason-org/mason.nvim",
-		opts = { ensure_installed = { "yamlfmt" } },
-	},
 }

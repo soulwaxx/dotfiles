@@ -1,0 +1,19 @@
+{
+  "preset": "default",
+  "welcome": false,
+  "queue": {
+    "compactPromptMode": "native"
+  },
+  "placement": "below",
+  "workingIndicatorPlacement": "above-powerline",
+  "secondaryOverflow": "wrap",
+  "cost": {
+    "subscriptionDisplay": "both"
+  },
+  "cache_read": {
+    "format": "session-request"
+  },
+  "git": {
+    "hostIcon": true
+  }
+}

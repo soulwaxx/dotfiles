@@ -130,17 +130,18 @@
         PATH="${pkgs.git}/bin:$PATH" ${pkgs.bash}/bin/bash ${./local-files.sh} ${host.role}
       '';
 
-      nixStoreCheck = pkgs: ''
-        if ! ${pkgs.nix}/bin/nix-store --verify --check-contents; then
-          echo "Nix store/database inconsistency detected. Do not edit /nix/store directly; repair the reported paths before continuing." >&2
-          exit 1
+      nixStoreCheck = pkgs: "${import ./modules/lib/verify-nix-store.nix { inherit pkgs; }}";
+
+      # Shared preamble for switch apps: refuse to run as the wrong user unless
+      # --force-host-mismatch is the first argument (it is consumed here).
+      hostUserGuard = pkgs: hostname: host: ''
+        force_host_mismatch=0
+        if [[ "''${1:-}" == "--force-host-mismatch" ]]; then
+          force_host_mismatch=1
+          shift
         fi
-        writable_store_path="$(${pkgs.findutils}/bin/find /nix/store \
-          -mindepth 1 -maxdepth 1 ! -type l ! -name '*.lock' ! -name .links \
-          \( -perm -0200 -o -perm -0020 -o -perm -0002 \) -print -quit)"
-        if [[ -n "$writable_store_path" ]]; then
-          echo "Writable Nix store path detected: $writable_store_path" >&2
-          echo "Do not chmod paths under /nix/store; repair it before continuing." >&2
+        if [[ "$force_host_mismatch" -ne 1 && "$(${pkgs.coreutils}/bin/id -un)" != "${host.username}" ]]; then
+          echo "Refusing to switch ${hostname}: expected user ${host.username}, got $(${pkgs.coreutils}/bin/id -un). Pass --force-host-mismatch to override." >&2
           exit 1
         fi
       '';
@@ -247,9 +248,10 @@
       mkChecks = pkgs: {
         herdr =
           let
-            hosts = lib.filterAttrs (_: host: host.system == pkgs.stdenv.hostPlatform.system) (
-              darwinHosts // linuxHosts
-            );
+            # Every host, not just this system's: the scripts are context-free
+            # strings and the test rewrites store paths, so foreign hosts are
+            # exercised too (there is no CI to build Linux checks on Linux).
+            hosts = darwinHosts // linuxHosts;
             fixtures = pkgs.writeText "herdr-fixtures.json" (
               builtins.toJSON (
                 lib.mapAttrs (
@@ -384,6 +386,10 @@
           # No --no-build: the `checks` outputs are the test suite and must
           # actually run. They are tiny; the other buildable outputs
           # (devShells.default, formatter) are already substituted.
+          # Both target lists are already filtered to this system, so one is empty.
+          buildSnippet = ''
+            ${pkgs.nix-output-monitor}/bin/nom build "''${extra_args[@]}" --no-link ${darwinBuildTargets} ${linuxBuildTargets}
+          '';
           checkSnippet = ''
             set -euo pipefail
             ${appDotfilesSetup { withExtraArgs = true; }}
@@ -401,11 +407,7 @@
           # Run check then build activation outputs for every declared host on this system.
           check-full = mkApp pkgs "check-full" ''
             ${checkSnippet}
-            if [[ "$(uname -s)" == "Darwin" ]]; then
-              ${pkgs.nix-output-monitor}/bin/nom build "''${extra_args[@]}" --no-link ${darwinBuildTargets}
-            else
-              ${pkgs.nix-output-monitor}/bin/nom build "''${extra_args[@]}" --no-link ${linuxBuildTargets}
-            fi
+            ${buildSnippet}
           '';
           # Validate shell scripts and source JSON files.
           lint = mkApp pkgs "lint" ''
@@ -430,11 +432,7 @@
           check-build = mkApp pkgs "check-build" ''
             set -euo pipefail
             ${appDotfilesSetup { withExtraArgs = true; }}
-            if [[ "$(uname -s)" == "Darwin" ]]; then
-              ${pkgs.nix-output-monitor}/bin/nom build "''${extra_args[@]}" --no-link ${darwinBuildTargets}
-            else
-              ${pkgs.nix-output-monitor}/bin/nom build "''${extra_args[@]}" --no-link ${linuxBuildTargets}
-            fi
+            ${buildSnippet}
           '';
           # Format all files treefmt knows about (currently Nix via nixfmt).
           fmt = mkApp pkgs "fmt" ''
@@ -456,15 +454,7 @@
         pkgs: hostname: host: name:
         mkApp pkgs name ''
           set -euo pipefail
-          force_host_mismatch=0
-          if [[ "''${1:-}" == "--force-host-mismatch" ]]; then
-            force_host_mismatch=1
-            shift
-          fi
-          if [[ "$force_host_mismatch" -ne 1 && "$(${pkgs.coreutils}/bin/id -un)" != "${host.username}" ]]; then
-            echo "Refusing to switch ${hostname}: expected user ${host.username}, got $(${pkgs.coreutils}/bin/id -un). Pass --force-host-mismatch to override." >&2
-            exit 1
-          fi
+          ${hostUserGuard pkgs hostname host}
           ${appDotfilesSetup { withExtraArgs = true; }}
           ${localFilesCheck pkgs host}
           # nh wraps darwin-rebuild and self-elevates twice: once to set the
@@ -498,15 +488,7 @@
         pkgs: hostname: host: name:
         mkApp pkgs name ''
           set -euo pipefail
-          force_host_mismatch=0
-          if [[ "''${1:-}" == "--force-host-mismatch" ]]; then
-            force_host_mismatch=1
-            shift
-          fi
-          if [[ "$force_host_mismatch" -ne 1 && "$(${pkgs.coreutils}/bin/id -un)" != "${host.username}" ]]; then
-            echo "Refusing to switch ${hostname}: expected user ${host.username}, got $(${pkgs.coreutils}/bin/id -un). Pass --force-host-mismatch to override." >&2
-            exit 1
-          fi
+          ${hostUserGuard pkgs hostname host}
           ${appDotfilesSetup { withExtraArgs = true; }}
           ${localFilesCheck pkgs host}
           # nh starts its own nix process, so the outer `nix run` feature flags

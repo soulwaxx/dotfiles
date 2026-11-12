@@ -1,29 +1,11 @@
 {
-  "toolActivation": "auto",
-  "disabledFeatures": [
-    "agent-management",
-    "watchdog",
-    "panes",
-    "missions",
-    "spawn-budget-grants",
-    "preflight",
-    "lane-metadata",
-    "gates",
-    "usage-budgets",
-    "tool-budgets",
-    "control-overrides",
-    "extension-bindings",
-    "external-machines"
-  ],
-  "scheduledRuns": {
-    "enabled": false
-  },
-  "missions": {
-    "enabled": false
-  },
+  "disableDefaultAgents": true,
+  "fallbackSubagent": "none",
+  "packageAgents": true,
+  "packageWorkflows": false,
   "maxSubagentDepth": 1,
-  "authorityPolicy": {
-    "discardWorktree": "confirm",
-    "destructiveCleanup": "confirm"
-  }
+  "schedulingEnabled": false,
+  "workflowsEnabled": true,
+  "strictAgentFiles": true,
+  "reportUsage": true
 }

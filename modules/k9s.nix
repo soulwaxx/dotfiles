@@ -147,24 +147,27 @@ lib.mkIf config.dotfiles.kubernetes.enable {
     ''
   );
 
-  programs.zsh.initContent = ''
-    ks() {
-      local contexts context
-      contexts=$(kubectl config get-contexts -o name) || return
-      context=$(print -r -- "$contexts" | \
-        fzf --prompt='Kubernetes context > ' --height=50% --border) || return
-      [[ -n "$context" ]] || return 0
-      # Contexts authenticate through their kubeconfig AWS_PROFILE; inherited
-      # awsp credentials would take precedence, so drop them for k9s only.
-      env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY \
-        -u AWS_SESSION_TOKEN -u AWS_SECURITY_TOKEN \
-        k9s --context "$context" "$@"
-    }
+  programs.zsh = {
+    shellAliases.k = "kubectl";
+    initContent = ''
+      ks() {
+        local contexts context
+        contexts=$(kubectl config get-contexts -o name) || return
+        context=$(print -r -- "$contexts" | \
+          fzf --prompt='Kubernetes context > ' --height=50% --border) || return
+        [[ -n "$context" ]] || return 0
+        # Contexts authenticate through their kubeconfig AWS_PROFILE; inherited
+        # awsp credentials would take precedence, so drop them for k9s only.
+        env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY \
+          -u AWS_SESSION_TOKEN -u AWS_SECURITY_TOKEN \
+          k9s --context "$context" "$@"
+      }
 
-    ksr() {
-      ks --readonly "$@"
-    }
-  '';
+      ksr() {
+        ks --readonly "$@"
+      }
+    '';
+  };
 
   programs.k9s = {
     enable = true;

@@ -140,7 +140,7 @@ run_case custom-repo 0 \
   ACTUAL_REPO=https://github.com/fork/dotfiles
 [[ -s "$tmp/custom-repo/log/nix" ]]
 [[ ! -e "$tmp/custom-repo/log/trusted-users" ]]
-grep -qxF 'systemctl restart nix-daemon' "$tmp/custom-repo/log/sudo"
+[[ ! -e "$tmp/custom-repo/log/sudo" ]]
 
 run_case trust-merge 0 \
   TRUSTED_USERS='root admin @builders'
@@ -150,7 +150,8 @@ grep -qxF 'systemctl restart nix-daemon' "$tmp/trust-merge/log/sudo"
 run_case trust-existing 0 \
   TRUSTED_USERS='root admin testuser'
 [[ ! -e "$tmp/trust-existing/log/trusted-users" ]]
-grep -qxF 'systemctl restart nix-daemon' "$tmp/trust-existing/log/sudo"
+# Already trusted: no daemon restart, so no systemctl dependency.
+[[ ! -e "$tmp/trust-existing/log/sudo" ]]
 
 run_case wrong-user 1 HOST_USER=someone-else
 [[ ! -e "$tmp/wrong-user/log/sudo" ]]
@@ -229,4 +230,9 @@ fi
 
 # The assertion intentionally matches the literal runtime variables.
 # shellcheck disable=SC2016
-grep -qF 'run "path:$DOTFILES_DIR#bootstrap-$HOST"' "$bootstrap"
+grep -qF 'run "$DOTFILES_DIR#bootstrap-$HOST"' "$bootstrap"
+# shellcheck disable=SC2016
+if grep -qF '"path:$DOTFILES_DIR' "$bootstrap"; then
+  echo 'bootstrap copies ignored files into the store via a path: flake ref' >&2
+  exit 1
+fi
