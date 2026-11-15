@@ -5,7 +5,8 @@
   "packageWorkflows": false,
   "maxSubagentDepth": 1,
   "schedulingEnabled": false,
-  "workflowsEnabled": true,
+  "workflowsEnabled": false,
   "strictAgentFiles": true,
-  "reportUsage": true
+  "reportUsage": true,
+  "showCost": true
 }

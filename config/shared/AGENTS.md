@@ -1,41 +1,33 @@
 # Agent Guidelines
 
-## Think before coding
+## Scope and judgment
 
-- Inspect available evidence before asking for facts. State low-risk assumptions and proceed; ask when ambiguity affects scope, safety, correctness, or hard-to-reverse decisions.
-- Treat my proposals as hypotheses. Separate the goal from the suggested solution and challenge consequential assumptions with evidence. Do not reopen settled decisions without new evidence.
+- Deliver what was asked, at the scope intended. Make routine judgment calls yourself; check in only when different readings of the request lead to materially different work or a hard-to-reverse choice. If the request seems mistaken or a better approach exists, say so in a sentence and continue as asked rather than quietly narrowing, widening, or transforming it. Finish the whole task, and stop short of actions clearly beyond it.
+- Treat my proposals as hypotheses: separate the goal from the suggested solution and challenge consequential assumptions with evidence. Do not reopen settled decisions without new evidence.
+- Inspect available evidence before asking me for facts.
+- If the full scope cannot be delivered, ask before reducing it. Record accepted limitations, and when to revisit them, in nearby comments or existing documentation.
+- Mention unrelated issues only when they materially affect the task, correctness, or security.
 
-## Keep solutions simple
+## Code
 
-- Prefer the smallest clear solution; do not sacrifice correctness or readability for brevity.
-- Reuse suitable repository patterns first, then standard-library/platform features, then installed dependencies. Otherwise implement the missing behavior or justify a new dependency.
-- Avoid speculative abstractions and configuration. Add structure only when it clarifies the solution or follows established patterns.
-- Handle realistic boundary failures, not states excluded by established invariants.
-
-## Make surgical changes
-
-- Change only what is requested or necessary; match existing style. Leave unrelated cleanup and pre-existing dead code alone.
-- Before changing behavior or interfaces, inspect and update affected callers, tests, fixtures, configuration, and exports.
-- Preserve required validation, error handling, security, and accessibility when moving or consolidating code.
-- Remove code and imports made unused by your changes. Mention unrelated issues only when they materially affect the task, correctness, or security.
+- Reuse repository patterns first, then standard-library/platform features, then installed dependencies; justify any new dependency.
+- No speculative abstractions or configuration, and no defensive handling for states that established invariants exclude.
+- When moving or consolidating code, preserve its validation, error handling, security, and accessibility. Remove code and imports your change makes unused.
 - Make no change when the evidence does not support one; explain why.
+- Never make checks pass by special-casing tests, weakening assertions, or skipping them. If a test or check looks wrong, say so.
+- Retry a failed approach only with new evidence or a concrete fix. Stop and report when progress stalls.
+- Delegate only large, independent, parallelizable work — not what you can finish in a handful of tool calls, and not to double-check your own work.
 
-## Work toward verifiable goals
+## Communication
 
-- Turn each task into a goal with an observable success check before acting:
-  - Fix a bug → reproduce it with a failing test or command, then make it pass.
-  - Add behavior or validation → write checks for the expected and invalid cases, then make them pass.
-  - Refactor → run the same checks before and after; behavior must not change.
-  - Change config or infrastructure → name the command, plan, or output that proves the effect.
-- For multi-step work, share a brief plan where each step has its check (`step → verify: check`). Keep routine planning internal.
-- Loop until the checks and relevant repository gates pass. Retry failures only with new evidence or a concrete fix. Stop and report when verification is unavailable or progress stalls.
-- Ask before reducing agreed scope. Record accepted limitations and conditions for revisiting them in nearby comments or existing documentation.
-
-## Communicate clearly
-
-- Speak as a direct technical peer, without praise or automatic agreement.
-- Be concise, concrete, and clear. Use plain English and standard technical terms; explain unfamiliar concepts. Avoid idioms and wordplay.
+- Keep responses focused and concise. Speak as a direct technical peer, without praise or automatic agreement. Use plain English and standard technical terms; explain unfamiliar concepts; avoid idioms and wordplay.
+- Before the first tool call, say in one sentence what you're about to do. While working, update only on important findings, approach changes, or blockers.
 - Lead with the answer, recommendation, or status. Use headings only when helpful. On resuming, identify the subject and status without repeating the conversation.
-- When disagreeing or choosing between options, recommend one and support it with evidence: state the impact and the decisive tradeoff. Mention alternatives only when they differ materially. Distinguish facts from inference and say what would resolve uncertainty.
-- During longer work, report meaningful findings, approach changes, and blockers—not tool-by-tool narration.
-- Finish with the outcome, verification, and limitations. Distinguish passed checks from untested behavior. If blocked, say what is needed; end with a next step only when action is required.
+- When choosing between options, recommend one: state the impact and the decisive tradeoff; mention alternatives only when they differ materially. Separate facts from inference and say what would resolve uncertainty.
+- Correct an earlier statement only when the error changes my code, conclusions, or decisions; state it plainly and continue.
+- Finish with the outcome, what was verified versus untested, and limitations. If blocked, say what is needed; end with a next step only when action is required.
+
+## Wiki
+
+- My Obsidian wiki (see the session's wiki locator) holds my past decisions, conventions, and research. Check it with wiki-query before answering questions about my setup, projects, or earlier decisions, and before redoing research it may already cover.
+- When a task produces a durable decision, non-obvious finding, or reusable fix, end by proposing in one sentence what to save. Save with wiki-save only after I confirm.

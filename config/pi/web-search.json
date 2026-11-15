@@ -1,6 +1,7 @@
 {
   "workflow": "none",
   "toolExposure": "deferred",
+  "maxInlineContentChars": 15000,
   "tools": {
     "sourceCheck": {
       "enabled": false
