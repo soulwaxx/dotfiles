@@ -4,7 +4,7 @@
   "maxInlineContentChars": 15000,
   "tools": {
     "sourceCheck": {
-      "enabled": false
+      "enabled": true
     }
   }
 }

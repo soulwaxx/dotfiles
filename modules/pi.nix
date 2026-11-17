@@ -112,7 +112,7 @@ let
   # without web tools would see it (uncallable) on turn 1. `disallowed_tools`
   # removes it from the child's registry, where the loader cannot re-add it.
   readOnlyTools = "read, bash, grep, find, ls, ext:pi-fff/grep, ext:pi-fff/find";
-  webTools = "ext:pi-web-access/web_enable, ext:pi-web-access/web_search, ext:pi-web-access/fetch_content, ext:pi-web-access/get_search_content";
+  webTools = "ext:pi-web-access/web_enable, ext:pi-web-access/web_search, ext:pi-web-access/fetch_content, ext:pi-web-access/get_search_content, ext:pi-web-access/source_check";
 
   # Default agents are disabled in config/pi/subagents.json.
   piAgentFiles = {
@@ -200,7 +200,12 @@ let
     "npm:pi-web-access"
     "npm:pi-powerline-footer"
     "npm:@ff-labs/pi-fff"
-    "npm:@tintinweb/pi-subagents"
+    # workflowsEnabled is false (config/pi/subagents.json), so its
+    # workflow-authoring skill would only add an unusable system-prompt entry.
+    {
+      source = "npm:@tintinweb/pi-subagents";
+      skills = [ ];
+    }
     "npm:@juicesharp/rpiv-todo"
     "npm:@juicesharp/rpiv-ask-user-question"
     "npm:@soulwaxx/pi-skill-autocomplete"
@@ -218,6 +223,9 @@ let
     defaultTools = [
       "+codemode"
     ];
+    codemode.mode = "on";
+    # Local models are unused; drop the /llama command and llama.cpp provider.
+    extensions = [ "-builtin:llama.cpp" ];
     # Opt out of the anonymous install/update ping and provider attribution
     # headers; keep analytics sharing off explicitly rather than relying on the
     # default.
@@ -225,13 +233,15 @@ let
     enableAnalytics = false;
     # Render mermaid diagrams once complete instead of streaming partial frames.
     markdown.mermaid = "final";
-    tuiMode = "fullscreen"; # alternatives: "fullscreen" (default since 1.0.0), "regular"
+    tuiMode = "fullscreen";
     # Force capabilities pi may under-detect behind a multiplexer.
     # Kitty images work in Ghostty through Herdr graphics passthrough.
     terminal = {
       hyperlinks = true;
       trueColor = true;
       images = "kitty";
+      # OSC 9;4 tab progress (Ghostty).
+      showTerminalProgress = true;
     };
     defaultProjectTrust = "ask";
     quietStartup = true;
@@ -259,7 +269,11 @@ let
     }
   ) ((import ./mcp-servers.nix { inherit lib pkgs; }).mkServers config);
 
-  piPackageNames = map (lib.removePrefix "npm:") (builtins.filter (lib.hasPrefix "npm:") piPackages);
+  # Entries are source strings or { source, <resource filters> } objects.
+  piPackageSources = map (p: if builtins.isAttrs p then p.source else p) piPackages;
+  piPackageNames = map (lib.removePrefix "npm:") (
+    builtins.filter (lib.hasPrefix "npm:") piPackageSources
+  );
   piAllowedPackagesFile = jsonFormat.generate "pi-allowed-packages.json" piPackageNames;
 
   # Static options live in config/pi/pi-fff.json. Database paths are added per
