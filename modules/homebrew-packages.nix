@@ -98,6 +98,7 @@ let
     "orbstack"
     "font-jetbrains-mono"
     "font-jetbrains-mono-nerd-font"
+    "crisp"
   ];
 
   # Work-host-only Homebrew packages, referenced from hosts/work-macbook.nix.
