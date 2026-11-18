@@ -120,7 +120,7 @@ Start with `flake.nix`, then read `modules/profiles/base-home.nix` plus the rele
 - Add Linux CLI packages to `modules/linux/packages.nix`; Linuxbrew is intentionally not used.
 - Add Kubernetes tools on macOS via Homebrew (`modules/homebrew-packages.nix` `kubernetesBrews`, folded into `workBrews`) and on Linux via Nix (`modules/linux/packages.nix` `kubernetesPackages`, gated by `dotfiles.kubernetes.enable`), or a dedicated module such as `modules/k9s.nix`. Both paths follow `dotfiles.kubernetes.enable`, which is false on `personal-mac`.
 - Add a package to another Nix module when Home Manager needs it for generated config, shell activation, runtime integration, or platform-specific ownership.
-- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap`, `claude-state-jq`, `herdr`, and `pi-installer`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
+- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap`, `claude-state-jq`, `herdr`, `pi-installer`, and `pi-router`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
 - Run `nix run .#check-build` when changing activation scripts, generated files, MCP wiring, or Home Manager/nix-darwin module structure. It builds every declared host output for the current system; other-system hosts are evaluation-checked only. `nix run .#check-full` runs `check` and then `check-build`.
 - Add shared MCP servers in `modules/mcp-servers.nix`; add tool-specific differences inside that server entry instead of duplicating definitions in `modules/claude/mcp.nix`.
 - Treat `~/.pi/agent/settings.json` and `~/.pi/agent/mcp.json` as read-only. Home Manager owns both files. Change Pi settings, packages, extensions, and MCP servers in this repository, then switch the host.
@@ -177,6 +177,24 @@ git restore -S -- <pathspec>
 ```
 
 Other option layouts, including staging-only commands with Git global options, conservatively require confirmation. Permission prompts emit a terminal bell; whether it produces a sound or visual indication depends on the terminal settings.
+
+### Virtual model router
+
+Try the router from the checkout before switching your Home Manager generation:
+
+```bash
+pi -e ./config/pi/extensions/auto-router.ts --model anthropic/auto:medium
+```
+
+After a switch, the extension is auto-loaded: select `anthropic/auto` in `/model` or run `pi --model anthropic/auto:medium`. The existing startup default and subagent models are unchanged.
+
+| Example at `medium` | Dispatch |
+| --- | --- |
+| `What is a Git rebase?` | Haiku 5.5 · low |
+| `Add tests for this parser.` | Sonnet 5.5 · medium |
+| `Find the root cause of this flaky test.` | Opus 5.5 · high |
+
+The router uses local rules, not an extra classifier call. It defaults to Sonnet when the prompt is unclear. `low` reduces reasoning effort without changing the task tier; `high` requests Opus for every new user turn. Tool continuations and retries retain the last in-flight model and effort when available. At `medium`, short replies like `Go ahead` also retain the prior route. Missing targets fall back within the same Claude pool; retries do not fail over on provider errors. Pi records the physical model and thinking level on each assistant response. Use `/session` to inspect per-model usage.
 
 ### Subagents
 

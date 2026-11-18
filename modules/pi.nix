@@ -207,7 +207,11 @@ let
       skills = [ ];
     }
     "npm:@juicesharp/rpiv-todo"
-    "npm:@juicesharp/rpiv-ask-user-question"
+    # ask_user supplies its own usage guidance; omit the redundant bundled skill.
+    {
+      source = "npm:@eko24ive/pi-ask";
+      skills = [ ];
+    }
     "npm:@soulwaxx/pi-skill-autocomplete"
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
@@ -377,6 +381,10 @@ in
       ".pi/agent/web-search.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/web-search.json";
 
+      # Pi auto-discovers the router; the default model remains unchanged.
+      ".pi/agent/extensions/auto-router.ts".source =
+        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/extensions/auto-router.ts";
+
       # Extension configs — static JSON, symlinked.
       ".pi/agent/extensions/pi-permission-system/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/permission-system.json";
@@ -406,13 +414,11 @@ in
   };
 
   # pi-web-access reads this path on Linux when XDG_CONFIG_HOME is set and
-  # PI_CODING_AGENT_DIR is unset. The rpiv packages use these XDG paths on every
-  # host, falling back to the same ~/.config locations when the variable is unset.
+  # PI_CODING_AGENT_DIR is unset. rpiv-todo uses its XDG path on every host,
+  # falling back to ~/.config when XDG_CONFIG_HOME is unset.
   xdg.configFile = {
     "pi/web-search.json".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/web-search.json";
-    "rpiv-ask-user-question/config.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/rpiv-ask-user-question.json";
     "rpiv-todo/config.json".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/rpiv-todo.json";
   };

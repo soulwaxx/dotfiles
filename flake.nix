@@ -285,6 +285,13 @@
             ${pkgs.nodejs_24}/bin/node ${./config/pi/run-installer.cjs} ${pkgs.bash}/bin/bash
           touch $out
         '';
+        pi-router = pkgs.runCommand "check-pi-router" { } ''
+          mkdir -p tests config/pi/extensions
+          cp ${./tests/pi-router.mjs} tests/pi-router.mjs
+          cp ${./config/pi/extensions/auto-router.ts} config/pi/extensions/auto-router.ts
+          ${pkgs.nodejs_24}/bin/node --test tests/pi-router.mjs
+          touch $out
+        '';
         bootstrap =
           pkgs.runCommand "check-bootstrap"
             {
