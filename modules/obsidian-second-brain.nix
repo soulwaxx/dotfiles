@@ -12,6 +12,9 @@ let
   properties = pkgs.writeText "obsidian-properties.json" (
     builtins.toJSON {
       inherit (cfg) vaultPath;
+      # List the wiki_* tools under pi's codemode (enabled in pi.nix) instead
+      # of declaring them directly, matching the MCP servers' exposure.
+      pi.toolExposure = "codemode";
       features = {
         guard = true;
         toc = true;
