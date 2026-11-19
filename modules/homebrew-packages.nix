@@ -115,7 +115,6 @@ let
   ];
 
   workCasks = [
-    "keepingyouawake"
     "session-manager-plugin"
   ];
 in
