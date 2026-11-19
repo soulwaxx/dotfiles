@@ -70,7 +70,7 @@ in
       # Use mild thickening on mixed-DPI displays instead of the default 255.
       # Revisit after testing both displays or if Ghostty adds per-DPI control.
       font-thicken = true;
-      font-thicken-strength = 62;
+      # font-thicken-strength = 62;
       # Map theme colors onto the Display P3 gamut instead of sRGB. Not
       # hex-accurate, but avoids the washed-out look on wide-gamut Mac displays.
       window-colorspace = "display-p3";

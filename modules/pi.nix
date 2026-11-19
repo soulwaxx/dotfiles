@@ -236,10 +236,15 @@ let
     enableInstallTelemetry = false;
     enableAnalytics = false;
     # Render mermaid diagrams once complete instead of streaming partial frames.
-    markdown.mermaid = "final";
+    markdown = {
+      mermaid = "final";
+      codeBlockIndent = "";
+    };
     tuiMode = "fullscreen";
     # Force capabilities pi may under-detect behind a multiplexer.
     # Kitty images work in Ghostty through Herdr graphics passthrough.
+    outputPad = 0;
+    showHardwareCursor = true;
     terminal = {
       hyperlinks = true;
       trueColor = true;
