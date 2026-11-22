@@ -243,8 +243,6 @@ let
     tuiMode = "fullscreen";
     # Force capabilities pi may under-detect behind a multiplexer.
     # Kitty images work in Ghostty through Herdr graphics passthrough.
-    # Rex (on trial, libghostty-based): kitty images and OSC 9;4 progress
-    # not yet verified.
     outputPad = 0;
     showHardwareCursor = true;
     terminal = {
