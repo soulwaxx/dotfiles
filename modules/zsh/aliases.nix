@@ -129,6 +129,12 @@ in
         flush_dns = "sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder";
         showfiles = "defaults write com.apple.finder AppleShowAllFiles YES && killall Finder";
         hidefiles = "defaults write com.apple.finder AppleShowAllFiles NO && killall Finder";
+        # Wipe the Background Task Management database behind System Settings →
+        # Login Items & Extensions, clearing stale entries left by uninstalled
+        # apps (no uninstaller, Mole included, prunes it). Destructive: every
+        # app re-prompts for background permission. Reboot afterwards.
+        # Inspect first with `sfltool dumpbtm`.
+        btm-reset = "sudo sfltool resetbtm";
         # brew upgrade is intentionally separate: it can break dylib links if transitive
         # deps get new sonames; run this explicitly, then darwin-rebuild if needed.
         # Ghostty needs --greedy (auto_updates cask, skipped by plain upgrade;

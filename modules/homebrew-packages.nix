@@ -85,6 +85,10 @@ let
     "imagemagick"
     "ghostscript"
     "mermaid-cli"
+    # `mo uninstall` removes an app plus its leftovers (caches, prefs,
+    # LaunchAgents/Daemons plists) for apps not managed as casks here, which
+    # bypass onActivation.cleanup = "zap". See also `btm-reset` in aliases.nix.
+    "mole"
   ];
 
   darwinCasks = [
