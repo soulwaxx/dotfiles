@@ -120,12 +120,12 @@ Start with `flake.nix`, then read `modules/profiles/base-home.nix` plus the rele
 - Add Linux CLI packages to `modules/linux/packages.nix`; Linuxbrew is intentionally not used.
 - Add Kubernetes tools on macOS via Homebrew (`modules/homebrew-packages.nix` `kubernetesBrews`, folded into `workBrews`) and on Linux via Nix (`modules/linux/packages.nix` `kubernetesPackages`, gated by `dotfiles.kubernetes.enable`), or a dedicated module such as `modules/k9s.nix`. Both paths follow `dotfiles.kubernetes.enable`, which is false on `personal-mac`.
 - Add a package to another Nix module when Home Manager needs it for generated config, shell activation, runtime integration, or platform-specific ownership.
-- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap`, `claude-state-jq`, `herdr`, `pi-installer`, and `pi-router`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
+- Run `nix run .#check` before switching hosts; it runs the dotfiles behavior checks (`bootstrap`, `claude-plugins`, `claude-state-jq`, `herdr`, `pi-claude-plugins`, `pi-installer`, and `pi-router`), then evaluates each host's activation/system derivation path so a broken `home.file` source or package attr fails fast without a cross-build. Tests and flake checks are executable verification, not model directives.
 - Run `nix run .#check-build` when changing activation scripts, generated files, MCP wiring, or Home Manager/nix-darwin module structure. It builds every declared host output for the current system; other-system hosts are evaluation-checked only. `nix run .#check-full` runs `check` and then `check-build`.
 - Add shared MCP servers in `modules/mcp-servers.nix`; add tool-specific differences inside that server entry instead of duplicating definitions in `modules/claude/mcp.nix`.
 - Treat `~/.pi/agent/settings.json` and `~/.pi/agent/mcp.json` as read-only. Home Manager owns both files. Change Pi settings, packages, extensions, and MCP servers in this repository, then switch the host.
 - Add shared skills under `config/shared/skills/<name>/SKILL.md`. Home Manager links `config/shared/skills` to `~/.claude/skills`; pi reads the same tree via `~/.pi/agent/skills`. Mark repository skills explicit-only (`disable-model-invocation: true`) so they are invoked by name.
-- Some shared skills are vendored (and re-authored) from upstream projects. When a skill is derived from an external source, record its provenance and update-check steps in a `VENDOR.md` beside its `SKILL.md` (see `config/shared/skills/aws-architecture-diagram/VENDOR.md`), so a future agent can diff against upstream and port improvements without re-discovering the source.
+- Some shared skills are vendored (and re-authored) from upstream projects. When a skill is derived from an external source, record its provenance and update-check steps in a `VENDOR.md` beside its `SKILL.md`, so a future agent can diff against upstream and port improvements without re-discovering the source.
 
 Useful shell aliases:
 
@@ -195,6 +195,24 @@ After a switch, the extension is auto-loaded: select `anthropic/auto` in `/model
 | `Find the root cause of this flaky test.` | Opus 5.5 · high |
 
 The router uses local rules, not an extra classifier call. It defaults to Sonnet when the prompt is unclear. `low` reduces reasoning effort without changing the task tier; `high` requests Opus for every new user turn. Tool continuations and retries retain the last in-flight model and effort when available. At `medium`, short replies like `Go ahead` also retain the prior route. Missing targets fall back within the same Claude pool; retries do not fail over on provider errors. Pi records the physical model and thinking level on each assistant response. Use `/session` to inspect per-model usage.
+
+### Claude Code plugins
+
+Work hosts load team Claude Code plugins in both harnesses from one local marketplace checkout. The untracked `~/.config/claude-plugins.json` names the checkout and plugins, so employer identifiers stay out of this repository (see [Local machine files](#local-machine-files-untracked)). Each switch runs `modules/claude-plugins/activate.sh`, which:
+
+- clones the checkout from `repo` when `path` is missing;
+- registers it as a Claude Code `directory` marketplace, installs and enables the listed plugins at user scope, and disables other plugins of that marketplace. Claude Code documents that it loads relative-path plugins of a local marketplace in place, and `claude plugin list --json` reports `readFromFolder` as the checkout, so `git pull` should apply at the next session or `/reload-plugins` (it also keeps a copy under `~/.claude/plugins/cache/`; confirm with a skill change after pulling);
+- links the plugin roots and their skills under `~/.local/share/claude-plugins/{plugins,skills}`. Agent prompts use these links; for example, `infra-reviewer` reads `skills/kubernetes-skill` there.
+
+Removing the file removes the links on the next switch; disable the plugins with `claude plugin disable`. A marketplace with the same name from another source is reported, not replaced.
+
+In pi, `config/pi/extensions/claude-plugins.ts` reads the linked plugins. Skills and agents whose names `config/shared/skills` or `~/.pi/agent/agents` already define keep the dotfiles version; the rest merge in:
+
+- Plugin skills load in place but are hidden from the model's skill list, as with `disable-model-invocation: true`, so run them with `/skill:<name>`. Claude Code offers no equivalent: `skillOverrides` does not apply to plugin skills.
+- Plugin agents are translated into `~/.pi/agent/claude-plugins/agents/`, a local pi package that pi-subagents ranks below every personal and project agent. `/agents` lists them read-only; use Eject to customize one. The extension rewrites and prunes that directory at startup, so edit the plugin source instead. The translation maps `model` aliases to `dotfiles.claudePlugins.modelAliases`, `effort` to `thinking`, `background`, `maxTurns`, Claude Code tool names (`Grep`, `Glob`, `WebFetch`, `WebSearch`, and MCP names including `claude_ai_<Name>` connectors) to their pi forms, preloads `skills:` by path, denies `ask_user_question` to agents that inherit every tool, and reports unsupported fields at startup.
+- `${CLAUDE_SKILL_DIR}`, `${CLAUDE_PLUGIN_ROOT}`, and `$ARGUMENTS` are resolved when the model reads plugin files or runs `/skill:<name> <args>`.
+
+Plugin `commands/`, hooks, MCP servers, and `.lsp.json` are not loaded in pi.
 
 ### Subagents
 
@@ -272,7 +290,12 @@ Work hosts:
 
 - `~/.aws/config` — the `aws-mcp` server reads its profile allowlist from `aws configure list-profiles` at launch, read-only profiles first. Optionally set `AWS_MCP_PROFILE_FILTER` (ERE) in `~/.secrets` to narrow the list.
 - `~/.zshrc.local` — also holds work VPN server aliases and the `dev-portal` function.
-- `config/shared/skills/{create-aws-account,scaffold-gitops}/` — gitignored employer-specific skills inside the checkout. A fresh clone does not contain them; copy them from a backup. They load through the skills symlink without a switch.
+- `~/.config/claude-plugins.json` — team Claude Code marketplace checkout and the plugins to enable in Claude Code and pi. `repo` is optional and only clones a missing checkout. See [Claude Code plugins](#claude-code-plugins).
+
+  ```json
+  {"path": "~/workspace/<marketplace-repo>", "repo": "git@github.com:<org>/<marketplace-repo>.git", "plugins": ["<plugin>"]}
+  ```
+
 
 ## Nix cheat sheet
 

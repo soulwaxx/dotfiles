@@ -9,6 +9,8 @@ let
   dotfiles = config.dotfiles.path;
   jsonFormat = pkgs.formats.json { };
   subagentModels = config.dotfiles.pi.subagentModels;
+  workPlugins = config.dotfiles.claude.enableWorkIntegrations;
+  claudePluginsPackageDir = "${config.home.homeDirectory}/.pi/agent/claude-plugins";
   mkCurlInstaller = import ./lib/mk-curl-installer.nix { inherit lib pkgs; };
   theme = config.dotfiles.theme.current;
 
@@ -170,7 +172,7 @@ let
         mkPiAgent "infra-reviewer"
           (
             ''
-              Read ${config.home.homeDirectory}/.pi/agent/skills/infra-review/SKILL.md and follow it as the review contract. For Kubernetes, Helm, Kustomize, or GitOps reviews, also read ${config.home.homeDirectory}/.pi/agent/skills/kubernetes-skill/SKILL.md and its relevant references.
+              Read ${config.home.homeDirectory}/.pi/agent/skills/infra-review/SKILL.md and follow it as the review contract.${config.dotfiles.claudePlugins.kubernetesSkillHint}
 
             ''
             + builtins.readFile ../config/shared/agents/infra-reviewer.md
@@ -207,16 +209,15 @@ let
       skills = [ ];
     }
     "npm:@juicesharp/rpiv-todo"
-    # ask_user supplies its own usage guidance; omit the redundant bundled skill.
-    {
-      source = "npm:@eko24ive/pi-ask";
-      skills = [ ];
-    }
+    "npm:@juicesharp/rpiv-ask-user-question"
     "npm:@soulwaxx/pi-skill-autocomplete"
   ]
   ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
     "npm:@soulwaxx/obsidian-second-brain"
-  ];
+  ]
+  # Local package whose agents/ the claude-plugins extension generates, so
+  # pi-subagents ranks them below every personal or project agent.
+  ++ lib.optionals workPlugins [ claudePluginsPackageDir ];
 
   piSettings = {
     defaultProvider = config.dotfiles.pi.defaultProvider;
@@ -415,16 +416,52 @@ in
       ".pi/agent/prompts/init.md".source =
         config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/prompts/init.md";
     }
-    // piAgentFiles;
+    // piAgentFiles
+    // lib.optionalAttrs workPlugins {
+      # Claude Code plugin compatibility (modules/claude-plugins, README).
+      ".pi/agent/extensions/claude-plugins.ts".source =
+        config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/extensions/claude-plugins.ts";
+      # Every `pi` resource list is empty so pi does not auto-discover
+      # directories here; only pi-subagents reads the declared agents.
+      ".pi/agent/claude-plugins/package.json".source = jsonFormat.generate "claude-plugins-package.json" {
+        name = "claude-plugins";
+        private = true;
+        pi = {
+          extensions = [ ];
+          skills = [ ];
+          prompts = [ ];
+          themes = [ ];
+          subagents.agents = [ "./agents" ];
+        };
+      };
+      ".pi/agent/claude-plugins/config.json".source = jsonFormat.generate "claude-plugins-config.json" {
+        pluginsDir = "${config.dotfiles.claudePlugins.linksDir}/plugins";
+        models = config.dotfiles.claudePlugins.modelAliases;
+        # Claude Code tool names whose pi tools need the selectors above.
+        tools = {
+          Grep = "grep, ext:pi-fff/grep";
+          Glob = "find, ext:pi-fff/find";
+          WebFetch = webTools;
+          WebSearch = webTools;
+        };
+        deniedTools = {
+          WebFetch = "fetch_content";
+          WebSearch = "web_search, source_check";
+        };
+      };
+    };
   };
 
   # pi-web-access reads this path on Linux when XDG_CONFIG_HOME is set and
-  # PI_CODING_AGENT_DIR is unset. rpiv-todo uses its XDG path on every host,
-  # falling back to ~/.config when XDG_CONFIG_HOME is unset.
+  # PI_CODING_AGENT_DIR is unset. rpiv-todo and rpiv-ask-user-question use
+  # their XDG paths on every host, falling back to ~/.config when
+  # XDG_CONFIG_HOME is unset.
   xdg.configFile = {
     "pi/web-search.json".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/web-search.json";
     "rpiv-todo/config.json".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/rpiv-todo.json";
+    "rpiv-ask-user-question/config.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfiles}/config/pi/rpiv-ask-user-question.json";
   };
 }

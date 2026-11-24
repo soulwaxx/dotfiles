@@ -65,9 +65,7 @@ if [[ "$role" == work ]]; then
   if [[ ! -f "$HOME/.aws/config" ]]; then
     warn "~/.aws/config is missing; aws-mcp has no profiles."
   fi
-  for skill in create-aws-account scaffold-gitops; do
-    if [[ ! -d "${DOTFILES_DIR:?}/config/shared/skills/$skill" ]]; then
-      warn "config/shared/skills/$skill is missing; copy it from a backup."
-    fi
-  done
+  if [[ ! -f "$HOME/.config/claude-plugins.json" ]]; then
+    warn "~/.config/claude-plugins.json is missing; team Claude Code plugins are not installed."
+  fi
 fi

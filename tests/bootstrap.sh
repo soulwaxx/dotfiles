@@ -204,7 +204,7 @@ w="$tmp/work-prompt/home/.gitconfig.local"
 [[ "$(identity "$w" user.username)" == w-gh ]]
 [[ "$(mode "$w")" == 600 ]]
 grep -qF '.aws/config is missing' "$tmp/work-prompt/log/output"
-grep -qF 'skills/create-aws-account is missing' "$tmp/work-prompt/log/output"
+grep -qF '.config/claude-plugins.json is missing' "$tmp/work-prompt/log/output"
 
 setup_partial_identity() {
   git config --file "$1/.gitconfig.personal" user.name 'Kept Name'

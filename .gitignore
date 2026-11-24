@@ -17,9 +17,6 @@ __pycache__/
 # Secrets
 .secrets
 
-config/shared/skills/create-aws-account/
-config/shared/skills/scaffold-gitops/
-
 # Claude Code ephemeral state
 .claude/
 

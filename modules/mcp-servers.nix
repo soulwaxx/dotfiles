@@ -59,11 +59,6 @@ let
         env = { };
       };
 
-      aws-knowledge-mcp = {
-        description = "Search and read AWS documentation, guidance, and best practices.";
-        url = "https://knowledge-mcp.global.api.aws";
-      };
-
       notion = {
         description = "Search, read, and manage Notion pages and databases.";
         url = "https://mcp.notion.com/mcp";

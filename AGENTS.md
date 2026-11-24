@@ -25,6 +25,9 @@ Claude Code and pi.
   harness-specific schemas.
 - Shared skills: `config/shared/skills/<name>/SKILL.md`. All are
   explicit-only (`disable-model-invocation: true`); agents read them by path.
+- Team Claude Code plugins (work only): `modules/claude-plugins/` wires
+  the marketplace named by untracked `~/.config/claude-plugins.json` into
+  Claude Code and pi; `config/pi/extensions/claude-plugins.ts` adapts them.
 - `tests/` is executable verification, not agent instructions. Obsidian and
   skill-completion tests belong to their standalone package repositories.
 

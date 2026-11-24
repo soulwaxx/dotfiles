@@ -89,7 +89,7 @@ let
         mkClaudeAgent "infra-reviewer"
           (
             ''
-              Read ${config.home.homeDirectory}/.claude/skills/infra-review/SKILL.md and follow it as the review contract. For Kubernetes, Helm, Kustomize, or GitOps reviews, also read ${config.home.homeDirectory}/.claude/skills/kubernetes-skill/SKILL.md and its relevant references.
+              Read ${config.home.homeDirectory}/.claude/skills/infra-review/SKILL.md and follow it as the review contract.${config.dotfiles.claudePlugins.kubernetesSkillHint}
 
             ''
             + builtins.readFile ../../config/shared/agents/infra-reviewer.md

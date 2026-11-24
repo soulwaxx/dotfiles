@@ -43,6 +43,7 @@ in
     ../terraform.nix
     ../theme
     ../claude
+    ../claude-plugins
     ../pi.nix
   ];
 }

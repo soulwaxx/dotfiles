@@ -292,6 +292,28 @@
           ${pkgs.nodejs_24}/bin/node --test tests/pi-router.mjs
           touch $out
         '';
+        claude-plugins =
+          pkgs.runCommand "check-claude-plugins"
+            {
+              nativeBuildInputs = [
+                pkgs.bash
+                pkgs.coreutils
+                pkgs.git
+                pkgs.gnugrep
+                pkgs.jq
+              ];
+            }
+            ''
+              bash ${./tests/claude-plugins.sh} ${./modules/claude-plugins/activate.sh}
+              touch $out
+            '';
+        pi-claude-plugins = pkgs.runCommand "check-pi-claude-plugins" { } ''
+          mkdir -p tests config/pi/extensions
+          cp ${./tests/pi-claude-plugins.mjs} tests/pi-claude-plugins.mjs
+          cp ${./config/pi/extensions/claude-plugins.ts} config/pi/extensions/claude-plugins.ts
+          ${pkgs.nodejs_24}/bin/node --test tests/pi-claude-plugins.mjs
+          touch $out
+        '';
         bootstrap =
           pkgs.runCommand "check-bootstrap"
             {

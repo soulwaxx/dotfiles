@@ -13,7 +13,6 @@
     "allow": [
       "mcp__aws-mcp__*",
       "mcp__aws-pricing-mcp-server__*",
-      "mcp__aws-knowledge-mcp__*",
       "mcp__kubernetes__*",
       "mcp__notion__*",
       "mcp__github__*",
