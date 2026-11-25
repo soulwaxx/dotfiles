@@ -13,15 +13,20 @@ fail() {
 
 export HOME=$tmp/home CALLS=$tmp/calls MARKETPLACES=$tmp/marketplaces.json PLUGINS=$tmp/plugins.json
 export CLAUDE=$tmp/claude
+# Ignore the caller's Git config (e.g. commit signing via XDG_CONFIG_HOME).
+export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
 mkdir -p "$HOME"
-cat >"$CLAUDE" <<'SH'
-#!/usr/bin/env bash
+# Absolute shebang: the Nix build sandbox has no /usr/bin/env.
+{
+  printf '#!%s\n' "$(command -v bash)"
+  cat <<'SH'
 echo "$*" >>"$CALLS"
 case "$*" in
 "plugin marketplace list --json") cat "$MARKETPLACES" ;;
 "plugin list --json") cat "$PLUGINS" ;;
 esac
 SH
+} >"$CLAUDE"
 chmod +x "$CLAUDE"
 
 # A marketplace repo with a listed plugin, an unlisted one, and a remote source.
@@ -119,7 +124,7 @@ activate || fail "string plugin entry aborted activation"
 cp "$tmp/manifest" "$HOME/work/market/.claude-plugin/marketplace.json"
 
 # CLI failures warn instead of aborting activation.
-printf '#!/usr/bin/env bash\nexit 1\n' >"$CLAUDE"
+printf '#!%s\nexit 1\n' "$(command -v bash)" >"$CLAUDE"
 activate || fail "claude failure aborted activation"
 grep -qF 'claude plugin marketplace list failed' "$tmp/stderr" || fail "claude failure not reported"
 echo ok
