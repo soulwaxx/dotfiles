@@ -44,6 +44,9 @@ in
     ];
 
     systemd.user.services.nh-clean.Service = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+      # nh shells out to `nix`; the user systemd manager's PATH on non-NixOS
+      # hosts lacks the Nix profile, so nh fails on `nix --version`.
+      Environment = [ "PATH=${lib.makeBinPath [ pkgs.nix ]}" ];
       ExecStartPre = [ "${verifyNixStore}" ];
       ExecStartPost = [ "${verifyNixStore}" ];
     };
