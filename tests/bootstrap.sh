@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Assertions match the literal ~/ paths that local-files.sh prints.
+# shellcheck disable=SC2088
 set -euo pipefail
 
 bootstrap=${1:?usage: bootstrap.sh BOOTSTRAP_SCRIPT LOCAL_FILES_SCRIPT}
@@ -185,6 +187,9 @@ run_case no-tty 0
 grep -qF '.gitconfig.personal lacks user.name user.email user.username' "$tmp/no-tty/log/output"
 grep -qF '.secrets is missing' "$tmp/no-tty/log/output"
 if grep -qF '.gitconfig.local' "$tmp/no-tty/log/output"; then exit 1; fi
+grep -qF '~/.ssh/git_personal.pub is missing; Git commit signing fails' "$tmp/no-tty/log/output"
+if grep -qF '~/.ssh/git.pub' "$tmp/no-tty/log/output"; then exit 1; fi
+if grep -qF 'precedence over the Home Manager Git config' "$tmp/no-tty/log/output"; then exit 1; fi
 
 printf 'Personal Name\npersonal@example.com\npersonal-gh\n' >"$tmp/personal-answers"
 run_case personal-prompt 0 BOOTSTRAP_TTY="$tmp/personal-answers"
@@ -205,6 +210,20 @@ w="$tmp/work-prompt/home/.gitconfig.local"
 [[ "$(mode "$w")" == 600 ]]
 grep -qF '.aws/config is missing' "$tmp/work-prompt/log/output"
 grep -qF '.config/claude-plugins.json is missing' "$tmp/work-prompt/log/output"
+grep -qF '~/.ssh/git.pub is missing' "$tmp/work-prompt/log/output"
+
+# A legacy ~/.gitconfig overriding identity or signing is reported; a private
+# key without its public half gets the recovery command; present keys are quiet.
+setup_legacy_git() {
+  printf '[user]\n  signingkey = /elsewhere/key.pub\n[commit]\n  gpgsign = true\n[core]\n  editor = vi\n' >"$1/.gitconfig"
+  mkdir -p "$1/.ssh"
+  touch "$1/.ssh/git_personal" "$1/.ssh/git.pub"
+}
+run_case legacy-git 0 HOST_ROLE=work
+o="$tmp/legacy-git/log/output"
+grep -qF '~/.gitconfig sets commit.gpgsign user.signingkey, which take precedence' "$o"
+grep -qF "ssh-keygen -y -f ~/.ssh/git_personal > ~/.ssh/git_personal.pub" "$o"
+if grep -qF '~/.ssh/git.pub' "$o"; then exit 1; fi
 
 setup_partial_identity() {
   git config --file "$1/.gitconfig.personal" user.name 'Kept Name'

@@ -277,6 +277,9 @@ Personal and work hosts:
   chmod 600 ~/.gitconfig.personal
   ```
 
+- `~/.ssh/git_personal` and `~/.ssh/git_personal.pub` — personal SSH signing key pair. Copy both; `ssh-keygen -y -f ~/.ssh/git_personal > ~/.ssh/git_personal.pub` recreates a missing public key. Activation reads the public key for `~/.ssh/allowed_signers`.
+- Do not keep identity or signing settings in `~/.gitconfig`: Git reads it after the Home Manager config, so they override it. `local-files.sh` warns about them.
+
 Work hosts:
 
 - `~/.gitconfig.local` — work Git identity. Included before the personal-remote override. Activation also reads `user.email` from it as the work principal in `~/.ssh/allowed_signers`. The shared Git module does not supply `user.name`, so set it here.
@@ -287,6 +290,8 @@ Work hosts:
   git config --file ~/.gitconfig.local user.username "<work-github-user>"
   chmod 600 ~/.gitconfig.local
   ```
+
+- `~/.ssh/git` and `~/.ssh/git.pub` — work SSH signing key pair, the default signing key on work hosts.
 
 - `~/.aws/config` — the `aws-mcp` server reads its profile allowlist from `aws configure list-profiles` at launch, read-only profiles first. Optionally set `AWS_MCP_PROFILE_FILTER` (ERE) in `~/.secrets` to narrow the list.
 - `~/.zshrc.local` — also holds work VPN server aliases and the `dev-portal` function.

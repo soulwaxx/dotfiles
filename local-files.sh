@@ -58,6 +58,34 @@ if [[ "$role" == work ]]; then
   git_identity "$HOME/.gitconfig.local" Work
 fi
 
+# Git reads ~/.gitconfig after Home Manager's ~/.config/git/config, so identity
+# or signing settings there silently override the managed ones.
+if [[ -f "$HOME/.gitconfig" ]]; then
+  # No mapfile: bootstrap runs this with macOS's bash 3.2.
+  shadowing=$(git config --file "$HOME/.gitconfig" --name-only \
+    --get-regexp '^(user\.|gpg\.|commit\.gpgsign$|tag\.gpgsign$)' 2>/dev/null | sort -u | tr '\n' ' ') || true
+  if [[ -n "$shadowing" ]]; then
+    warn "~/.gitconfig sets ${shadowing% }, which take precedence over the Home Manager Git config; remove them (identities belong in ~/.gitconfig.personal or ~/.gitconfig.local)."
+  fi
+fi
+
+# Signing keys named by programs.git.signing and ssh.allowedSigners in
+# modules/host-specific/<role>.nix.
+signing_keys=(git_personal)
+if [[ "$role" == work ]]; then
+  signing_keys=(git git_personal)
+fi
+for key in "${signing_keys[@]}"; do
+  if [[ -f "$HOME/.ssh/$key.pub" ]]; then
+    continue
+  fi
+  if [[ -f "$HOME/.ssh/$key" ]]; then
+    warn "~/.ssh/$key.pub is missing; recreate it with 'ssh-keygen -y -f ~/.ssh/$key > ~/.ssh/$key.pub', then switch again."
+  else
+    warn "~/.ssh/$key.pub is missing; Git commit signing fails until the key pair is copied to ~/.ssh."
+  fi
+done
+
 if [[ ! -f "$HOME/.secrets" ]]; then
   warn "~/.secrets is missing; MCP configuration expects GH_TOKEN."
 fi
