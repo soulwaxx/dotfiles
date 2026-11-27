@@ -5,6 +5,7 @@
 {
   imports = [
     ../modules/darwin/system.nix
+    ../modules/darwin/personal-homebrew.nix
   ];
 
   home-manager.users.${username} = {

@@ -121,6 +121,15 @@ let
   workCasks = [
     "session-manager-plugin"
   ];
+
+  # Personal-host-only Homebrew packages, referenced from hosts/personal-mac.nix.
+  personalTaps = [
+    "streetpea/streetpea"
+  ];
+
+  personalCasks = [
+    "streetpea/streetpea/chiaki-ng"
+  ];
 in
 # Only the composed lists are exported; the category bindings above are
 # assembly detail and had no consumers.
@@ -132,5 +141,7 @@ in
     darwinCasks
     workBrews
     workCasks
+    personalTaps
+    personalCasks
     ;
 }
